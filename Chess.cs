@@ -13,7 +13,7 @@ namespace c_minimal
         // string or char
         // 
         private Square[,] board; // the core element, this is the cloned piece
-        private List<string> piecesCapd;//x2
+        private List<string> piecesCapd;//x2 
 
         public string Player { get; set; }
         public bool IsGame { get; set; }
