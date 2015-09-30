@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace c_minimal
+namespace chess
 {
     class Game
     {
@@ -35,12 +35,18 @@ namespace c_minimal
         public void test()
         {
             Chess c;
+            Evaluator e;
             c = new Chess();
+            e = new Evaluator();
             c.populate();
             while (true)
             {
                 c.display();
-                Console.ReadLine();
+                string input = Console.ReadLine();
+                FormedMove move = e.formatMove(input);
+                System.Console.WriteLine("The input created a move: {0}, with coords: {1}", move.IsCompletelyFormed, move.ToString());
+                // eg if completely formed, evaluate it
+                // if isValidNow, apply it
             }
 
         }

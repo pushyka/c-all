@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace c_minimal
+namespace chess
 {
     class Chess // interface
     {
@@ -126,7 +126,7 @@ namespace c_minimal
             {
                 for (int col = 0; col < 12; col ++)
                 {
-                    System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry alotted 2 chars, with 1 char space
+                    System.Console.Write("{0,-2} ", (this.board[row, col].piece != 'X') ? this.board[row, col].piece : ' '); // each entry alotted 2 chars, with 1 char space
                 }
                 System.Console.WriteLine(); // each row on a new line
             }
