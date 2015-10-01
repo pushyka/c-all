@@ -230,16 +230,45 @@ namespace chess
 
 
         /// <summary>
-        /// Takes a position a, upon which a king is expected to be in the board object.
-        /// Determines if the king at a is currently in check. This method called frequently.
+        /// Takes a board, and a tuple specifying the location of one of the kings' squares.
+        /// The function returns a boolean indicating whether or not that king currently 
+        /// finds itself in check. ~this function is called frequently.
+        /// i think it will call explorePath with a number of different configurations until it finds a threat
         /// </summary>
         /// <param name="a"></param>
         /// <param name="board"></param>
         /// <returns></returns>
-        public bool determineIfCheck(Tuple<int,int> a, Chess board)
+        public bool isInCheck(Square[,] board, Tuple<int,int> loc)
         {
-            // TODO, optimise
+            bool check = false;
+
+            int row = loc.Item1;
+            int col = loc.Item2;
+            Square kingSq = board[row, col];
+            char player = Char.IsUpper(kingSq.piece) ? 'b' : 'w'; // only squares not empty, not of this player, and have a path to this king can attack it
+
+            System.Diagnostics.Debug.Assert(Char.ToLower(board[row, col].piece) == 'k'); // already determined the player, just assert its really a king 
+
+          
+
+
+
             return false;
+        }
+
+
+        /// <summary>
+        /// 'path' is a vector to explore from the 'location' origin
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="path"></param>
+        /// <param name="board"></param>
+        private bool explorePathForThreats(Tuple<int,int> location, Tuple<int,int> vector, Square[,] board, char player)
+        {
+            // a threat is an encountered piece along the vector whose player value
+            // is not player, and holds an inverse vector (can reach it the other way)
+            // add the 12*12 back with X
+            // search along a path until reach a non e square (including X)
         }
 
     }
