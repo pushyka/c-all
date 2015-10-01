@@ -79,5 +79,21 @@ namespace chess
             
         }
 
+        public Tuple<int,int> PosA
+        {
+            get
+            {
+                return this.posA;
+            }
+        }
+
+        public Tuple<int,int> PosB
+        {
+            get
+            {
+                return this.posB;
+            }
+        }
+
     }
 }

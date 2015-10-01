@@ -15,7 +15,7 @@ namespace chess
             Chess c = new Chess();
             c.populate();
 
-            c.Player = "w";
+            c.Player = 'w';
             c.IsGame = true;
 
             while (c.IsGame)
@@ -34,17 +34,24 @@ namespace chess
 
         public void test()
         {
+            
             Chess c;
             Evaluator e;
             c = new Chess();
             e = new Evaluator();
             c.populate();
+            c.Player = 'b';
             while (true)
             {
                 c.display();
                 string input = Console.ReadLine();
                 FormedMove move = e.formatMove(input);
                 System.Console.WriteLine("The input created a move: {0}, with coords: {1}", move.IsCompletelyFormed, move.ToString());
+                if (move.IsCompletelyFormed)
+                {
+                    bool result = e.evaluateMove(move, c.Board, c.Player);
+                    System.Console.WriteLine("So far move is valid {0}", result);
+                }
                 // eg if completely formed, evaluate it
                 // if isValidNow, apply it
             }

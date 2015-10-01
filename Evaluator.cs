@@ -87,11 +87,45 @@ namespace chess
         /// <param name="b"></param>
         /// <param name="board"></param>
         /// <returns></returns>
-        public bool evaluateMove(FormedMove move, Chess board, string cur_turn)
+        public bool evaluateMove(FormedMove move, Square[,] board, char cur_turn)
         {
-            
+            // a formed move is garunteed to be within the board bounds
+
+            bool moveIsValidOnBoard = false;
+            if (toAndFromPositionsDistinct(move) &&
+                posAContainsCurPlayerPiece(move, board, cur_turn)
+
+                )
+            // && ..
+            // && ..
+            {
+                moveIsValidOnBoard = true;
+            }
             // TODO
-            return false;
+            return moveIsValidOnBoard;
+        }
+
+        private bool toAndFromPositionsDistinct(FormedMove move)
+        {
+            Tuple<int, int> posA = move.PosA;
+            Tuple<int, int> posB = move.PosB;
+            return (posA.Item1 == posB.Item1 && posA.Item2 == posB.Item2) ? false : true;
+        }
+
+        private bool posAContainsCurPlayerPiece(FormedMove move, Square[,] board, char cur_turn)
+        {
+            bool containsCurPlayerPiece = false;
+            char piece = board[move.PosA.Item1, move.PosA.Item2].piece;
+            ;
+            if (piece != 'e')
+            {
+                if ((cur_turn == 'b' && Char.IsUpper(piece)) || (cur_turn == 'w' && Char.IsLower(piece)))
+                {
+                    containsCurPlayerPiece = true;
+                }
+            }
+
+            return containsCurPlayerPiece;
         }
 
         /// <summary>
