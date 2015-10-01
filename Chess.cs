@@ -23,8 +23,8 @@ namespace chess
 
         public Chess()
         {
-            this.board = new Square[8, 8]; // 8x8 surounded by 2-width of invalid assigned squares (prevents outofbounds issues)
-             // hence 2,2 becomes the topleft origin
+            this.board = new Square[8, 8]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
+             // hence 2,2 becomes the top left origin
 
         }
 
@@ -36,7 +36,7 @@ namespace chess
 
 
             // black row 2
-            this.board[0, 0] = new Square('R'); // topleft origin
+            this.board[0, 0] = new Square('R'); // top left origin
             this.board[0, 1] = new Square('N');
             this.board[0, 2] = new Square('B');
             this.board[0, 3] = new Square('Q');
@@ -78,7 +78,7 @@ namespace chess
             this.board[7, 4] = new Square('k');
             this.board[7, 5] = new Square('b');
             this.board[7, 6] = new Square('n');
-            this.board[7, 7] = new Square('r'); // 9,9 the bottomright (rather than 7,7) due to the 2x offboard buffer
+            this.board[7, 7] = new Square('r'); // 9,9 the bottomright (rather than 7,7) due to the 2x off board buffer
 
 
 
@@ -91,7 +91,7 @@ namespace chess
             {
                 for (int col = 0; col < 8; col ++)
                 {
-                    System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry alotted 2 chars, with 1 char space
+                    System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry allotted 2 chars, with 1 char space
                 }
                 System.Console.WriteLine(); // each row on a new line
             }

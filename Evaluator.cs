@@ -89,19 +89,60 @@ namespace chess
         /// <returns></returns>
         public bool evaluateMove(FormedMove move, Square[,] board, char cur_turn)
         {
-            // a formed move is garunteed to be within the board bounds
+            // 1 a formed move is already guaranteed to be within the board bounds (from formatMove)
+            // 2 check to and from pos are not the same
+            // 3 check from pos contains piece of current player
 
-            bool moveIsValidOnBoard = false;
-            if (toAndFromPositionsDistinct(move) &&
-                posAContainsCurPlayerPiece(move, board, cur_turn)
+            bool moveIsValidOnBoard, isDistinct, isPlayerPosA, isPlayerPosB, isOponentPosB, isEmptyPosB;
+            Square piecePosA, piecePosB;
 
-                )
-            // && ..
-            // && ..
+            isDistinct = toAndFromPositionsDistinct(move);
+
+            isPlayerPosA = isPlayerPieceOnPosA(move, board, cur_turn);
+            if (isPlayerPosA)
             {
-                moveIsValidOnBoard = true;
+                piecePosA = getPieceOnPosA(move, board);
+
+                // can assume only one of these will be true
+                isPlayerPosB = isPlayerPieceOnPosB(move, board, cur_turn);
+                isOponentPosB = isOponentPieceOnPosB(move, board, cur_turn);
+                isEmptyPosB = isEmptyPieceOnPosB(move, board);
+
+
+                // each of these branches then check the typeof(the piece of posA) can infact reach posB
+                // based on its move definitions, and there is a clear path to it and the move doesnt result in a check (maybe use of copy board)
+                // isPlayerPosB (castling) slightly more indepth check checking
+                if (isPlayerPosB)
+                {
+                    //piecePosB = getPieceOnPosB(move, board);
+                    // possibly a castling .. to do later, success if piecePosA is king, piecePosB is castle etc
+                    // and the checking
+                    //outcome = bool;
+                }
+                else if (isOponentPosB)
+                {
+                    //piecePosB = getPieceOnPosB(move, board);
+                    // possibly a capture
+                    //outcome = bool;
+                }
+                else if (isEmptyPosB)
+                {
+                    //dont require getting the piece
+                    // possibly a normal move
+                    //outcome = bool;
+                }
             }
-            // TODO
+            else
+            {
+                // invalid
+            }
+
+            
+
+
+            
+            //combine all the bools for answer
+            moveIsValidOnBoard = true;
             return moveIsValidOnBoard;
         }
 
@@ -112,21 +153,81 @@ namespace chess
             return (posA.Item1 == posB.Item1 && posA.Item2 == posB.Item2) ? false : true;
         }
 
-        private bool posAContainsCurPlayerPiece(FormedMove move, Square[,] board, char cur_turn)
+        private bool isPlayerPieceOnPosA(FormedMove move, Square[,] board, char cur_turn)
         {
-            bool containsCurPlayerPiece = false;
+            bool result = false;
             char piece = board[move.PosA.Item1, move.PosA.Item2].piece;
             ;
             if (piece != 'e')
             {
                 if ((cur_turn == 'b' && Char.IsUpper(piece)) || (cur_turn == 'w' && Char.IsLower(piece)))
                 {
-                    containsCurPlayerPiece = true;
+                    result = true;
                 }
             }
 
-            return containsCurPlayerPiece;
+            return result;
         }
+
+        private Square getPieceOnPosA(FormedMove move, Square[,] board)
+        {
+            Square piece;
+            piece = board[move.PosA.Item1, move.PosA.Item2];
+            return piece;
+        }
+
+        private bool isPlayerPieceOnPosB(FormedMove move, Square[,] board, char cur_turn)
+        {
+            bool result = false;
+            char piece = board[move.PosB.Item1, move.PosB.Item2].piece;
+            ;
+            if (piece != 'e')
+            {
+                if ((cur_turn == 'b' && Char.IsUpper(piece)) || (cur_turn == 'w' && Char.IsLower(piece)))
+                {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
+        private bool isOponentPieceOnPosB(FormedMove move, Square[,] board, char cur_turn)
+        {
+            bool result = false;
+            char piece = board[move.PosB.Item1, move.PosB.Item2].piece;
+            ;
+            if (piece != 'e')
+            {
+                // player b uses the upper case chars, so this means piece is owned by the opposite to player b and vice versa
+                if ((cur_turn == 'b' && Char.IsLower(piece)) || (cur_turn == 'w' && Char.IsUpper(piece)))
+                {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
+        private Square getPieceOnPosB(FormedMove move, Square[,] board)
+        {
+            Square piece;
+            piece = board[move.PosB.Item1, move.PosB.Item2];
+            return piece;
+        }
+
+        private bool isEmptyPieceOnPosB(FormedMove move, Square[,] board)
+        {
+            bool result;
+            char piece = board[move.PosB.Item1, move.PosB.Item2].piece;
+            ;
+            result = (piece == 'e') ? true : false;
+            return result;
+        }
+
+
+
+
 
         /// <summary>
         /// Takes a position a, upon which a king is expected to be in the board object.
