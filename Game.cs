@@ -44,16 +44,29 @@ namespace chess
             while (true)
             {
                 c.display();
+                System.Console.Write("Player {0}, enter a move: ", c.Player);
                 string input = Console.ReadLine();
-                FormedMove move = e.formatMove(input);
-                System.Console.WriteLine("The input created a move: {0}, with coords: {1}", move.IsCompletelyFormed, move.ToString());
-                if (move.IsCompletelyFormed)
+                FormedMove move = null;
+                
+                
+                if (e.validateInput(input, ref move))
                 {
-                    bool result = e.evaluateMove(move, c.Board, c.Player);
-                    System.Console.WriteLine("So far move is valid {0}", result);
+                    // then move is non null
+                    System.Console.WriteLine("The input created a move: {0}", move.ToString());
+                    if(e.validateMove(move, c.Board, c.Player))
+                    {
+                        System.Console.WriteLine("The move is valid in this c.Board context");
+                        // apply the move
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("The move is NOT valid in this c.Board context");
+                    }
                 }
-                // eg if completely formed, evaluate it
-                // if isValidNow, apply it
+                else
+                {
+                    System.Console.WriteLine("The input was NOT valid");
+                }
             }
 
         }

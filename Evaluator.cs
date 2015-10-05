@@ -19,10 +19,10 @@ namespace chess
         /// </summary>
         /// <param name="input"> "B2 B4" </param>
         /// <returns></returns>
-        public FormedMove formatMove(string input)
+        public bool validateInput(string input, ref FormedMove move)
         {
 
-            FormedMove formedMove = new FormedMove();
+           move = new FormedMove();
             
             #region try to make a move
             try
@@ -57,7 +57,7 @@ namespace chess
                                 int rankToRow = validRanks.IndexOf(rank);
                                 ;
                                 Tuple<int, int> formedPosition = Tuple.Create<int, int>(rankToRow, fileToCol);
-                                formedMove.Add(formedPosition);
+                                move.Add(formedPosition);
                             }
                         }
 
@@ -73,7 +73,7 @@ namespace chess
                 Console.Error.WriteLine(e.ToString());
             }
 
-            return formedMove;
+            return move.IsCompletelyFormed;
 
         }
 
@@ -87,7 +87,7 @@ namespace chess
         /// <param name="b"></param>
         /// <param name="board"></param>
         /// <returns></returns>
-        public bool evaluateMove(FormedMove move, Square[,] board, char cur_turn)
+        public bool validateMove(FormedMove move, Square[,] board, char cur_turn)
         {
             // 1 a formed move is already guaranteed to be within the board bounds (from formatMove)
             // 2 check to and from pos are not the same
@@ -269,6 +269,7 @@ namespace chess
             // is not player, and holds an inverse vector (can reach it the other way)
             // add the 12*12 back with X
             // search along a path until reach a non e square (including X)
+            return false;
         }
 
     }
