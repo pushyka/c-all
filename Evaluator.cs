@@ -13,9 +13,12 @@ namespace chess
 
         /// <summary>
         /// Ensures the user input matches the expected format (B2 etc), then convert the input to the 
-        /// primitive move Tuple structure. (could just as easily use a move class but I like these types)
-        /// Function returns the formatted move ready to be evaluated and used, or a null-filled 
-        /// formattedMove object if runs in to errors
+        /// FormedMove format. (could just as easily use a move class but I like these types)
+        /// Function returns whether or not the move was completely formed or not.
+        /// If the function returns true, then this guarantees the move object has been completely 
+        /// formed and is ready to be validated against the current board state. 
+        /// The move object is in the calling scope, this function assembles it via 
+        /// a reference.
         /// </summary>
         /// <param name="input"> "B2 B4" </param>
         /// <returns></returns>
@@ -81,13 +84,16 @@ namespace chess
         /// In-depth move checker function determines whether a FormedMove move
         /// is valid in the context of the rules/requirements. board is a cloned copy so that additions may be 
         /// made to it during the process of checking if the move is valid (after move is made does it result in check etc)
-        /// At the end of the function, this board is discarded and a boolean result is returned 
+        /// At the end of the function, this board is discarded and a boolean result is returned indicating 
+        /// if the move is legal or not.
+        /// If the move fails to validate, a report string is stored in 'invalidInfo'
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <param name="board"></param>
+        /// <param name="invalidInfo"></param>
         /// <returns></returns>
-        public bool validateMove(FormedMove move, Square[,] board, char cur_turn)
+        public bool validateMove(FormedMove move, Square[,] board, char cur_turn, ref string invalidInfo)
         {
             // 1 a formed move is already guaranteed to be within the board bounds (from formatMove)
             // 2 check to and from pos are not the same
@@ -112,7 +118,7 @@ namespace chess
                         // now both posA and posB contains cur player pieces
 
                         // possibly a castling .. to do later
-                        System.Console.WriteLine("possibly a castling .. to do later");
+                        invalidInfo = "possibly a castling .. to do later";
 
                         //outcome = bool;
                     }
@@ -122,6 +128,7 @@ namespace chess
 
                         // possibly a capture
                         System.Console.WriteLine("possibly a capture");
+                        invalidInfo = "posA was nota player piece";
 
                         //outcome = bool;
                     }
