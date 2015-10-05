@@ -97,11 +97,87 @@ namespace chess
             }
         }
 
-        public void doMove(string input)
+        /// <summary>
+        /// The Entry point for move application, this method
+        /// selects the appropriate type of move to make based on moveType
+        /// </summary>
+        /// <param name="move"></param>
+        /// <param name="moveType"></param>
+        public void applyMove(FormedMove move, string moveType)
+        {
+            switch (moveType)
+            {
+                case "castle":
+                    applyCastling(move);
+                    break;
+                case "capture":
+                    applyCapture(move);
+                    break;
+                case "movement":
+                    applyMovement(move);
+                    break;
+                default:
+                    System.Console.WriteLine("ERROR: No moveType set"); // should never reach 
+                    break;
+            }
+
+        }
+
+        /// <summary>
+        /// Applies a formed move to the current state of the board.
+        /// The formed move has already been validated so this function 
+        /// simply performs the MOVE operation on the game board.
+        /// </summary>
+        /// <param name="input"></param>
+        private void applyMovement(FormedMove move)
         {
             // TODO
-            // any captures are added to capture array
+            // 
+            // IF moving piece TYPE is pawn, and has reached king row (0-7)
+            //  promotePawn(loc)
         }
+
+        /// <summary>
+        /// Performs the CAPTURE operation, (a move and
+        /// replacement of a piece) also adds any captured 
+        /// pieces to the capture list.
+        /// </summary>
+        /// <param name="move"></param>
+        private void applyCapture(FormedMove move)
+        {
+            // todo
+            // IF moving piece TYPE is pawn, and has reached king row (0-7)
+            //  promotePawn(loc)
+        }
+
+        /// <summary>
+        /// Performs the CASTLE operation (a specific
+        /// move type operation)
+        /// As with the other applyMove functions, the move has
+        /// already been validated as legal. For castling this
+        /// includes check for check operation.
+        /// </summary>
+        /// <param name="move"></param>
+        private void applyCastling(FormedMove move)
+        {
+            // todo
+        }
+
+        /// <summary>
+        /// Performs the pawn PROMOTION operation. 
+        /// Since this an optional side effect of either the MOVE or 
+        /// CAPTURE operations, this is left for them to check.
+        /// Rather than the evaluator.
+        /// </summary>
+        /// <param name="move"></param>
+        private void promotePawn(Tuple<int, int> loc)
+        {
+            // todo
+        }
+
+
+
+
 
         public void togglePlayer()
         {

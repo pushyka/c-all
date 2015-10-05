@@ -91,15 +91,16 @@ namespace chess
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <param name="board"></param>
-        /// <param name="invalidInfo"></param>
+        /// <param name="moveType"></param>
         /// <returns></returns>
-        public bool validateMove(FormedMove move, Square[,] board, char cur_turn, ref string invalidInfo)
+        public bool validateMove(FormedMove move, Square[,] board, char cur_turn, ref string moveType)
         {
             // 1 a formed move is already guaranteed to be within the board bounds (from formatMove)
             // 2 check to and from pos are not the same
             // 3 check from pos contains piece of current player
 
-            bool moveIsValidOnBoard; 
+
+            bool outcome = false; 
             Square pieceOnPosA = new Square();
             Square pieceOnPosB = new Square();
 
@@ -118,28 +119,33 @@ namespace chess
                         // now both posA and posB contains cur player pieces
 
                         // possibly a castling .. to do later
-                        invalidInfo = "possibly a castling .. to do later";
+
 
                         //outcome = bool;
+                        // IF OUTCOME:
+                             moveType = "castle";
                     }
                     else if (isOponentTurnPieceOnPosB(move, board, cur_turn, ref pieceOnPosB))
                     {
                         // posA is cur player, posB is opponent
 
                         // possibly a capture
-                        System.Console.WriteLine("possibly a capture");
-                        invalidInfo = "posA was nota player piece";
+
 
                         //outcome = bool;
+                        // IF OUTCOME :
+                            moveType = "capture";
                     }
                     else if (isEmptyPieceOnPosB(move, board, ref pieceOnPosB))
                     {
                         // posA is cur player, posB is empty square
 
                         // possibly a normal move
-                        System.Console.WriteLine("possibly a normal move");
+
 
                         //outcome = bool;
+                        // IF OUTCOME: 
+                            moveType = "movement";
                     }
                 }
                 else
@@ -154,16 +160,17 @@ namespace chess
                 System.Console.WriteLine("positions are not distinct");
             }
 
-            
-            
-
-            
 
 
-            
-            //combine all the bools for answer
-            moveIsValidOnBoard = true;
-            return moveIsValidOnBoard;
+
+
+
+
+
+            //outcome of the final check (path check / check check)
+            // if that check is not reached (fails on distinct check)
+            // returns the default false value of outcome :)
+            return outcome;
         }
 
         private bool toAndFromPositionsDistinct(FormedMove move)

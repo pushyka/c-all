@@ -26,7 +26,7 @@ namespace chess
                 // use the deep copy in the evaluator, then discard
                 // c.doMove on the original
 
-                c.doMove(input); // either applies the move to the game and returns true, or fails and returns false (with no game change)
+                //c.doMove(input); // either applies the move to the game and returns true, or fails and returns false (with no game change)
                 c.togglePlayer();
 
             }
@@ -35,10 +35,12 @@ namespace chess
         public void test()
         {
             
-            Chess c;
-            Evaluator e;
-            c = new Chess();
-            e = new Evaluator();
+            Chess c = new Chess();
+            Evaluator e = new Evaluator();
+            string moveType;
+            FormedMove move;
+           
+            
             c.populate();
             c.Player = 'b';
             while (true)
@@ -46,27 +48,33 @@ namespace chess
                 c.display();
                 System.Console.Write("Player {0}, enter a move: ", c.Player);
                 string input = Console.ReadLine();
-                FormedMove move = null;
+                move = null;
+                moveType = null;
                 
                 
                 if (e.validateInput(input, ref move))
                 {
                     // then move is non null
                     System.Console.WriteLine("The input created a move: {0}", move.ToString());
-                    if(e.validateMove(move, c.Board, c.Player))
+                    if(e.validateMove(move, c.Board, c.Player, ref moveType))
                     {
-                        System.Console.WriteLine("The move is valid in this c.Board context");
+                        c.applyMove(move, moveType);
                         // apply the move
                     }
                     else
                     {
-                        System.Console.WriteLine("The move is NOT valid in this c.Board context");
+                        // move failed to validate
+                        System.Console.WriteLine("The move was not valid");
                     }
                 }
                 else
                 {
-                    System.Console.WriteLine("The input was NOT valid");
+                    // input failed to validate
+                    System.Console.WriteLine("The input was not valid");
                 }
+
+                // change player
+
             }
 
         }
