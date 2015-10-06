@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+using chess.model;
+
+namespace chess.controller
 {
     class Game
     {
