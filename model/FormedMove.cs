@@ -10,7 +10,7 @@ namespace chess.model
     /// FormedMove moves are only created by the Evaluator.formatMove
     /// and are thus garunteed to be bound by the board 
     /// </summary>
-    class FormedMove
+    public class FormedMove
     {
         private Tuple<int, int> posA;
         private Tuple<int, int> posB;

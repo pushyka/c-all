@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace chess.model
 {
-    class Chess // interface
+    public class Chess // interface
     {
 
         // using multi-dimensional array since rows of equal lengths
