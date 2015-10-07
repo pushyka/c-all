@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 
-namespace chess.model
+namespace chess.Model
 {
     class Evaluator
     {
@@ -19,6 +19,8 @@ namespace chess.model
         /// formed and is ready to be validated against the current board state. 
         /// The move object is in the calling scope, this function assembles it via 
         /// a reference.
+        /// 
+        /// 
         /// </summary>
         /// <param name="input"> "B2 B4" </param>
         /// <returns></returns>

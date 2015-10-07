@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using chess.model;
+using chess.Model;
 
-namespace chess.controller
+namespace chess.Controller
 {
     class Game
     {
@@ -29,7 +29,7 @@ namespace chess.controller
                 // c.doMove on the original
 
                 //c.doMove(input); // either applies the move to the game and returns true, or fails and returns false (with no game change)
-                c.togglePlayer();
+                //c.togglePlayer();
 
             }
         }

@@ -46,16 +46,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="model\Chess.cs" />
-    <Compile Include="model\Evaluator.cs" />
-    <Compile Include="model\FormedMove.cs" />
-    <Compile Include="controller\Game.cs" />
+    <Compile Include="Model\Chess.cs" />
+    <Compile Include="Model\Evaluator.cs" />
+    <Compile Include="Model\FormedMove.cs" />
+    <Compile Include="Controller\Game.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="model\SquareStruct.cs" />
+    <Compile Include="Model\SquareStruct.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="view\" />
+    <Folder Include="View\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

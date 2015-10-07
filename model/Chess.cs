@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess.model
+namespace chess.Model
 {
     public class Chess // interface
     {
@@ -179,10 +179,6 @@ namespace chess.model
 
 
 
-        public void togglePlayer()
-        {
-            // TODO
-        }
 
         /// <summary>
         /// Provides a deep copy of the board array to be used in the Evaluator functions.

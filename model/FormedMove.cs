@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace chess.model
+namespace chess.Model
 {
     /// <summary>
     /// A move object to hold the 2 coord specifications for a move.
