@@ -20,7 +20,7 @@ namespace chess.Model
         /// The move object is in the calling scope, this function assembles it via 
         /// a reference.
         /// 
-        /// 
+        /// TODO: remove forloop
         /// </summary>
         /// <param name="input"> "B2 B4" </param>
         /// <returns></returns>
@@ -126,6 +126,7 @@ namespace chess.Model
                         //outcome = bool;
                         // IF OUTCOME:
                              moveType = "castle";
+                        return outcome;
                     }
                     else if (isOponentTurnPieceOnPosB(move, board, cur_turn, ref pieceOnPosB))
                     {
@@ -137,6 +138,7 @@ namespace chess.Model
                         //outcome = bool;
                         // IF OUTCOME :
                             moveType = "capture";
+                        return outcome;
                     }
                     else if (isEmptyPieceOnPosB(move, board, ref pieceOnPosB))
                     {
@@ -148,6 +150,7 @@ namespace chess.Model
                         //outcome = bool;
                         // IF OUTCOME: 
                             moveType = "movement";
+                        return outcome;
                     }
                 }
                 else
@@ -172,6 +175,7 @@ namespace chess.Model
             //outcome of the final check (path check / check check)
             // if that check is not reached (fails on distinct check)
             // returns the default false value of outcome :)
+            // if control reaches here, then it hasnt dentified a valid move
             return outcome;
         }
 
