@@ -147,9 +147,10 @@ namespace chess.Model
                         // possibly a normal move
 
 
-                        //outcome = bool;
+                        //outcome = check path / check;
                         // IF OUTCOME: 
-                            moveType = "movement";
+                        outcome = true;
+                        moveType = "movement";
                         return outcome;
                     }
                 }

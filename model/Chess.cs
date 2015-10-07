@@ -14,6 +14,7 @@ namespace chess.Model
         // 
         private Square[,] board; // the core element, this is the cloned piece
         private List<string> piecesCapd;//x2 
+        private int dim;
 
         public char Player { get; set; }
         public bool IsGame { get; set; }
@@ -23,7 +24,8 @@ namespace chess.Model
 
         public Chess()
         {
-            this.board = new Square[8, 8]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
+            this.dim = 8;
+            this.board = new Square[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
              // hence 2,2 becomes the top left origin
 
         }
@@ -47,7 +49,7 @@ namespace chess.Model
 
 
             // black row 3 (pawns)
-            for (int col = 0; col < 8; col ++)
+            for (int col = 0; col < dim; col ++)
             {
                 this.board[1, col] = new Square('P'); ; // pawns have 2 additional properties {movedOnce=false : used to allow +1/+2 advance for FIRST move}
                                             //                                    {canBeCapEnPassant=false : set=true if pawn advances +2, function 
@@ -58,14 +60,14 @@ namespace chess.Model
             // empty rows 
             for (int row = 2; row < 6; row ++)
             {
-                for (int col = 0; col < 8; col ++)
+                for (int col = 0; col < dim; col ++)
                 {
                     this.board[row, col] = new Square('e'); // empty 
                 }
             }
 
             // white row 8 (pawns)
-            for (int col = 0; col < 8; col ++)
+            for (int col = 0; col < dim; col ++)
             {
                 this.board[6, col] = new Square('p'); ; // as above
             }
@@ -87,9 +89,9 @@ namespace chess.Model
 
         public void display()
         {
-            for (int row = 0; row < 8; row ++)
+            for (int row = 0; row < dim; row ++)
             {
-                for (int col = 0; col < 8; col ++)
+                for (int col = 0; col < dim; col ++)
                 {
                     System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry allotted 2 chars, with 1 char space
                 }
@@ -131,10 +133,30 @@ namespace chess.Model
         /// <param name="input"></param>
         private void applyMovement(FormedMove move)
         {
+            System.Console.WriteLine("applying movement..");
+
+            Square fromTile = getTile(move.PosA);
+            Square toTile   = getTile(move.PosB);
+            
+            // update toTile with the values of fromTile
+            updateTile(toTile, fromTile);
+            // even this doesnt work
+            // since the getTile is returning STRUCT by value (not reference)
+            toTile.piece = 'X';
+
+            // make fromTile empty
             // TODO
-            // 
+
             // IF moving piece TYPE is pawn, and has reached king row (0-7)
-            //  promotePawn(loc)
+            if ((toTile.piece.Equals('p')) || toTile.piece.Equals('P'))
+            {
+                // toTile yPos is posB.Item1
+                if (move.PosB.Item1 == 0 || move.PosB.Item1 == (dim-1))
+                {
+                    promotePawn(toTile);
+                }
+            }
+            
         }
 
         /// <summary>
@@ -168,11 +190,17 @@ namespace chess.Model
         /// Since this an optional side effect of either the MOVE or 
         /// CAPTURE operations, this is left for them to check.
         /// Rather than the evaluator.
+        /// 
+        /// ATM default to QUEEN
         /// </summary>
         /// <param name="move"></param>
-        private void promotePawn(Tuple<int, int> loc)
+        private void promotePawn(Square tile)
         {
-            // todo
+            // todo - change piece to q of same allegiance (case)
+            // isUpper = black
+            char queen = (Char.IsUpper(tile.piece)) ? 'Q' : 'q';
+            tile.piece = queen;
+            System.Console.WriteLine("pawn promoted to queen");
         }
 
 
@@ -195,6 +223,28 @@ namespace chess.Model
                 return this.board;
             }
         }
+
+        /// <summary>
+        /// Given a Tuple(int,int) position, return a reference
+       /// to the Square object located at that at that position on the board.
+        /// </summary>
+        private Square getTile(Tuple<int, int> position)
+        {
+            int row = position.Item1;
+            int col = position.Item2;
+
+            return this.board[row, col];
+        }
+
+        // update toTile with the values in fromTile
+        private void updateTile(Square toTile, Square fromTile)
+        {
+            toTile.piece = fromTile.piece;
+            toTile.movedOnce = fromTile.movedOnce;
+            toTile.canBeCapturedEnPassant = fromTile.canBeCapturedEnPassant;
+        }
+
+
     }
 
 }

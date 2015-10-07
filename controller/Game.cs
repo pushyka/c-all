@@ -61,6 +61,7 @@ namespace chess.Controller
                     if(e.validateMove(move, c.Board, c.Player, ref moveType))
                     {
                         c.applyMove(move, moveType);
+                        System.Console.WriteLine("have applied move of type {0}", moveType);
                         // apply the move
                     }
                     else
