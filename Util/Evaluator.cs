@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
+using chess.Model;
 
-namespace chess.Model
+namespace chess.Util
 {
     class Evaluator
     {

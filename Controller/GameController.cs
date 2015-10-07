@@ -4,13 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 using chess.Model;
+using chess.View;
+using chess.Util;
 
 namespace chess.Controller
 {
-    class Game
+    public class GameController
     {
-        public Game() { }
+        Chess c;
+        Evaluator e;
+
+        public GameController()
+        {
+            this.c = new Chess(); // model
+            this.e = new Evaluator(); // utility
+
+
+        }
 
         public void start()
         {
@@ -34,11 +46,23 @@ namespace chess.Controller
             }
         }
 
+        // following are test methodss
+        public void setUp()
+        {
+            c.populate();
+            c.Player = 'b';
+        }
+
+        public void recvInstructTEST()
+        {
+            c.applyMoveTEST();
+        }
+
+
         public void test()
         {
             
-            Chess c = new Chess();
-            Evaluator e = new Evaluator();
+
             string moveType;
             FormedMove move;
            
@@ -47,7 +71,7 @@ namespace chess.Controller
             c.Player = 'b';
             while (true)
             {
-                c.display();
+                //c.display();
                 System.Console.Write("Player {0}, enter a move: ", c.Player);
                 string input = Console.ReadLine();
                 move = null;
@@ -81,6 +105,13 @@ namespace chess.Controller
             }
 
         }
+
+        public Square[,] lookAtChessModel()
+        {
+            return c.Board;
+        }
+
+
 
     }
 }

@@ -99,6 +99,12 @@ namespace chess.Model
             }
         }
 
+
+        public void applyMoveTEST()
+        {
+            this.Board[0, 0].piece = 'X';
+        }
+
         /// <summary>
         /// The Entry point for move application, this method
         /// selects the appropriate type of move to make based on moveType
