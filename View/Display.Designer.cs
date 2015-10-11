@@ -68,20 +68,21 @@
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(136, 22);
             this.toolStripMenuItem2.Text = "Test";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.menuItem_Test_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem3.Text = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(136, 22);
+            this.toolStripMenuItem3.Text = "show board";
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.menuItem_addBoard_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.closeToolStripMenuItem.Text = "Close";
             // 
             // button1
@@ -98,7 +99,7 @@
             // 
             this.button2.Location = new System.Drawing.Point(337, 209);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.Size = new System.Drawing.Size(79, 23);
             this.button2.TabIndex = 2;
             this.button2.Text = "setup";
             this.button2.UseVisualStyleBackColor = true;

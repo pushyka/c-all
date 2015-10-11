@@ -106,9 +106,9 @@ namespace chess.Controller
 
         }
 
-        public Square[,] lookAtChessModel()
+        public Chess lookAtChessModel()
         {
-            return c.Board;
+            return c;
         }
 
 

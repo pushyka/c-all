@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+    public delegate void BoardChanged(object sender, EventArgs e);
+
     public class Chess // interface
     {
 
@@ -15,6 +17,7 @@ namespace chess.Model
         private Square[,] board; // the core element, this is the cloned piece
         private List<string> piecesCapd;//x2 
         private int dim;
+        public event EventHandler BoardChanged;
 
         public char Player { get; set; }
         public bool IsGame { get; set; }
@@ -103,6 +106,7 @@ namespace chess.Model
         public void applyMoveTEST()
         {
             this.Board[0, 0].piece = 'X';
+            OnBoardChanged(EventArgs.Empty);
         }
 
         /// <summary>
@@ -128,7 +132,8 @@ namespace chess.Model
                     System.Console.WriteLine("ERROR: No moveType set"); // should never reach 
                     break;
             }
-
+            // fire the event (board changed)
+            OnBoardChanged(EventArgs.Empty);
         }
 
         /// <summary>
@@ -248,6 +253,16 @@ namespace chess.Model
             toTile.piece = fromTile.piece;
             toTile.movedOnce = fromTile.movedOnce;
             toTile.canBeCapturedEnPassant = fromTile.canBeCapturedEnPassant;
+        }
+
+
+        // this method is called by some code (when the code changes the board) and raises the event 
+        protected virtual void OnBoardChanged(EventArgs e)
+        {
+            if (BoardChanged != null)
+            {
+                BoardChanged(this, e);
+            }
         }
 
 
