@@ -14,6 +14,8 @@ namespace chess.Controller
     public class GameController
     {
         public string INPUT { get; set; } = null;
+        // need a lock type value (prevent INPUT being changed again, during the validation phase)
+        // eg input is only modified when a second value holds a certain value
 
         Chess c;
         Evaluator e;
@@ -55,6 +57,7 @@ namespace chess.Controller
 
                 // check if there is a potential move, else IsGame = false
 
+                // check if display has provided a move
                 if (INPUT != null)
                 {
                     if (e.validateInput(INPUT, ref move))
