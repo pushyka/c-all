@@ -84,7 +84,43 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <None Include="Resources\File-Chess_bdt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_blt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_bdt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_kdt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_klt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_ndt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_nlt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_pdt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_plt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_qdt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_qlt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_rdt60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chess_rlt60.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

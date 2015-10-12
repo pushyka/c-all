@@ -139,7 +139,7 @@ namespace chess.Model
         /// <summary>
         /// Applies a formed move to the current state of the board.
         /// The formed move has already been validated so this function 
-        /// simply performs the MOVE operation on the game board.
+        /// simply performs the MOVE operation on the game board. 
         /// </summary>
         /// <param name="input"></param>
         private void applyMovement(FormedMove move)
@@ -247,18 +247,28 @@ namespace chess.Model
             return this.board[row, col];
         }
 
-        // update toTile with the values in fromTile
+        /// <summary>
+        /// The base update operation on the model data. A given movetype will result in a call to this method for
+        /// each tile which is being changed for that move. The boardchanged event can be fired here.
+        /// 
+        /// </summary>
+        /// <param name="toTile"></param>
+        /// <param name="fromTile"></param>
         private void updateTile(Square toTile, Square fromTile)
         {
             toTile.piece = fromTile.piece;
             toTile.movedOnce = fromTile.movedOnce;
             toTile.canBeCapturedEnPassant = fromTile.canBeCapturedEnPassant;
+
+            // finally fire the BoardChanged event!
+            // EventArgs could be the tile coordinates which have changed
         }
 
 
         // this method is called by some code (when the code changes the board) and raises the event 
         protected virtual void OnBoardChanged(EventArgs e)
         {
+            // eg makes sure the Event has a delegate attached
             if (BoardChanged != null)
             {
                 BoardChanged(this, e);

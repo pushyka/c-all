@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 
 using chess.Model;
@@ -13,6 +13,8 @@ namespace chess.Controller
 {
     public class GameController
     {
+        public string INPUT { get; set; } = null;
+
         Chess c;
         Evaluator e;
 
@@ -24,38 +26,100 @@ namespace chess.Controller
 
         }
 
-        public void start()
-        {
-            Chess c = new Chess();
-            c.populate();
-
-            c.Player = 'w';
-            c.IsGame = true;
-
-            while (c.IsGame)
-            {
-                c.display();
-                string input = Console.ReadLine(); // prompt input for player 
-                // getdeepcopy of c.board
-                // use the deep copy in the evaluator, then discard
-                // c.doMove on the original
-
-                //c.doMove(input); // either applies the move to the game and returns true, or fails and returns false (with no game change)
-                //c.togglePlayer();
-
-            }
-        }
-
         // following are test methodss
         public void setUp()
         {
             c.populate();
             c.Player = 'b';
+            c.IsGame = true;
+            
         }
+
+
+        public void startGameLoop()
+        {
+            Thread t = new Thread(gameLoop);
+            t.Start();
+        }
+
+        private void gameLoop()
+        {
+            string moveType;
+            FormedMove move;
+
+            // this bool will be set false when the game ends
+            while (c.IsGame)
+            {
+                move = null;
+                moveType = null;
+
+                // check if there is a potential move, else IsGame = false
+
+                if (INPUT != null)
+                {
+                    if (e.validateInput(INPUT, ref move))
+                    {
+                        // then move is non null
+                        System.Console.WriteLine("The input created a move: {0}", move.ToString());
+                        if (e.validateMove(move, c.Board, c.Player, ref moveType))
+                        {
+                            c.applyMove(move, moveType);
+                            System.Console.WriteLine("have applied move of type {0}", moveType);
+                            // change the player
+                            c.Player = (c.Player == 'b') ? 'w' : 'b';
+                        }
+                        else
+                        {
+                            // move failed to validate
+                            System.Console.WriteLine("The move was not valid");
+                        }
+                    }
+                    else
+                    {
+                        // input failed to validate
+                        System.Console.WriteLine("The input was not valid");
+                    }
+
+                    INPUT = null;
+                }
+
+            }
+
+            System.Console.WriteLine("The game has ended");
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public void recvInstructTEST()
         {
             c.applyMoveTEST();
+        }
+
+        public void recvInstruct(string move)
+        {
+            System.Console.WriteLine("Controller has recvd the move: {0}", move);
         }
 
 
