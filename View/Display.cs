@@ -170,6 +170,11 @@ namespace chess.View
         /// <param name="e"></param>
         private void menuItem_addBoard_Click(object sender, EventArgs e)
         {
+            // if dont disable this menu option, it can be clicked multiple times causing
+            // for example these handlers to be registered multiple times , so ensure 
+            // this menu item is not clickeed multiple times
+            this.menuItem_add_Board.Enabled = false;
+
             // make the board visible
             this.genericBoardBase.Visible = true;
 
@@ -180,12 +185,19 @@ namespace chess.View
             //todo
             this.updateView(this.gc.lookAtChessModel().Board);
 
+            this.concedeButton.Visible = true;
+
 
             //finally register the view to the model.BoardChanged event so it will update itself on future changes
 
             // the view sees a change to the model and updates accordingly
             // an event hander in the view subscribes to an event in the model
             this.gc.lookAtChessModel().BoardChanged += model_BoardChanged;
+
+
+
+            // the display code to update the message box will subscribe to this Message.propertyChanged event
+            this.gc.PropertyChanged += message_PropertyChanged;
 
             
             this.gc.startGameLoop();
@@ -310,6 +322,54 @@ namespace chess.View
         {
             System.Console.WriteLine("I am the view and I have registered that the model has changed");
             // redraw the display using the model
+        }
+
+
+        delegate void message_PropertyChangedCallback(object sender, PropertyChangedEventArgs e);
+
+        /// <summary>
+        /// Handler for the PropertyChanged event raised when gc.Message is changed.
+        /// When this event occurs, the function updates the message listbox with 
+        /// the new value.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void message_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // e.PropertyName is that which has changed, always Message in this case
+
+            /* == cross thread call problem ==
+            *  Most of the changes to the message variable are occuring inside the gameLoop child thread.
+            *  So this thread is raising the PropertyChanged event and the handler and this is all within
+            *  that child thread. When it tries to update the form control message_box, there is a problem
+            *  since the message_box was created in the main gui thread, and this is detected as an unsafe
+            *  cross thread operation. 
+            *  Need to call InvokeRequired which returns true if that message_box was created in a different
+            *  thread than the one currently executing. Then calling invoke and passing it a callback to this
+            *  same function, allows it to do the execution on that parent thread asynchronously.
+            */
+
+            if (this.message_box.InvokeRequired)
+            {
+                // delegate d a pointer to the function
+                message_PropertyChangedCallback d = new message_PropertyChangedCallback(message_PropertyChanged);
+                this.message_box.Invoke(d, new object[] { sender, e });
+            }
+            // else we are in the thread which created the control
+            else
+            {
+                this.message_box.BeginUpdate();
+                this.message_box.Items.Add(this.gc.Message);
+                // set most recently added as the last one
+                this.message_box.TopIndex = this.message_box.Items.Count - 1;
+                this.message_box.EndUpdate();
+            }
+
+        }
+
+        private void concedeButton_Click(object sender, EventArgs e)
+        {
+            this.gc.INPUT = "concede";
         }
     }
 }

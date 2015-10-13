@@ -8,15 +8,18 @@ using System.Threading;
 using chess.Model;
 using chess.View;
 using chess.Util;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace chess.Controller
 {
-    public class GameController
+    public class GameController : INotifyPropertyChanged
     {
         public string INPUT { get; set; } = null;
         // need a lock type value (prevent INPUT being changed again, during the validation phase)
         // eg input is only modified when a second value holds a certain value
 
+        string message = null;
         Chess c;
         Evaluator e;
 
@@ -34,6 +37,7 @@ namespace chess.Controller
             c.populate();
             c.Player = 'b';
             c.IsGame = true;
+            this.Message = "Game is setup";
             
         }
 
@@ -42,6 +46,7 @@ namespace chess.Controller
         {
             Thread t = new Thread(gameLoop);
             t.Start();
+            this.Message = "Game has started";
         }
 
         private void gameLoop()
@@ -54,13 +59,21 @@ namespace chess.Controller
             {
                 move = null;
                 moveType = null;
-
+                this.Message = "Player " + c.Player + "'s turn";
                 // check if there is a potential move, else IsGame = false
 
                 // check if display has provided a move
                 if (INPUT != null)
                 {
-                    if (e.validateInput(INPUT, ref move))
+                    if (INPUT == "concede")
+                    {
+                        // c.Player has conceded
+                        conceded(c.Player);
+                        INPUT = null;
+                        break;
+                    }
+
+                    else if (e.validateInput(INPUT, ref move))
                     {
                         // then move is non null
                         System.Console.WriteLine("The input created a move: {0}", move.ToString());
@@ -88,7 +101,7 @@ namespace chess.Controller
 
             }
 
-            System.Console.WriteLine("The game has ended");
+            this.Message = "The game has ended, loop thread detached";
         }
 
 
@@ -103,7 +116,10 @@ namespace chess.Controller
 
 
 
-
+        private void conceded(char p)
+        {
+            this.Message = "Player " + p + " has conceded!";
+        }
 
 
 
@@ -179,6 +195,35 @@ namespace chess.Controller
         }
 
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        // The CallerMemberName attribute makes propertyName of the caller to be the argument.
+        // so Message is the arg for propertyName
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+
+        public string Message
+        {
+            set
+            {
+                if (this.message != value)
+                {
+                    this.message = value;
+                    NotifyPropertyChanged();
+                }
+
+            }
+            get
+            {
+                return this.message;
+            }
+        }
 
     }
 }
