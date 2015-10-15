@@ -126,6 +126,7 @@ namespace chess.Util
 
                         //outcome = bool;
                         // IF OUTCOME:
+                        outcome = true;
                              moveType = "castle";
                         return outcome;
                     }
@@ -138,6 +139,7 @@ namespace chess.Util
 
                         //outcome = bool;
                         // IF OUTCOME :
+                        outcome = true;
                             moveType = "capture";
                         return outcome;
                     }

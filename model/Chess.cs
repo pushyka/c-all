@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace chess.Model
 {
-    public delegate void BoardChanged(object sender, EventArgs e);
+
+
+
+    public delegate void BoardChanged(object sender, BoardChangedEventArgs e);
 
     public class Chess // interface
     {
@@ -15,9 +20,10 @@ namespace chess.Model
         // string or char
         // 
         private Square[,] board; // the core element, this is the cloned piece
-        private List<string> piecesCapd;//x2 
+        private List<char> piecesCapd;//x2 
         private int dim;
-        public event EventHandler BoardChanged;
+        public event EventHandler<BoardChangedEventArgs> BoardChanged;
+        public event EventHandler CapturedChanged;
 
         public char Player { get; set; }
         public bool IsGame { get; set; }
@@ -37,7 +43,8 @@ namespace chess.Model
         {
 
 
-
+            // initial=te the capture list
+            this.piecesCapd = new List<char>();
 
 
             // black row 2
@@ -102,13 +109,6 @@ namespace chess.Model
             }
         }
 
-
-        public void applyMoveTEST()
-        {
-            this.Board[0, 0].piece = 'X';
-            OnBoardChanged(EventArgs.Empty);
-        }
-
         /// <summary>
         /// The Entry point for move application, this method
         /// selects the appropriate type of move to make based on moveType
@@ -133,7 +133,6 @@ namespace chess.Model
                     break;
             }
             // fire the event (board changed)
-            OnBoardChanged(EventArgs.Empty);
         }
 
         /// <summary>
@@ -144,43 +143,68 @@ namespace chess.Model
         /// <param name="input"></param>
         private void applyMovement(FormedMove move)
         {
-            System.Console.WriteLine("applying movement..");
+            Tuple<int, int> fromSquareLoc = move.PosA;
+            Tuple<int, int> toSquareLoc = move.PosB;
+            // copy the piece from the fromSquare to the toSquare
+            Square fromSquareVal = getSquare(fromSquareLoc);
+            changeSquare(toSquareLoc, fromSquareVal);
 
-            Square fromTile = getTile(move.PosA);
-            Square toTile   = getTile(move.PosB);
-            
-            // update toTile with the values of fromTile
-            updateTile(toTile, fromTile);
-            // even this doesnt work
-            // since the getTile is returning STRUCT by value (not reference)
-            toTile.piece = 'X';
+            // delete the piece from the fromTile by..
+            // (update the from location with a empty sq)
+            Square emptySquareVal = new Square('e');
+            changeSquare(fromSquareLoc, emptySquareVal);
 
-            // make fromTile empty
-            // TODO
-
+            // TODO PAWN
             // IF moving piece TYPE is pawn, and has reached king row (0-7)
-            if ((toTile.piece.Equals('p')) || toTile.piece.Equals('P'))
-            {
-                // toTile yPos is posB.Item1
-                if (move.PosB.Item1 == 0 || move.PosB.Item1 == (dim-1))
-                {
-                    promotePawn(toTile);
-                }
-            }
+            //if ((toTile.piece.Equals('p')) || toTile.piece.Equals('P'))
+            //{
+            //    // toTile yPos is posB.Item1
+            //    if (move.PosB.Item1 == 0 || move.PosB.Item1 == (dim-1))
+            //    {
+            //        promotePawn(toTile);
+            //    }
+            //}
             
         }
 
         /// <summary>
         /// Performs the CAPTURE operation, (a move and
         /// replacement of a piece) also adds any captured 
-        /// pieces to the capture list.
+        /// pieces to the capture list. Essentially same as movement.
         /// </summary>
         /// <param name="move"></param>
         private void applyCapture(FormedMove move)
         {
-            // todo
+            Tuple<int, int> fromSquareLoc = move.PosA;
+            Tuple<int, int> toSquareLoc = move.PosB;
+            // get the piece from the toSquare (which is being captured)
+            Square toSquareVal = getSquare(toSquareLoc);
+
+
+
+
+            // copy the piece from the fromSquare to the toSquare
+            Square fromSquareVal = getSquare(fromSquareLoc);
+            changeSquare(toSquareLoc, fromSquareVal);
+
+            // delete the piece from the fromTile by..
+            // (update the from location with a empty sq)
+            Square emptySquareVal = new Square('e');
+            changeSquare(fromSquareLoc, emptySquareVal);
+
+            // add the captured to the list
+            addToCaptured(toSquareVal.piece);
+
+            // TODO PAWN
             // IF moving piece TYPE is pawn, and has reached king row (0-7)
-            //  promotePawn(loc)
+            //if ((toTile.piece.Equals('p')) || toTile.piece.Equals('P'))
+            //{
+            //    // toTile yPos is posB.Item1
+            //    if (move.PosB.Item1 == 0 || move.PosB.Item1 == (dim-1))
+            //    {
+            //        promotePawn(toTile);
+            //    }
+            //}
         }
 
         /// <summary>
@@ -201,6 +225,8 @@ namespace chess.Model
         /// Since this an optional side effect of either the MOVE or 
         /// CAPTURE operations, this is left for them to check.
         /// Rather than the evaluator.
+        /// 
+        /// TODO
         /// 
         /// ATM default to QUEEN
         /// </summary>
@@ -239,7 +265,7 @@ namespace chess.Model
         /// Given a Tuple(int,int) position, return a reference
        /// to the Square object located at that at that position on the board.
         /// </summary>
-        private Square getTile(Tuple<int, int> position)
+        private Square getSquare(Tuple<int, int> position)
         {
             int row = position.Item1;
             int col = position.Item2;
@@ -254,19 +280,45 @@ namespace chess.Model
         /// </summary>
         /// <param name="toTile"></param>
         /// <param name="fromTile"></param>
-        private void updateTile(Square toTile, Square fromTile)
+        private void changeSquare(Tuple<int,int> location, Square newValues)
         {
-            toTile.piece = fromTile.piece;
-            toTile.movedOnce = fromTile.movedOnce;
-            toTile.canBeCapturedEnPassant = fromTile.canBeCapturedEnPassant;
+            int row = location.Item1;
+            int col = location.Item2;
+
+            this.board[row, col] = newValues;
 
             // finally fire the BoardChanged event!
             // EventArgs could be the tile coordinates which have changed
+            BoardChangedEventArgs e = new BoardChangedEventArgs();
+            e.Add(location);
+            OnBoardChanged(e);
         }
 
 
+
+
+
+        
+
+
+        private void addToCaptured(char piece)
+        {
+            this.piecesCapd.Add(piece);
+            OnCapturedChanged(EventArgs.Empty);
+        }
+
+        public List<char> PiecesCapd
+        {
+            get
+            {
+                return this.piecesCapd;
+            }
+        }
+
+
+
         // this method is called by some code (when the code changes the board) and raises the event 
-        protected virtual void OnBoardChanged(EventArgs e)
+        protected virtual void OnBoardChanged(BoardChangedEventArgs e)
         {
             // eg makes sure the Event has a delegate attached
             if (BoardChanged != null)
@@ -275,6 +327,13 @@ namespace chess.Model
             }
         }
 
+        protected virtual void OnCapturedChanged(EventArgs e)
+        {
+            if (CapturedChanged != null)
+            {
+                CapturedChanged(this, e);
+            }
+        }
 
     }
 

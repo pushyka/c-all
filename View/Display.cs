@@ -199,13 +199,15 @@ namespace chess.View
             // the display code to update the message box will subscribe to this Message.propertyChanged event
             this.gc.PropertyChanged += message_PropertyChanged;
 
-            
+            this.gc.lookAtChessModel().CapturedChanged += model_CapturedChanged;
             this.gc.startGameLoop();
 
 
 
 
         }
+
+
 
         /// <summary>
         /// Called once to initially draw the state of the model onto the
@@ -231,7 +233,6 @@ namespace chess.View
                         Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(col, row);
                         //dispTile.BackColor = Color.Yellow;
                         // draw the graphic onto the display tile (graphic must inherit Click ability)
-                        System.Console.WriteLine("tile size is {0}", gTile.Size);
                         gTile.Controls.Add(gPiece);
 
                     }
@@ -243,6 +244,7 @@ namespace chess.View
         private PictureBox getGuiPiece(char mPiece)
         {
             PictureBox pb = new PictureBox();
+            pb.Name = "pb";
             pb.Size = new Size(50, 50);
             pb.Image = gamePieces[mPiece];
             pb.SizeMode = PictureBoxSizeMode.Zoom;
@@ -303,7 +305,7 @@ namespace chess.View
             else // else the first click has already been added to usermove, so add the second
             {
                 USRMOVE += ' ' + tileClicked;
-                this.gc.INPUT = USRMOVE;
+                this.gc.Input = USRMOVE;
                 // clear USRMOVE for next turn
                 USRMOVE = "";
             }
@@ -314,14 +316,56 @@ namespace chess.View
             
         }
 
-        // private void GENERIC tileClicked handler which waits until TWO tiles eg "b4 c2" have been clicked then it sends it
-        // to the controller
-        // use STATIC or DISPLAY-CLASS FIELD VALUES
+        delegate void model_BoardChangedCallback(object sender, BoardChangedEventArgs e);
 
-        private void model_BoardChanged(object sender, EventArgs e)
+        private void model_BoardChanged(object sender, BoardChangedEventArgs e)
         {
-            System.Console.WriteLine("I am the view and I have registered that the model has changed");
-            // redraw the display using the model
+            // code calling this method from non Form disp thread, so need to invoke into
+            // the thread which is responsible for running the disp (eg the genericboardbase's thread)
+            if (this.genericBoardBase.InvokeRequired)
+            {
+                model_BoardChangedCallback d = new model_BoardChangedCallback(model_BoardChanged);
+                this.genericBoardBase.Invoke(d, new object[] { sender, e });
+            }
+            else
+            {
+                List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
+                foreach (Tuple<int, int> pos in positionsChanged)
+                {
+                    // update the display to match the model 
+
+                    // corresponding gui position
+                    Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
+
+                    char mPiece = this.gc.lookAtChessModel().Board[pos.Item1, pos.Item2].piece;
+
+                    // remove all existing items on the tile (picture boxes if any)
+                    foreach (Control pb in gTile.Controls.OfType<PictureBox>())
+                    {
+                        gTile.Controls.Remove(pb);
+                    }
+
+                    // if mPiece was changed to e, then this is satisfactorily cleared the tile
+
+                    // else mPiece is a piece which needs to be added to the now empty tile
+                    if (gamePieces.ContainsKey(mPiece))
+                    {
+                        PictureBox gPiece = getGuiPiece(mPiece);
+                        gTile.Controls.Add(gPiece);
+                    }
+                    else if (mPiece == 'e')
+                    {
+                        // then the clearing is already done
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("model piece is some unexpected value");
+                    }
+
+                }
+            }
+            
+            
         }
 
 
@@ -349,11 +393,11 @@ namespace chess.View
             *  same function, allows it to do the execution on that parent thread asynchronously.
             */
 
-            if (this.message_box.InvokeRequired)
+            if (this.genericBoardBase.InvokeRequired)
             {
                 // delegate d a pointer to the function
                 message_PropertyChangedCallback d = new message_PropertyChangedCallback(message_PropertyChanged);
-                this.message_box.Invoke(d, new object[] { sender, e });
+                this.genericBoardBase.Invoke(d, new object[] { sender, e });
             }
             // else we are in the thread which created the control
             else
@@ -367,9 +411,20 @@ namespace chess.View
 
         }
 
+
+
+
+        private void model_CapturedChanged(object sender, EventArgs e)
+        {
+            System.Console.WriteLine("I have registered a capture");
+            // todo cross thread etc
+        }
+
+
+
         private void concedeButton_Click(object sender, EventArgs e)
         {
-            this.gc.INPUT = "concede";
+            this.gc.Input = "concede";
         }
     }
 }

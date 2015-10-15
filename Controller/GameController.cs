@@ -15,9 +15,7 @@ namespace chess.Controller
 {
     public class GameController : INotifyPropertyChanged
     {
-        public string INPUT { get; set; } = null;
-        // need a lock type value (prevent INPUT being changed again, during the validation phase)
-        // eg input is only modified when a second value holds a certain value
+        private string input = null;
 
         string message = null;
         Chess c;
@@ -63,17 +61,17 @@ namespace chess.Controller
                 // check if there is a potential move, else IsGame = false
 
                 // check if display has provided a move
-                if (INPUT != null)
+                if (input != null)
                 {
-                    if (INPUT == "concede")
+                    if (input == "concede")
                     {
                         // c.Player has conceded
                         conceded(c.Player);
-                        INPUT = null;
+                        input = null;
                         break;
                     }
 
-                    else if (e.validateInput(INPUT, ref move))
+                    else if (e.validateInput(input, ref move))
                     {
                         // then move is non null
                         System.Console.WriteLine("The input created a move: {0}", move.ToString());
@@ -96,7 +94,7 @@ namespace chess.Controller
                         System.Console.WriteLine("The input was not valid");
                     }
 
-                    INPUT = null;
+                    input = null;
                 }
 
             }
@@ -133,7 +131,7 @@ namespace chess.Controller
 
         public void recvInstructTEST()
         {
-            c.applyMoveTEST();
+            //c.applyMoveTEST();
         }
 
         public void recvInstruct(string move)
@@ -222,6 +220,21 @@ namespace chess.Controller
             get
             {
                 return this.message;
+            }
+        }
+
+        public string Input
+        {
+            get
+            {
+                return this.input;
+            }
+            set
+            {
+                if (this.input == null)
+                    this.input = value;
+                else
+                    System.Console.WriteLine("A previous input hsant been cleared yet (currently being processed) so this Set has failed");
             }
         }
 

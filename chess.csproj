@@ -54,6 +54,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\BoardChangedEventArgs.cs" />
     <Compile Include="Model\Chess.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
