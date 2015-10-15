@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 using chess.Controller;
 using chess.Model;
@@ -22,6 +23,7 @@ namespace chess.View
         private GameController gc;
         private TableLayoutPanel genericBoardBase;
         private string USRMOVE = "";
+        private List<Control> tintRef;
 
         // dictionaries for quick conversion from coordinates to file/rank
         private Dictionary<int, char> colToFile = new Dictionary<int, char>
@@ -70,6 +72,9 @@ namespace chess.View
             // tripple buffer>
             InitializeComponent();
             InitGenericBoard();
+
+            tintRef = new List<Control>();
+
 
         }
 
@@ -234,6 +239,7 @@ namespace chess.View
                         //dispTile.BackColor = Color.Yellow;
                         // draw the graphic onto the display tile (graphic must inherit Click ability)
                         gTile.Controls.Add(gPiece);
+                        
 
                     }
                 }
@@ -255,6 +261,9 @@ namespace chess.View
 
 
 
+ 
+
+
 
         /// <summary>
         /// This function when called, generates a tile location eg ("B3") based on what the user
@@ -274,7 +283,36 @@ namespace chess.View
             if (sender is Panel)
             {
                 Panel tile = (Panel)sender;
-                TableLayoutPanelCellPosition pos = this.genericBoardBase.GetPositionFromControl(tile);
+                TableLayoutPanelCellPosition pos;
+                if (tile.Name == "tint")
+                {
+                    // then the user has clicked already tinted panel (same panel of this turn so they want to unselect it)
+                    // send the duplicate tiles as normal, the evaluator will detect the error
+                    // and will untint it after sending like normal,
+                    // the purpose of these lines is to simply switch from the tinted tile back to the parent
+                    // guiTile, (this may be the parent if empty, or the parents parent if a piece square)
+                    // since only the guiTile can provide the pos info required for the evaluator
+                    if (tile.Parent is Panel)
+                    {
+                        pos = this.genericBoardBase.GetPositionFromControl(tile.Parent);
+                    }
+                    else if (tile.Parent is PictureBox)
+                    {
+                        pos = this.genericBoardBase.GetPositionFromControl(tile.Parent.Parent);
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                    
+
+                }
+                else
+                {
+                    addTint(tile);
+                    pos = this.genericBoardBase.GetPositionFromControl(tile);
+                }
+
                 System.Console.WriteLine("I am the view and I have registered a click: {0}", pos);
                 tileClicked += colToFile[pos.Column].ToString() + rowToRank[pos.Row].ToString();
             }
@@ -282,6 +320,8 @@ namespace chess.View
             else if (sender is PictureBox)
             {
                 PictureBox picture = (PictureBox)sender;
+                // add the tint
+                addTint(picture);
                 // get the parent Panel container of the picturebox
                 Panel tile = (Panel)picture.Parent;
 
@@ -305,9 +345,17 @@ namespace chess.View
             else // else the first click has already been added to usermove, so add the second
             {
                 USRMOVE += ' ' + tileClicked;
+                
+                
                 this.gc.Input = USRMOVE;
+
+                //Thread.Sleep(250); // this is actually causing the delay to responding to the update event
+                // so cant have my highlight on second click pause without pausing the same threads dsplay update of the pieces
+
                 // clear USRMOVE for next turn
                 USRMOVE = "";
+                // clear those highlights now
+                removeTint();
             }
 
 
@@ -315,6 +363,47 @@ namespace chess.View
             // when have 2 ready, form the string to be sent to the evaluator
             
         }
+
+        private void addTint(Control tileref)
+        {
+            // could be adding tint to picturebox or panel
+
+            // and add the tile to a ref array so that the tint may be later removed
+
+            this.tintRef.Add(tileref);
+            
+            Panel tintPane = new Panel();
+            tintPane.Name = "tint";
+            tintPane.Size = tileref.Size;
+
+            tintPane.BackColor = Color.FromArgb(50, Color.Yellow);
+            tintPane.Click += OnTileClick;
+            tileref.Controls.Add(tintPane);
+
+            
+            
+
+            //tintPane.BringToFront();
+            
+            
+        }
+
+        private void removeTint()
+        {
+            // foreach board square control (2 of them)
+            foreach (Control c in this.tintRef)
+            {
+                // the control is either a panel or a picturebox
+                // with only 1 control within in, = the tint panel
+                foreach (Control tp in c.Controls.OfType<Panel>())
+                {
+                    c.Controls.Remove(tp);
+                }
+            }
+            this.tintRef.Clear();
+        }
+
+
 
         delegate void model_BoardChangedCallback(object sender, BoardChangedEventArgs e);
 
@@ -424,6 +513,9 @@ namespace chess.View
 
         private void concedeButton_Click(object sender, EventArgs e)
         {
+            // remove any lingering tints for aesthetics
+            removeTint();
+            this.genericBoardBase.Enabled = false;
             this.gc.Input = "concede";
         }
     }
