@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\BoardChangedEventArgs.cs" />
-    <Compile Include="Model\Chess.cs" />
+    <Compile Include="Model\ChessModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

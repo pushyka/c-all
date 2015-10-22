@@ -13,7 +13,7 @@ namespace chess.Model
 
     public delegate void BoardChanged(object sender, BoardChangedEventArgs e);
 
-    public class Chess // interface
+    public class ChessModel // interface
     {
 
         // using multi-dimensional array since rows of equal lengths
@@ -31,7 +31,7 @@ namespace chess.Model
 
 
 
-        public Chess()
+        public ChessModel()
         {
             this.dim = 8;
             this.board = new Square[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)

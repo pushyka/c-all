@@ -20,7 +20,7 @@ namespace chess.View
     /// </summary>
     public partial class Display : Form
     {
-        private GameController gc;
+        private GameController gameController;
         private TableLayoutPanel genericBoardBase;
         private string USRMOVE = "";
         private List<Control> tintRef;
@@ -68,7 +68,7 @@ namespace chess.View
 
         public Display(GameController gc)
         {
-            this.gc = gc;
+            this.gameController = gc;
             // tripple buffer>
             InitializeComponent();
             InitGenericBoard();
@@ -83,7 +83,8 @@ namespace chess.View
         /// </summary>
         private void InitGenericBoard()
         {
-            
+            this.concedeButton.FlatStyle = FlatStyle.Flat;
+            //this.concedeButton.FlatAppearance.BorderColor = Color.BlanchedAlmond;
 
             // now the main container panel
             this.genericBoardBase = new TableLayoutPanel();
@@ -105,7 +106,8 @@ namespace chess.View
             // add it to the main display form
             this.Controls.Add(this.genericBoardBase);
             // hide ot fpr npw
-            this.genericBoardBase.Visible = false;
+            //this.genericBoardBase.Visible = false;
+            this.genericBoardBase.Enabled = false;
         }
 
 
@@ -130,6 +132,7 @@ namespace chess.View
                         tile.BackColor = Color.Peru;
                     }
                     tile.Click += OnTileClick;
+                    tile.MouseEnter += Tile_MouseEnter; // maybe too messy for now
                     this.genericBoardBase.Controls.Add(tile);
                 }
                 
@@ -138,6 +141,8 @@ namespace chess.View
             }
 
         }
+
+
 
 
         // This space reserved for tests
@@ -152,17 +157,17 @@ namespace chess.View
 
         private void button_Test_Click(object sender, EventArgs e)
         {
-            this.gc.recvInstructTEST();
+            this.gameController.recvInstructTEST();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            this.gc.setUp();
+            this.gameController.setUp();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Square[,] refToB = this.gc.lookAtChessModel().Board;
+            Square[,] refToB = this.gameController.ChessModel.Board;
             System.Console.WriteLine("Testing for access to c.Board...");
             System.Console.WriteLine("I can see... ({0}) ?? hopefully capital r", refToB[0, 0].piece);
         }
@@ -180,16 +185,21 @@ namespace chess.View
             // this menu item is not clickeed multiple times
             this.menuItem_add_Board.Enabled = false;
 
-            // make the board visible
-            this.genericBoardBase.Visible = true;
+
 
             // setup the model (populate)
-            this.gc.setUp();
+            this.gameController.setUp();
 
             // update the view to match the model 
             //todo
-            this.updateView(this.gc.lookAtChessModel().Board);
+            this.updateView(this.gameController.ChessModel.Board);
 
+
+
+            // make the board visible
+            //this.genericBoardBase.Visible = true;
+            this.genericBoardBase.Enabled = true;
+            this.message_box.Enabled = true;
             this.concedeButton.Visible = true;
 
 
@@ -197,15 +207,15 @@ namespace chess.View
 
             // the view sees a change to the model and updates accordingly
             // an event hander in the view subscribes to an event in the model
-            this.gc.lookAtChessModel().BoardChanged += model_BoardChanged;
+            this.gameController.ChessModel.BoardChanged += model_BoardChanged;
 
 
 
             // the display code to update the message box will subscribe to this Message.propertyChanged event
-            this.gc.PropertyChanged += message_PropertyChanged;
+            this.gameController.PropertyChanged += message_PropertyChanged;
 
-            this.gc.lookAtChessModel().CapturedChanged += model_CapturedChanged;
-            this.gc.startGameLoop();
+            this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
+            this.gameController.startGameLoop();
 
 
 
@@ -347,7 +357,7 @@ namespace chess.View
                 USRMOVE += ' ' + tileClicked;
                 
                 
-                this.gc.Input = USRMOVE;
+                this.gameController.Input = USRMOVE;
 
                 //Thread.Sleep(250); // this is actually causing the delay to responding to the update event
                 // so cant have my highlight on second click pause without pausing the same threads dsplay update of the pieces
@@ -376,7 +386,7 @@ namespace chess.View
             tintPane.Name = "tint";
             tintPane.Size = tileref.Size;
 
-            tintPane.BackColor = Color.FromArgb(50, Color.Yellow);
+            tintPane.BackColor = Color.FromArgb(70, Color.Yellow);
             tintPane.Click += OnTileClick;
             tileref.Controls.Add(tintPane);
 
@@ -404,6 +414,16 @@ namespace chess.View
         }
 
 
+        private void Tile_MouseEnter(object sender, EventArgs e)
+        {
+            //Panel tile = (Panel)sender;
+            //tile.BackColor = Color.FromArgb(25, tile.BackColor);
+          // todo
+            //    modify it slightly and restore on leave
+
+        }
+
+
 
         delegate void model_BoardChangedCallback(object sender, BoardChangedEventArgs e);
 
@@ -426,7 +446,7 @@ namespace chess.View
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
 
-                    char mPiece = this.gc.lookAtChessModel().Board[pos.Item1, pos.Item2].piece;
+                    char mPiece = this.gameController.ChessModel.Board[pos.Item1, pos.Item2].piece;
 
                     // remove all existing items on the tile (picture boxes if any)
                     foreach (Control pb in gTile.Controls.OfType<PictureBox>())
@@ -492,7 +512,7 @@ namespace chess.View
             else
             {
                 this.message_box.BeginUpdate();
-                this.message_box.Items.Add(this.gc.Message);
+                this.message_box.Items.Add(this.gameController.Message);
                 // set most recently added as the last one
                 this.message_box.TopIndex = this.message_box.Items.Count - 1;
                 this.message_box.EndUpdate();
@@ -516,7 +536,8 @@ namespace chess.View
             // remove any lingering tints for aesthetics
             removeTint();
             this.genericBoardBase.Enabled = false;
-            this.gc.Input = "concede";
+            this.concedeButton.Visible = false;
+            this.gameController.Input = "concede";
         }
     }
 }

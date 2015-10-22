@@ -13,18 +13,22 @@ using System.Runtime.CompilerServices;
 
 namespace chess.Controller
 {
+    public enum GameControlState { Initial = 1, Game = 2, Load = 3, Settings = 4}
+
     public class GameController : INotifyPropertyChanged
     {
+        
         private string input = null;
-
-        string message = null;
-        Chess c;
-        Evaluator e;
+        private string message = null;
+        private ChessModel chessModel;
+        private Evaluator evaluator;
+        private GameControlState state;
 
         public GameController()
         {
-            this.c = new Chess(); // model
-            this.e = new Evaluator(); // utility
+            this.chessModel = new ChessModel(); // model
+            this.evaluator = new Evaluator(); // utility
+            this.state = GameControlState.Initial;
 
 
         }
@@ -32,9 +36,9 @@ namespace chess.Controller
         // following are test methodss
         public void setUp()
         {
-            c.populate();
-            c.Player = 'b';
-            c.IsGame = true;
+            chessModel.populate();
+            chessModel.Player = 'b';
+            state = GameControlState.Game;
             this.Message = "Game is setup";
             
         }
@@ -53,11 +57,11 @@ namespace chess.Controller
             FormedMove move;
 
             // this bool will be set false when the game ends
-            while (c.IsGame)
+            while (state == GameControlState.Game)
             {
                 move = null;
                 moveType = null;
-                this.Message = "Player " + c.Player + "'s turn";
+                this.Message = "Player " + chessModel.Player + "'s turn";
                 // check if there is a potential move, else IsGame = false
 
                 // check if display has provided a move
@@ -66,21 +70,21 @@ namespace chess.Controller
                     if (input == "concede")
                     {
                         // c.Player has conceded
-                        conceded(c.Player);
+                        conceded(chessModel.Player);
                         input = null;
                         break;
                     }
 
-                    else if (e.validateInput(input, ref move))
+                    else if (evaluator.validateInput(input, ref move))
                     {
                         // then move is non null
                         System.Console.WriteLine("The input created a move: {0}", move.ToString());
-                        if (e.validateMove(move, c.Board, c.Player, ref moveType))
+                        if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, ref moveType))
                         {
-                            c.applyMove(move, moveType);
+                            chessModel.applyMove(move, moveType);
                             System.Console.WriteLine("have applied move of type {0}", moveType);
                             // change the player
-                            c.Player = (c.Player == 'b') ? 'w' : 'b';
+                            chessModel.Player = (chessModel.Player == 'b') ? 'w' : 'b';
                         }
                         else
                         {
@@ -148,24 +152,24 @@ namespace chess.Controller
             FormedMove move;
            
             
-            c.populate();
-            c.Player = 'b';
+            chessModel.populate();
+            chessModel.Player = 'b';
             while (true)
             {
                 //c.display();
-                System.Console.Write("Player {0}, enter a move: ", c.Player);
+                System.Console.Write("Player {0}, enter a move: ", chessModel.Player);
                 string input = Console.ReadLine();
                 move = null;
                 moveType = null;
                 
                 
-                if (e.validateInput(input, ref move))
+                if (evaluator.validateInput(input, ref move))
                 {
                     // then move is non null
                     System.Console.WriteLine("The input created a move: {0}", move.ToString());
-                    if(e.validateMove(move, c.Board, c.Player, ref moveType))
+                    if(evaluator.validateMove(move, chessModel.Board, chessModel.Player, ref moveType))
                     {
-                        c.applyMove(move, moveType);
+                        chessModel.applyMove(move, moveType);
                         System.Console.WriteLine("have applied move of type {0}", moveType);
                         // apply the move
                     }
@@ -187,9 +191,12 @@ namespace chess.Controller
 
         }
 
-        public Chess lookAtChessModel()
+        public ChessModel ChessModel
         {
-            return c;
+            get
+            {
+                return this.chessModel;
+            }
         }
 
 
