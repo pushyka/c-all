@@ -20,14 +20,14 @@ namespace chess.Controller
         
         private string input = null;
         private string message = null;
-        private ChessModel chessModel;
-        private Evaluator evaluator;
+        private ChessModel chessModel = null;
+        private Evaluator evaluator = null;
         private GameControlState state;
+        private Thread t;
 
         public GameController()
         {
-            this.chessModel = new ChessModel(); // model
-            this.evaluator = new Evaluator(); // utility
+
             this.state = GameControlState.Initial;
 
 
@@ -36,6 +36,8 @@ namespace chess.Controller
         // following are test methodss
         public void setUp()
         {
+            chessModel = new ChessModel(); // model
+            evaluator = new Evaluator(); // utility
             chessModel.populate();
             chessModel.Player = 'b';
             state = GameControlState.Game;
@@ -43,10 +45,20 @@ namespace chess.Controller
             
         }
 
+        public void tearDown()
+        {
+            chessModel = null;
+            evaluator = null;
+            state = GameControlState.Initial;
+            //terminate t, if its running
+            t.Abort();
+            this.Message = "Initial state";
+        }
+
 
         public void startGameLoop()
         {
-            Thread t = new Thread(gameLoop);
+            t = new Thread(gameLoop);
             t.Start();
             this.Message = "Game has started";
         }
@@ -100,7 +112,8 @@ namespace chess.Controller
 
                     input = null;
                 }
-
+                Thread.Sleep(1000);
+                System.Console.WriteLine("I am still alive");
             }
 
             this.Message = "The game has ended, loop thread detached";

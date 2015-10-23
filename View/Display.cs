@@ -20,10 +20,10 @@ namespace chess.View
     /// </summary>
     public partial class Display : Form
     {
-        private GameController gameController;
-        private TableLayoutPanel genericBoardBase;
+        private GameController gameController = null;
+        private TableLayoutPanel genericBoardBase = null;
         private string USRMOVE = "";
-        private List<Control> tintRef;
+        private List<Control> tintRef = null;
 
         // dictionaries for quick conversion from coordinates to file/rank
         private Dictionary<int, char> colToFile = new Dictionary<int, char>
@@ -71,9 +71,12 @@ namespace chess.View
             this.gameController = gc;
             // tripple buffer>
             InitializeComponent();
+            InitializeComponent2();
             InitGenericBoard();
+            
+            
 
-            tintRef = new List<Control>();
+            tintRef = new List<Control>(); //reset?
 
 
         }
@@ -83,8 +86,7 @@ namespace chess.View
         /// </summary>
         private void InitGenericBoard()
         {
-            this.concedeButton.FlatStyle = FlatStyle.Flat;
-            //this.concedeButton.FlatAppearance.BorderColor = Color.BlanchedAlmond;
+
 
             // now the main container panel
             this.genericBoardBase = new TableLayoutPanel();
@@ -143,7 +145,10 @@ namespace chess.View
         }
 
 
-
+        private void InitializeComponent2()
+        {
+            this.concedeButton.FlatStyle = FlatStyle.Flat;
+        }
 
         // This space reserved for tests
         private void menuItem_Test_Click(object sender, EventArgs e)
@@ -184,6 +189,7 @@ namespace chess.View
             // for example these handlers to be registered multiple times , so ensure 
             // this menu item is not clickeed multiple times
             this.menuItem_add_Board.Enabled = false;
+            this.abandonGameToolStripMenuItem.Enabled = true;
 
 
 
@@ -193,6 +199,7 @@ namespace chess.View
             // update the view to match the model 
             //todo
             this.updateView(this.gameController.ChessModel.Board);
+
 
 
 
@@ -216,12 +223,45 @@ namespace chess.View
 
             this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
             this.gameController.startGameLoop();
-
-
-
-
+            
         }
 
+
+        private void abandonGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // deregister display handlers from the model
+            this.gameController.ChessModel.BoardChanged -= model_BoardChanged;
+            this.gameController.PropertyChanged -= message_PropertyChanged;
+            this.gameController.ChessModel.CapturedChanged -= model_CapturedChanged;
+            // clear model data and abort the gameloop worker thread
+            this.gameController.tearDown();
+            // clear display
+            resetView();
+            this.genericBoardBase.Enabled = false;
+            this.concedeButton.Visible = false;
+            this.menuItem_add_Board.Enabled = true;
+            this.abandonGameToolStripMenuItem.Enabled = false;
+        }
+
+        private void resetView()
+        {
+            // clear the view tiles
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 8; col++)
+                {
+                    Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(col, row);
+                    gTile.Controls.Clear();
+                }
+            }
+
+
+            this.blackPiecesCaptured.Controls.Clear();
+            this.whitePiecesCaptured.Controls.Clear();
+
+            // clear message box
+            this.message_box.Items.Clear();
+        }
 
 
         /// <summary>
@@ -269,9 +309,19 @@ namespace chess.View
             return pb;
         }
 
+        private PictureBox getGuiPiece2(char mPiece)
+        {
+            PictureBox pb = new PictureBox();
+            pb.Name = "pb";
+            pb.Size = new Size(50, 50);
+            pb.Image = gamePieces[mPiece];
+            pb.SizeMode = PictureBoxSizeMode.Zoom;
+            return pb;
+        }
 
 
- 
+
+
 
 
 
@@ -521,12 +571,48 @@ namespace chess.View
         }
 
 
-
+        delegate void model_CapturedChangedCallback(object sender, EventArgs e);
 
         private void model_CapturedChanged(object sender, EventArgs e)
         {
             System.Console.WriteLine("I have registered a capture");
             // todo cross thread etc
+            if (this.genericBoardBase.InvokeRequired)
+            {
+                model_CapturedChangedCallback d = new model_CapturedChangedCallback(model_CapturedChanged);
+                this.genericBoardBase.Invoke(d, new object[] { sender, e });
+            }
+            else
+            {
+                // update captured display to match cpatpieces list
+                // only update the most recent item captured
+                ;
+                try
+                {
+                    // get the last item
+                    char capturedPiece = gameController.ChessModel.PiecesCapd[gameController.ChessModel.PiecesCapd.Count - 1];
+                    ;
+                    // uses version of the function which doesnt add click handler
+                    PictureBox gCapturedPiece = getGuiPiece2(capturedPiece);
+                    if (char.IsUpper(capturedPiece))
+                    {
+                        // add to the black display
+                        this.blackPiecesCaptured.Controls.Add(gCapturedPiece);
+                    }
+                    else if (char.IsLower(capturedPiece))
+                    {
+                        this.whitePiecesCaptured.Controls.Add(gCapturedPiece);
+                    }
+
+                }
+                catch (Exception)
+                {
+
+                }
+
+                    
+
+            }
         }
 
 
@@ -539,5 +625,6 @@ namespace chess.View
             this.concedeButton.Visible = false;
             this.gameController.Input = "concede";
         }
+
     }
 }
