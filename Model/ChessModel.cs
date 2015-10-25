@@ -13,7 +13,7 @@ namespace chess.Model
 
     public delegate void BoardChanged(object sender, BoardChangedEventArgs e);
 
-    public class ChessModel // interface
+    public class ChessModel : IChessModel
     {
 
         // using multi-dimensional array since rows of equal lengths
@@ -103,7 +103,7 @@ namespace chess.Model
             {
                 for (int col = 0; col < dim; col ++)
                 {
-                    System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry allotted 2 chars, with 1 char space
+                    System.Console.Write("{0,-2} ", this.board[row, col].pID); // each entry allotted 2 chars, with 1 char space
                 }
                 System.Console.WriteLine(); // each row on a new line
             }
@@ -145,14 +145,30 @@ namespace chess.Model
         {
             Tuple<int, int> fromSquareLoc = move.PosA;
             Tuple<int, int> toSquareLoc = move.PosB;
-            // copy the piece from the fromSquare to the toSquare
+            
             Square fromSquareVal = getSquare(fromSquareLoc);
-            changeSquare(toSquareLoc, fromSquareVal);
+            
 
             // delete the piece from the fromTile by..
             // (update the from location with a empty sq)
             Square emptySquareVal = new Square('e');
             changeSquare(fromSquareLoc, emptySquareVal);
+
+
+            //  pawn stuff
+            if (fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P')
+            {
+                // the pawn has been moved atleast once so
+                fromSquareVal.movedOnce = true;
+            }
+            // also need to add pawn en passant property
+            // if is pawn and was moved 2 squares, set to true
+            // then in capture, allow this to be significant
+
+
+            // copy the piece from the fromSquare to the toSquare
+            changeSquare(toSquareLoc, fromSquareVal);
+
 
             // TODO PAWN
             // IF moving piece TYPE is pawn, and has reached king row (0-7)
@@ -164,7 +180,7 @@ namespace chess.Model
             //        promotePawn(toTile);
             //    }
             //}
-            
+
         }
 
         /// <summary>
@@ -193,7 +209,7 @@ namespace chess.Model
             changeSquare(fromSquareLoc, emptySquareVal);
 
             // add the captured to the list
-            addToCaptured(toSquareVal.piece);
+            addToCaptured(toSquareVal.pID);
 
             // TODO PAWN
             // IF moving piece TYPE is pawn, and has reached king row (0-7)
@@ -235,8 +251,8 @@ namespace chess.Model
         {
             // todo - change piece to q of same allegiance (case)
             // isUpper = black
-            char queen = (Char.IsUpper(tile.piece)) ? 'Q' : 'q';
-            tile.piece = queen;
+            char queen = (Char.IsUpper(tile.pID)) ? 'Q' : 'q';
+            tile.pID = queen;
             System.Console.WriteLine("pawn promoted to queen");
         }
 

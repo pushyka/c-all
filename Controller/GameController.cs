@@ -15,22 +15,24 @@ namespace chess.Controller
 {
     public enum GameControlState { Initial = 1, Game = 2, Load = 3, Settings = 4}
 
-    public class GameController : INotifyPropertyChanged
+    public class GameController : INotifyPropertyChanged, IGameController // remove the propertychanged event
     {
         
-        private string input = null;
-        private string message = null;
-        private ChessModel chessModel = null;
-        private Evaluator evaluator = null;
+        private string input;
+        private string message;
+        private ChessModel chessModel;
+        private Evaluator evaluator;
         private GameControlState state;
         private Thread t;
 
         public GameController()
         {
-
-            this.state = GameControlState.Initial;
-
-
+            input = null;
+            message = null;
+            chessModel = null;
+            evaluator = null;
+            t = null;
+            state = GameControlState.Initial;
         }
 
         // following are test methodss
@@ -39,7 +41,7 @@ namespace chess.Controller
             chessModel = new ChessModel(); // model
             evaluator = new Evaluator(); // utility
             chessModel.populate();
-            chessModel.Player = 'b';
+            chessModel.Player = 'w';
             state = GameControlState.Game;
             this.Message = "Game is setup";
             
@@ -47,12 +49,25 @@ namespace chess.Controller
 
         public void tearDown()
         {
+            //terminate t, if its running
+            stopGameLoop();
+
+            input = null;
+            message = null;
             chessModel = null;
             evaluator = null;
+            
             state = GameControlState.Initial;
-            //terminate t, if its running
-            t.Abort();
-            this.Message = "Initial state";
+            this.Message = "Game is teared down";
+        }
+
+        public void stopGameLoop()
+        {
+            if (t != null)
+            {
+                t.Abort();
+                t = null;
+            }
         }
 
 
@@ -67,14 +82,26 @@ namespace chess.Controller
         {
             string moveType;
             FormedMove move;
+            List<Tuple<int, int>> attackerPositions = new List<Tuple<int, int>>();
 
             // this bool will be set false when the game ends
             while (state == GameControlState.Game)
             {
                 move = null;
                 moveType = null;
+                attackerPositions.Clear();
+
                 this.Message = "Player " + chessModel.Player + "'s turn";
-                // check if there is a potential move, else IsGame = false
+                // check if there is a potential move before evaluating the input FOR CURRENT PLAYER
+                // , else IsGame = false
+                // if not in check and no legal move : stalemate
+                // if in check and no legal move to remove attack : checkmate
+                if (evaluator.isKingInCheck(chessModel.Board, chessModel.Player, ref attackerPositions))
+                    this.Message = $"Player {chessModel.Player}'s king is in check";
+
+                // break statemetns to exit the loop
+                // validateMove will also ensure the move does not leave the king in check
+
 
                 // check if display has provided a move
                 if (input != null)
@@ -140,69 +167,6 @@ namespace chess.Controller
 
 
 
-
-
-
-
-
-
-        public void recvInstructTEST()
-        {
-            //c.applyMoveTEST();
-        }
-
-        public void recvInstruct(string move)
-        {
-            System.Console.WriteLine("Controller has recvd the move: {0}", move);
-        }
-
-
-        public void test()
-        {
-            
-
-            string moveType;
-            FormedMove move;
-           
-            
-            chessModel.populate();
-            chessModel.Player = 'b';
-            while (true)
-            {
-                //c.display();
-                System.Console.Write("Player {0}, enter a move: ", chessModel.Player);
-                string input = Console.ReadLine();
-                move = null;
-                moveType = null;
-                
-                
-                if (evaluator.validateInput(input, ref move))
-                {
-                    // then move is non null
-                    System.Console.WriteLine("The input created a move: {0}", move.ToString());
-                    if(evaluator.validateMove(move, chessModel.Board, chessModel.Player, ref moveType))
-                    {
-                        chessModel.applyMove(move, moveType);
-                        System.Console.WriteLine("have applied move of type {0}", moveType);
-                        // apply the move
-                    }
-                    else
-                    {
-                        // move failed to validate
-                        System.Console.WriteLine("The move was not valid");
-                    }
-                }
-                else
-                {
-                    // input failed to validate
-                    System.Console.WriteLine("The input was not valid");
-                }
-
-                // change player
-
-            }
-
-        }
 
         public ChessModel ChessModel
         {

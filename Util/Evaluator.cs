@@ -9,8 +9,9 @@ using chess.Model;
 
 namespace chess.Util
 {
-    class Evaluator
+    class Evaluator : IEvaluator
     {
+        
 
         /// <summary>
         /// Ensures the user input matches the expected format (B2 etc), then convert the input to the 
@@ -145,14 +146,12 @@ namespace chess.Util
                     }
                     else if (isEmptyPieceOnPosB(move, board, ref pieceOnPosB))
                     {
-                        // posA is cur player, posB is empty square
-
-                        // possibly a normal move
+                        // check if the piece on posA can legally move to the posB position
 
 
                         //outcome = check path / check;
                         // IF OUTCOME: 
-                        outcome = true;
+                        outcome = canPieceALegallyMoveToPosB(move, board);
                         moveType = "movement";
                         return outcome;
                     }
@@ -195,9 +194,9 @@ namespace chess.Util
             bool result = false;
             posA = board[move.PosA.Item1, move.PosA.Item2];
             ;
-            if (posA.piece != 'e')
+            if (posA.pID != 'e')
             {
-                if ((cur_turn == 'b' && Char.IsUpper(posA.piece)) || (cur_turn == 'w' && Char.IsLower(posA.piece)))
+                if ((cur_turn == 'b' && Char.IsUpper(posA.pID)) || (cur_turn == 'w' && Char.IsLower(posA.pID)))
                 {
                     result = true;
                 }
@@ -211,9 +210,9 @@ namespace chess.Util
             bool result = false;
             posB = board[move.PosB.Item1, move.PosB.Item2];
             ;
-            if (posB.piece != 'e')
+            if (posB.pID != 'e')
             {
-                if ((cur_turn == 'b' && Char.IsUpper(posB.piece)) || (cur_turn == 'w' && Char.IsLower(posB.piece)))
+                if ((cur_turn == 'b' && Char.IsUpper(posB.pID)) || (cur_turn == 'w' && Char.IsLower(posB.pID)))
                 {
                     result = true;
                 }
@@ -227,10 +226,10 @@ namespace chess.Util
             bool result = false;
             posB = board[move.PosB.Item1, move.PosB.Item2];
             ;
-            if (posB.piece != 'e')
+            if (posB.pID != 'e')
             {
                 // player b uses the upper case chars, so this means piece is owned by the opposite to player b and vice versa
-                if ((cur_turn == 'b' && Char.IsLower(posB.piece)) || (cur_turn == 'w' && Char.IsUpper(posB.piece)))
+                if ((cur_turn == 'b' && Char.IsLower(posB.pID)) || (cur_turn == 'w' && Char.IsUpper(posB.pID)))
                 {
                     result = true;
                 }
@@ -245,56 +244,95 @@ namespace chess.Util
             bool result;
             posB = board[move.PosB.Item1, move.PosB.Item2];
             ;
-            result = (posB.piece == 'e') ? true : false;
+            result = (posB.pID == 'e') ? true : false;
             return result;
         }
 
-
-
-
-
-        /// <summary>
-        /// Takes a board, and a tuple specifying the location of one of the kings' squares.
-        /// The function returns a boolean indicating whether or not that king currently 
-        /// finds itself in check. ~this function is called frequently.
-        /// i think it will call explorePath with a number of different configurations until it finds a threat
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="board"></param>
-        /// <returns></returns>
-        public bool isInCheck(Square[,] board, Tuple<int,int> loc)
+        private bool canPieceALegallyMoveToPosB(FormedMove move, Square[,] board)
         {
-            bool check = false;
-
-            int row = loc.Item1;
-            int col = loc.Item2;
-            Square kingSq = board[row, col];
-            char player = Char.IsUpper(kingSq.piece) ? 'b' : 'w'; // only squares not empty, not of this player, and have a path to this king can attack it
-
-            System.Diagnostics.Debug.Assert(Char.ToLower(board[row, col].piece) == 'k'); // already determined the player, just assert its really a king 
-
-          
+            Tuple<int, int> posA = move.PosA;
+            // contains infor relevant for pawns
+            Square pieceOnPosA = board[posA.Item1, posA.Item2];
+            // generate the coords which piece could move to given its starting position and rule, and board context
 
 
+            // get a movement style for a given piece
+            MovementStyle style = MovementStyles.getMovementStyle(pieceOnPosA);
 
-            return false;
+            // apply the movement style to posA to generate valid positions pieceA can go to
+            // do this until maximum iterations reached or another piece in the way
+
+            List<Tuple<int, int>> coordsPieceACanMoveTo = getCoordsPieceACanMoveTo(posA, style, board);
+
+
+            // if move.posB exists in the resulting list of coords, then piece on posA can move to it
+            return coordsPieceACanMoveTo.Contains(move.PosB);
+
+        }
+
+        private List<Tuple<int, int>> getCoordsPieceACanMoveTo(Tuple<int, int> posA, MovementStyle style, Square[,] board)
+        {
+            List<Tuple<int, int>> coordsPieceACanMoveTo = new List<Tuple<int, int>>();
+
+            foreach (Tuple<int, int> direction in style.dirs)
+            {
+                int coordsNum = 1;
+                
+                while (coordsNum <= style.maxIterations)
+                {
+                    //generate the new coordinate by adding 1 unit of direction to the initial posA
+                    Tuple<int, int> newPos;
+                    int newPosRank = posA.Item1 + (coordsNum * direction.Item1);
+                    int newPosFile = posA.Item2 + (coordsNum * direction.Item2);
+                    newPos = Tuple.Create(newPosRank, newPosFile);
+                    // if the newPos is not on the board, dont add it to the list
+                    // and break since movement along this direction cannot continue
+                    if ((newPosRank < 0 || newPosRank > 7) ||
+                        (newPosFile < 0 || newPosFile > 7))
+                        break;
+                    // if the newPos is occupied by a non e, then movement along this path is blocked
+                    // so dont add it to the list and also break since movement cannot continue
+                    if (board[newPos.Item1, newPos.Item2].pID != 'e')
+                        break;
+                    //otherwise its empty so add it to the coords and continue along the path
+                    // no index error since already checked its not off the board
+                    if (board[newPos.Item1, newPos.Item2].pID == 'e')
+                        coordsPieceACanMoveTo.Add(newPos);
+
+
+                    coordsNum ++;
+                }
+            }
+
+
+            return coordsPieceACanMoveTo;
         }
 
 
-        /// <summary>
-        /// 'path' is a vector to explore from the 'location' origin
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="path"></param>
-        /// <param name="board"></param>
-        private bool explorePathForThreats(Tuple<int,int> location, Tuple<int,int> vector, Square[,] board, char player)
-        {
-            // a threat is an encountered piece along the vector whose player value
-            // is not player, and holds an inverse vector (can reach it the other way)
-            // add the 12*12 back with X
-            // search along a path until reach a non e square (including X)
-            return false;
-        }
 
+
+        public bool isKingInCheck(Square[,] board, char player, ref List<Tuple<int, int>> attackerPositions)
+        {
+            // find the king
+            Tuple<int, int> kingPos;
+            for (int row = 0; row < 8; row ++)
+            {
+                for (int col = 0; col < 8; col ++)
+                {
+                    char piece = board[row, col].pID;
+                    if ((player == 'w' && piece == 'k') ||
+                        (player == 'b' && piece == 'K'))
+                    {
+                        kingPos = Tuple.Create(row, col);
+                        break;
+                    }
+                }
+            }
+
+            // look along all possible attack vectors for isUpper if 'b' or usLower if 'w' using kingpos as origin
+
+            return false;
+            
+        }
     }
 }

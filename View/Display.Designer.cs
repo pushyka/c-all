@@ -37,14 +37,15 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem_add_Board = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.abandonGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.concedeButton = new System.Windows.Forms.Button();
             this.message_box = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.placeholder = new System.Windows.Forms.Panel();
             this.whitePiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
             this.blackPiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
-            this.abandonGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.placeholder = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -63,6 +64,7 @@
             // 
             this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuItem_add_Board,
+            this.loadGameToolStripMenuItem,
             this.abandonGameToolStripMenuItem,
             this.closeToolStripMenuItem});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
@@ -76,11 +78,27 @@
             this.menuItem_add_Board.Text = "New game";
             this.menuItem_add_Board.Click += new System.EventHandler(this.menuItem_addBoard_Click);
             // 
+            // loadGameToolStripMenuItem
+            // 
+            this.loadGameToolStripMenuItem.Name = "loadGameToolStripMenuItem";
+            this.loadGameToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.loadGameToolStripMenuItem.Text = "Load game";
+            this.loadGameToolStripMenuItem.Click += new System.EventHandler(this.menuItem_loadGame_Click);
+            // 
+            // abandonGameToolStripMenuItem
+            // 
+            this.abandonGameToolStripMenuItem.Enabled = false;
+            this.abandonGameToolStripMenuItem.Name = "abandonGameToolStripMenuItem";
+            this.abandonGameToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.abandonGameToolStripMenuItem.Text = "Abandon game";
+            this.abandonGameToolStripMenuItem.Click += new System.EventHandler(this.abandonGameToolStripMenuItem_Click);
+            // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.closeToolStripMenuItem.Text = "Close";
+            this.closeToolStripMenuItem.Click += new System.EventHandler(this.menuItem_close_Click);
             // 
             // concedeButton
             // 
@@ -121,15 +139,6 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(422, 397);
             this.tableLayoutPanel1.TabIndex = 6;
             // 
-            // placeholder
-            // 
-            this.placeholder.Enabled = false;
-            this.placeholder.Location = new System.Drawing.Point(60, 80);
-            this.placeholder.Name = "placeholder";
-            this.placeholder.Size = new System.Drawing.Size(400, 400);
-            this.placeholder.TabIndex = 7;
-            this.placeholder.Visible = false;
-            // 
             // whitePiecesCaptured
             // 
             this.whitePiecesCaptured.ColumnCount = 8;
@@ -169,13 +178,14 @@
             this.blackPiecesCaptured.Size = new System.Drawing.Size(205, 126);
             this.blackPiecesCaptured.TabIndex = 7;
             // 
-            // abandonGameToolStripMenuItem
+            // placeholder
             // 
-            this.abandonGameToolStripMenuItem.Enabled = false;
-            this.abandonGameToolStripMenuItem.Name = "abandonGameToolStripMenuItem";
-            this.abandonGameToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.abandonGameToolStripMenuItem.Text = "Abandon game";
-            this.abandonGameToolStripMenuItem.Click += new System.EventHandler(this.abandonGameToolStripMenuItem_Click);
+            this.placeholder.Enabled = false;
+            this.placeholder.Location = new System.Drawing.Point(60, 80);
+            this.placeholder.Name = "placeholder";
+            this.placeholder.Size = new System.Drawing.Size(400, 400);
+            this.placeholder.TabIndex = 7;
+            this.placeholder.Visible = false;
             // 
             // Display
             // 
@@ -212,5 +222,6 @@
         private System.Windows.Forms.TableLayoutPanel whitePiecesCaptured;
         private System.Windows.Forms.TableLayoutPanel blackPiecesCaptured;
         private System.Windows.Forms.ToolStripMenuItem abandonGameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadGameToolStripMenuItem;
     }
 }

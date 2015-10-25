@@ -54,8 +54,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\IGameController.cs" />
     <Compile Include="Model\BoardChangedEventArgs.cs" />
     <Compile Include="Model\ChessModel.cs" />
+    <Compile Include="Model\IChessModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -67,11 +69,20 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\SquareStruct.cs" />
+    <Compile Include="Util\IEvaluator.cs" />
+    <Compile Include="Util\MovementStyle.cs" />
+    <Compile Include="Util\MovementStyles.cs" />
     <Compile Include="View\Display.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="View\Display.Designer.cs">
       <DependentUpon>Display.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\LoadForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\LoadForm.Designer.cs">
+      <DependentUpon>LoadForm.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +93,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\Display.resx">
       <DependentUpon>Display.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\LoadForm.resx">
+      <DependentUpon>LoadForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

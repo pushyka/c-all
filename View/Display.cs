@@ -22,6 +22,7 @@ namespace chess.View
     {
         private GameController gameController = null;
         private TableLayoutPanel genericBoardBase = null;
+        private LoadForm loadform;
         private string USRMOVE = "";
         private List<Control> tintRef = null;
 
@@ -112,8 +113,6 @@ namespace chess.View
             this.genericBoardBase.Enabled = false;
         }
 
-
-
         private void generateTilesForBase()
         {
             for (int row = 0; row < 8; row ++)
@@ -144,38 +143,16 @@ namespace chess.View
 
         }
 
-
         private void InitializeComponent2()
         {
             this.concedeButton.FlatStyle = FlatStyle.Flat;
+            loadform = new LoadForm();
         }
 
-        // This space reserved for tests
-        private void menuItem_Test_Click(object sender, EventArgs e)
-        {
-            //this.gc.setUp();
-            
 
-            // so a property changed / object changed handler will be attached to this ref
-           
-        }
 
-        private void button_Test_Click(object sender, EventArgs e)
-        {
-            this.gameController.recvInstructTEST();
-        }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            this.gameController.setUp();
-        }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            Square[,] refToB = this.gameController.ChessModel.Board;
-            System.Console.WriteLine("Testing for access to c.Board...");
-            System.Console.WriteLine("I can see... ({0}) ?? hopefully capital r", refToB[0, 0].piece);
-        }
 
         /// <summary>
         /// load one of a number of games to the display.
@@ -189,7 +166,9 @@ namespace chess.View
             // for example these handlers to be registered multiple times , so ensure 
             // this menu item is not clickeed multiple times
             this.menuItem_add_Board.Enabled = false;
+            this.loadGameToolStripMenuItem.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = true;
+
 
 
 
@@ -223,7 +202,7 @@ namespace chess.View
 
             this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
             this.gameController.startGameLoop();
-            
+
         }
 
 
@@ -240,6 +219,7 @@ namespace chess.View
             this.genericBoardBase.Enabled = false;
             this.concedeButton.Visible = false;
             this.menuItem_add_Board.Enabled = true;
+            this.loadGameToolStripMenuItem.Enabled = true;
             this.abandonGameToolStripMenuItem.Enabled = false;
         }
 
@@ -277,7 +257,7 @@ namespace chess.View
             {
                 for (int col = 0; col < 8; col ++)
                 {
-                    char mPiece = board[row, col].piece;
+                    char mPiece = board[row, col].pID;
                     // if the tile isnt empty
                     if (mPiece != 'e')
                     {
@@ -496,7 +476,7 @@ namespace chess.View
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
 
-                    char mPiece = this.gameController.ChessModel.Board[pos.Item1, pos.Item2].piece;
+                    char mPiece = this.gameController.ChessModel.Board[pos.Item1, pos.Item2].pID;
 
                     // remove all existing items on the tile (picture boxes if any)
                     foreach (Control pb in gTile.Controls.OfType<PictureBox>())
@@ -626,5 +606,28 @@ namespace chess.View
             this.gameController.Input = "concede";
         }
 
+        private void menuItem_loadGame_Click(object sender, EventArgs e)
+        {
+            this.menuItem_add_Board.Enabled = false;
+            this.abandonGameToolStripMenuItem.Enabled = false;
+
+            DialogResult result = this.loadform.ShowDialog();
+            System.Console.WriteLine(result.ToString());
+            // worker thread to select the file and load method
+            // load game by applying moves etc
+            // when this thread completed :
+            // start the game thread
+            // visible abandon again
+            // if game is not ended transition into playing it
+            // when game thread ends / ends immediately, visible new game again etc 
+        }
+
+        private void menuItem_close_Click(object sender, EventArgs e)
+        {
+            // make sure to terminate the gameloop thread if its running
+            gameController.stopGameLoop();
+            // now end the main thread
+            this.Close();
+        }
     }
 }
