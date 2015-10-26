@@ -105,9 +105,7 @@ namespace chess.Controller
 
                 this.Message = "Player " + chessModel.Player + "'s turn";
 
-                // its the start of the player's turn so if he had any pawns that could have been captured
-                // en passant during hte oponents turn, they will now be unable to be captured en passant
-                chessModel.clearEnPassantPawns(chessModel.Player);
+
 
 
                 // check if there is a potential move before evaluating the input FOR CURRENT PLAYER
@@ -135,14 +133,23 @@ namespace chess.Controller
                     else if (evaluator.validateInput(input, ref move))
                     {
                         // then move is non null
-                        System.Console.WriteLine("The input created a move: {0}", move.ToString());
+
                         if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, ref moveType))
                         {
+                            
                             chessModel.applyMove(move, moveType);
+                            
+
                             // change display message here rather than whos turn
                             System.Console.WriteLine("have applied move of type {0}", moveType);
+                            //System.Console.WriteLine(" CLEARING PASSANTS");
+                            //chessModel.clearEnPassantPawns(chessModel.Player);
                             // change the player
                             chessModel.Player = (chessModel.Player == 'b') ? 'w' : 'b';
+                            // its the start of the player's turn so if he had any pawns that could have been captured
+                            // en passant during hte oponents turn, they will now be unable to be captured en passant
+
+
                         }
                         else
                             System.Console.WriteLine("The move was not valid");
@@ -152,8 +159,9 @@ namespace chess.Controller
 
                     input = null;
                 }
-                //Thread.Sleep(1000);
+                Thread.Sleep(1000);
                 //System.Console.WriteLine("I am still alive");
+                System.Console.WriteLine("99 NOWABOUTS PASSANT y:3 x:5 {0}", chessModel.Board[3, 5].canBeCapturedEnPassant);
             }
 
             this.Message = "The game has ended, loop thread detached";

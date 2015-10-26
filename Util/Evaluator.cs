@@ -147,7 +147,7 @@ namespace chess.Util
                     else if (isEmptyPieceOnPosB(move, board, ref pieceOnPosB))
                     {
                         // check if the piece on posA can legally move to the posB position
-
+                        System.Console.WriteLine("4 NOWABOUTS PASSANT y:3 x:5 {0}", board[3, 5].canBeCapturedEnPassant);
 
                         //outcome = check path / check;
                         // IF OUTCOME: 
@@ -250,6 +250,7 @@ namespace chess.Util
 
         private bool canPieceALegallyMoveToPosB(FormedMove move, Square[,] board)
         {
+            System.Console.WriteLine("3 NOWABOUTS PASSANT y:3 x:5 {0}", board[3, 5].canBeCapturedEnPassant);
             Tuple<int, int> posA = move.PosA;
             // contains infor relevant for pawns
             Square pieceOnPosA = board[posA.Item1, posA.Item2];
@@ -263,7 +264,7 @@ namespace chess.Util
             // do this until maximum iterations reached or another piece in the way
 
             List<Tuple<int, int>> coordsPieceACanMoveTo = getCoordsPieceACanMoveTo(posA, style, board);
-
+            ;
 
             // if move.posB exists in the resulting list of coords, then piece on posA can move to it
             return coordsPieceACanMoveTo.Contains(move.PosB);
@@ -273,7 +274,7 @@ namespace chess.Util
         private List<Tuple<int, int>> getCoordsPieceACanMoveTo(Tuple<int, int> posA, MovementStyle style, Square[,] board)
         {
             List<Tuple<int, int>> coordsPieceACanMoveTo = new List<Tuple<int, int>>();
-
+            System.Console.WriteLine("2 NOWABOUTS PASSANT y:3 x:5 {0}", board[3, 5].canBeCapturedEnPassant);
             foreach (Tuple<int, int> direction in style.dirs)
             {
                 int coordsNum = 1;
@@ -303,6 +304,58 @@ namespace chess.Util
                     coordsNum ++;
                 }
             }
+
+            // THE EN PASSANT CAPTURE IS A ->MOVE<- WITH A SECONDARY CAPTURE SIDE EFFECT
+            // check the positions adjacent to the posA:
+            // IF they -contain an enemy pawn
+            //         -the enemy pawn is.canBeCapturedEnPassant (this also implies the capturing pawn is in correct position)
+            // THEN add the diagonal coord to coordspieceacancapture
+            System.Console.WriteLine("1 NOWABOUTS PASSANT y:3 x:5 {0}", board[3, 5].canBeCapturedEnPassant);
+            System.Console.WriteLine("HERE 1");
+            Square pieceOnPosA = board[posA.Item1, posA.Item2];
+            char posAPlayer = (char.IsUpper(pieceOnPosA.pID)) ? 'b' : 'w';
+            if (pieceOnPosA.pID == 'p' || pieceOnPosA.pID == 'P')
+            {
+                ;
+                style = MovementStyles.getCaptureStyle(pieceOnPosA);
+                foreach (Tuple<int, int> attackDirection in style.dirs)
+                {
+                    Tuple<int, int> attackPos;
+                    int attackPosRank = posA.Item1 + attackDirection.Item1;
+                    int attackPosFile = posA.Item2 + attackDirection.Item2;
+                    attackPos = Tuple.Create(attackPosRank, attackPosFile);
+                    
+                    Tuple<int, int> passantPos;
+                    int passantPosRank = posA.Item1; // adjacent
+                    int passantPosFile = attackPosFile;
+                    passantPos = Tuple.Create(passantPosRank, passantPosFile);
+                    if ((passantPosRank < 0 || passantPosRank > 7) ||
+                        (passantPosFile < 0 || passantPosFile > 7))
+                        break;
+                    ; // correct here
+                    Square pieceOnPassantPos = board[passantPos.Item1, passantPos.Item2];
+                    // if passant piece is a pawn
+                    ;
+                    if (pieceOnPassantPos.pID == 'p' || pieceOnPassantPos.pID == 'P')
+                    {
+                        // and its the other players piece
+                        char pieceOnPassantPosOwner = (char.IsUpper(pieceOnPassantPos.pID)) ? 'b' : 'w';
+                        if (pieceOnPassantPosOwner != posAPlayer)
+                        {
+                            // and it can be captured enpassant
+                         
+                            if (pieceOnPassantPos.canBeCapturedEnPassant)
+                            {
+                                // then add the attackPos to the list of valid capture to positions
+                                coordsPieceACanMoveTo.Add(attackPos);
+                            }
+
+                        }
+                    }
+                }
+            }
+            // in the apply move function as a capture, and the piece is  pawn and there IS NOTHING in the posB, then this means it was
+            // an en passant capture.
 
 
             return coordsPieceACanMoveTo;
@@ -359,40 +412,7 @@ namespace chess.Util
                     coordsNum++;
                 }
             }
-            // for the pawn in addition to the normal capture completed above, also check the positions adjacent to the posA
-            // IF they -contain an enemy pawn
-            //         -the enemy pawn is.canBeCapturedEnPassant (this also implies the capturing pawn is in correct position)
-            // THEN add the diagonal coord to coordspieceacancapture
-            if (board[posA.Item1, posA.Item2].pID == 'p' || board[posA.Item1, posA.Item2].pID == 'P')
-            {
-                foreach (Tuple<int, int> attackDirection in style.dirs)
-                {
-                    Tuple<int, int> attackPos;
-                    int attackPosRank = posA.Item1 + attackDirection.Item1;
-                    int attackPosFile = posA.Item2 + attackDirection.Item2;
-                    attackPos = Tuple.Create(attackPosRank, attackPosFile);
-                    Tuple<int, int> passantPos;
-                    int passantPosRank = posA.Item1; // adjacent
-                    int passantPosFile = attackPosFile;
-                    passantPos = Tuple.Create(passantPosRank, passantPosFile);
-                    Square pieceOnPassantPos = board[passantPos.Item1, passantPos.Item2];
-                    // if passant piece is a pawn
-                    if (pieceOnPassantPos.pID == 'p' || pieceOnPassantPos.pID == 'P')
-                    {
-                        // and its the other players piece
-                        char pieceOnPassantPosOwner = (char.IsUpper(pieceOnPassantPos.pID)) ? 'b' : 'w';
-                        if (pieceOnPassantPosOwner != posAPlayer)
-                        {
-                            // and it can be captured enpassant
-                            if (pieceOnPassantPos.canBeCapturedEnPassant)
-                                // then add the attackPos to the list of valid capture to positions
-                                coordsPieceACanCapture.Add(attackPos);
-                        }
-                    }
-                }
-            }
-            // in the apply move function as a capture, and the piece is  pawn and there IS NOTHING in the posB, then this means it was
-            // an en passant capture.
+            
 
 
 

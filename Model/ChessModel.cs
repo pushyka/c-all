@@ -148,34 +148,65 @@ namespace chess.Model
             Tuple<int, int> toSquareLoc = move.PosB;
             
             Square fromSquareVal = getSquare(fromSquareLoc);
+            Square toSquareVal = getSquare(toSquareLoc);
             
 
-            // delete the piece from the fromTile by..
-            // (update the from location with a empty sq)
-            Square emptySquareVal = new Square('e');
-            changeSquare(fromSquareLoc, emptySquareVal);
+         
 
 
-            //  pawn stuff
-            if (fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P')
+            //  if moving piece is a pawn and its its first move
+            if ((fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P') &&
+                (!fromSquareVal.movedOnce))
             {
-
-                // if its a pawn and it hasnt been moved prior
-                if (!fromSquareVal.movedOnce)
-                    //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
-                    if (Math.Abs((fromSquareLoc.Item1 - toSquareLoc.Item1)) == 2)
-                        fromSquareVal.canBeCapturedEnPassant = true;
-
+                //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
+                if (Math.Abs((fromSquareLoc.Item1 - toSquareLoc.Item1)) == 2)
+                {
+                    fromSquareVal.canBeCapturedEnPassant = true;
+                }
                 // the pawn has been moved atleast once so
                 fromSquareVal.movedOnce = true;
             }
 
+            
+            // if moving piece is a pawn and the move is diagonal (non capture)
+            if ((fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P') &&
+                (toSquareLoc.Item2 != fromSquareLoc.Item2) &&
+                (toSquareVal.pID == 'e'))
+            {
+                // then this is an en passant capture
+                // add the passant square to the captured list
 
-            // copy the piece from the fromSquare to the toSquare
-            changeSquare(toSquareLoc, fromSquareVal);
+                // move the pawn to the to square (copy)
+                changeSquare(toSquareLoc, fromSquareVal);
+                // empty the from square
+                Square emptySquareVal2 = new Square('e');
+                changeSquare(fromSquareLoc, emptySquareVal2);
+                // clear the passant square -> empty
+                Tuple<int, int> passantSquareLoc;
+                int passantSquareLocRank = fromSquareLoc.Item1;
+                int passantSquareLocFile = toSquareLoc.Item2;
+                passantSquareLoc = Tuple.Create(passantSquareLocRank, passantSquareLocFile);
+                Square passantSquareVal = getSquare(passantSquareLoc);
+                Square emptySquareVal3 = new Square('e');
+                changeSquare(passantSquareLoc, emptySquareVal2);
+                // add the passant square to the captured list
+                addToCaptured(passantSquareVal.pID);
+                System.Console.WriteLine("en passant move registered");
+            }
+            // otherwise its not an en passant type capture
+            else
+            {
+  
+                // move the piece to the to square (copy)
+                changeSquare(toSquareLoc, fromSquareVal);
+                // empty the from square
+                Square emptySquareVal = new Square('e');
+                changeSquare(fromSquareLoc, emptySquareVal);
+
+            }
 
 
-
+            
 
 
         }
@@ -194,43 +225,15 @@ namespace chess.Model
             Square toSquareVal = getSquare(toSquareLoc);
             Square fromSquareVal = getSquare(fromSquareLoc);
 
-            // pawn intermission
-            // if the capturing piece is a pawn and the target is empty
-            if ((fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P') &&
-                (toSquareVal.pID == 'e'))
-                {
-                    // then this is an en passant capture
-                    // add the passant square to the captured list
+     
+            // move the piece to the to square (copy)
+            changeSquare(toSquareLoc, fromSquareVal);
+            // empty the from square
+            Square emptySquareVal = new Square('e');
+            changeSquare(fromSquareLoc, emptySquareVal);
 
-                    // move the pawn to the to square (copy)
-                    changeSquare(toSquareLoc, fromSquareVal);
-                    // empty the from square
-                    Square emptySquareVal = new Square('e');
-                    changeSquare(fromSquareLoc, emptySquareVal);
-                    // clear the passant square -> empty
-                    Tuple<int, int> passantSquareLoc;
-                    int passantSquareLocRank = fromSquareLoc.Item1;
-                    int passantSquareLocFile = toSquareLoc.Item2;
-                    passantSquareLoc = Tuple.Create(passantSquareLocRank, passantSquareLocFile);
-                    Square passantSquareVal = getSquare(passantSquareLoc);
-                    Square emptySquareVal2 = new Square('e');
-                    changeSquare(passantSquareLoc, emptySquareVal2);
-                    // add the passant square to the captured list
-                    addToCaptured(passantSquareVal.pID);
-                    System.Console.WriteLine("en passant move registered");
-                }
-            // otherwise its not an en passant type capture
-            else
-            {
-                    // move the piece to the to square (copy)
-                    changeSquare(toSquareLoc, fromSquareVal);
-                    // empty the from square
-                    Square emptySquareVal = new Square('e');
-                    changeSquare(fromSquareLoc, emptySquareVal);
-
-                    // add the captured to the list
-                    addToCaptured(toSquareVal.pID);
-            }
+            // add the captured to the list
+            addToCaptured(toSquareVal.pID);
         }
 
 
