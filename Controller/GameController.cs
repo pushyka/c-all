@@ -142,12 +142,13 @@ namespace chess.Controller
 
                             // change display message here rather than whos turn
                             System.Console.WriteLine("have applied move of type {0}", moveType);
-                            //System.Console.WriteLine(" CLEARING PASSANTS");
-                            //chessModel.clearEnPassantPawns(chessModel.Player);
+
                             // change the player
                             chessModel.Player = (chessModel.Player == 'b') ? 'w' : 'b';
                             // its the start of the player's turn so if he had any pawns that could have been captured
                             // en passant during hte oponents turn, they will now be unable to be captured en passant
+                            System.Console.WriteLine(" CLEARING PASSANTS");
+                            chessModel.clearEnPassantPawns(chessModel.Player);
 
 
                         }

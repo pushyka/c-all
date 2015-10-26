@@ -278,7 +278,9 @@ namespace chess.Model
             {
                 for (int col = 0; col < dim; col++)
                 {
-                    if (board[row, col].canBeCapturedEnPassant)
+                    if (board[row, col].pID == 'p' && player == 'w')
+                        board[row, col].canBeCapturedEnPassant = false;
+                    if (board[row, col].pID == 'P' && player == 'b')
                         board[row, col].canBeCapturedEnPassant = false;
                 }
             }
