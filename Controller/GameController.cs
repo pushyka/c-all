@@ -35,11 +35,23 @@ namespace chess.Controller
             state = GameControlState.Initial;
         }
 
-        // following are test methodss
-        public void setUp()
+
+        public void initModelandEval()
         {
             chessModel = new ChessModel(); // model
             evaluator = new Evaluator(); // utility
+        }
+
+        public void uninitModeandEval()
+        {
+            chessModel = null;
+            evaluator = null;
+        }
+
+        // following are test methodss
+        public void setUp()
+        {
+
             chessModel.populate();
             chessModel.Player = 'w';
             state = GameControlState.Game;
@@ -54,8 +66,8 @@ namespace chess.Controller
 
             input = null;
             message = null;
-            chessModel = null;
-            evaluator = null;
+            chessModel.Player = '\0';
+
             
             state = GameControlState.Initial;
             this.Message = "Game is teared down";
@@ -109,7 +121,7 @@ namespace chess.Controller
                     if (input == "concede")
                     {
                         // c.Player has conceded
-                        conceded(chessModel.Player);
+                        conceded();
                         input = null;
                         break;
                     }
@@ -121,52 +133,34 @@ namespace chess.Controller
                         if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, ref moveType))
                         {
                             chessModel.applyMove(move, moveType);
+                            // change display message here rather than whos turn
                             System.Console.WriteLine("have applied move of type {0}", moveType);
                             // change the player
                             chessModel.Player = (chessModel.Player == 'b') ? 'w' : 'b';
                         }
                         else
-                        {
-                            // move failed to validate
                             System.Console.WriteLine("The move was not valid");
-                        }
                     }
                     else
-                    {
-                        // input failed to validate
                         System.Console.WriteLine("The input was not valid");
-                    }
 
                     input = null;
                 }
-                Thread.Sleep(1000);
-                System.Console.WriteLine("I am still alive");
+                //Thread.Sleep(1000);
+                //System.Console.WriteLine("I am still alive");
             }
 
             this.Message = "The game has ended, loop thread detached";
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        private void conceded(char p)
+        
+        private void conceded()
         {
-            this.Message = "Player " + p + " has conceded!";
+            this.Message = "Player " + chessModel.Player + " has conceded!";
+            chessModel.Player = '\0';
         }
 
-
-
-
-
+        
 
         public ChessModel ChessModel
         {

@@ -24,8 +24,9 @@ namespace chess.Model
         private int dim;
         public event EventHandler<BoardChangedEventArgs> BoardChanged;
         public event EventHandler CapturedChanged;
+        public event EventHandler PlayerChanged;
 
-        public char Player { get; set; }
+        private char player;
         public bool IsGame { get; set; }
 
 
@@ -348,6 +349,30 @@ namespace chess.Model
             if (CapturedChanged != null)
             {
                 CapturedChanged(this, e);
+            }
+        }
+
+
+        public char Player
+        {
+            get
+            {
+                return this.player;
+            }
+            set
+            {
+                this.player = value;
+                OnPlayerChanged(EventArgs.Empty);
+            }
+        }
+
+
+
+        protected virtual void OnPlayerChanged(EventArgs e)
+        {
+            if (PlayerChanged != null)
+            {
+                PlayerChanged(this, e);
             }
         }
 

@@ -34,31 +34,110 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.concedeButton = new System.Windows.Forms.Button();
+            this.message_box = new System.Windows.Forms.ListBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.blackPiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
+            this.whitePiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
+            this.placeholder = new System.Windows.Forms.Panel();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem_add_Board = new System.Windows.Forms.ToolStripMenuItem();
             this.loadGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.abandonGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.concedeButton = new System.Windows.Forms.Button();
-            this.message_box = new System.Windows.Forms.ListBox();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.whitePiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
-            this.blackPiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
-            this.placeholder = new System.Windows.Forms.Panel();
-            this.menuStrip1.SuspendLayout();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.black_turn_panel = new System.Windows.Forms.Panel();
+            this.white_turn_panel = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // menuStrip1
+            // concedeButton
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(901, 24);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
+            this.concedeButton.BackColor = System.Drawing.Color.BlanchedAlmond;
+            this.concedeButton.Location = new System.Drawing.Point(202, 135);
+            this.concedeButton.Name = "concedeButton";
+            this.concedeButton.Size = new System.Drawing.Size(75, 23);
+            this.concedeButton.TabIndex = 4;
+            this.concedeButton.Text = "Concede";
+            this.concedeButton.UseVisualStyleBackColor = false;
+            this.concedeButton.Visible = false;
+            this.concedeButton.Click += new System.EventHandler(this.concedeButton_Click);
+            // 
+            // message_box
+            // 
+            this.message_box.Enabled = false;
+            this.message_box.FormattingEnabled = true;
+            this.message_box.Location = new System.Drawing.Point(202, 3);
+            this.message_box.Name = "message_box";
+            this.message_box.Size = new System.Drawing.Size(194, 121);
+            this.message_box.TabIndex = 5;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.message_box, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.concedeButton, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.blackPiecesCaptured, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.whitePiecesCaptured, 0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(452, 83);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.31543F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.34229F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.34229F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(399, 397);
+            this.tableLayoutPanel1.TabIndex = 6;
+            // 
+            // blackPiecesCaptured
+            // 
+            this.blackPiecesCaptured.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.blackPiecesCaptured.ColumnCount = 8;
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.blackPiecesCaptured.Location = new System.Drawing.Point(3, 334);
+            this.blackPiecesCaptured.Name = "blackPiecesCaptured";
+            this.blackPiecesCaptured.RowCount = 2;
+            this.blackPiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.blackPiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.blackPiecesCaptured.Size = new System.Drawing.Size(193, 60);
+            this.blackPiecesCaptured.TabIndex = 7;
+            // 
+            // whitePiecesCaptured
+            // 
+            this.whitePiecesCaptured.ColumnCount = 8;
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.whitePiecesCaptured.Location = new System.Drawing.Point(3, 3);
+            this.whitePiecesCaptured.Name = "whitePiecesCaptured";
+            this.whitePiecesCaptured.RowCount = 2;
+            this.whitePiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.whitePiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.whitePiecesCaptured.Size = new System.Drawing.Size(193, 60);
+            this.whitePiecesCaptured.TabIndex = 8;
+            // 
+            // placeholder
+            // 
+            this.placeholder.Enabled = false;
+            this.placeholder.Location = new System.Drawing.Point(46, 83);
+            this.placeholder.Name = "placeholder";
+            this.placeholder.Size = new System.Drawing.Size(400, 400);
+            this.placeholder.TabIndex = 7;
+            this.placeholder.Visible = false;
             // 
             // toolStripMenuItem1
             // 
@@ -100,92 +179,35 @@
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.menuItem_close_Click);
             // 
-            // concedeButton
+            // menuStrip1
             // 
-            this.concedeButton.BackColor = System.Drawing.Color.BlanchedAlmond;
-            this.concedeButton.Location = new System.Drawing.Point(214, 135);
-            this.concedeButton.Name = "concedeButton";
-            this.concedeButton.Size = new System.Drawing.Size(75, 23);
-            this.concedeButton.TabIndex = 4;
-            this.concedeButton.Text = "Concede";
-            this.concedeButton.UseVisualStyleBackColor = false;
-            this.concedeButton.Visible = false;
-            this.concedeButton.Click += new System.EventHandler(this.concedeButton_Click);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(901, 24);
+            this.menuStrip1.TabIndex = 0;
+            this.menuStrip1.Text = "menuStrip1";
             // 
-            // message_box
+            // black_turn_panel
             // 
-            this.message_box.Enabled = false;
-            this.message_box.FormattingEnabled = true;
-            this.message_box.Location = new System.Drawing.Point(214, 3);
-            this.message_box.Name = "message_box";
-            this.message_box.Size = new System.Drawing.Size(205, 121);
-            this.message_box.TabIndex = 5;
+            this.black_turn_panel.BackColor = System.Drawing.Color.Black;
+            this.black_turn_panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.black_turn_panel.Location = new System.Drawing.Point(433, 63);
+            this.black_turn_panel.Name = "black_turn_panel";
+            this.black_turn_panel.Size = new System.Drawing.Size(13, 14);
+            this.black_turn_panel.TabIndex = 8;
+            this.black_turn_panel.Visible = false;
             // 
-            // tableLayoutPanel1
+            // white_turn_panel
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.message_box, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.concedeButton, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.whitePiecesCaptured, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.blackPiecesCaptured, 0, 2);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(467, 83);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.31543F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.34229F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.34229F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(422, 397);
-            this.tableLayoutPanel1.TabIndex = 6;
-            // 
-            // whitePiecesCaptured
-            // 
-            this.whitePiecesCaptured.ColumnCount = 8;
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.whitePiecesCaptured.Location = new System.Drawing.Point(3, 3);
-            this.whitePiecesCaptured.Name = "whitePiecesCaptured";
-            this.whitePiecesCaptured.RowCount = 2;
-            this.whitePiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.whitePiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.whitePiecesCaptured.Size = new System.Drawing.Size(195, 126);
-            this.whitePiecesCaptured.TabIndex = 6;
-            // 
-            // blackPiecesCaptured
-            // 
-            this.blackPiecesCaptured.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.blackPiecesCaptured.ColumnCount = 8;
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
-            this.blackPiecesCaptured.Location = new System.Drawing.Point(3, 267);
-            this.blackPiecesCaptured.Name = "blackPiecesCaptured";
-            this.blackPiecesCaptured.RowCount = 2;
-            this.blackPiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.blackPiecesCaptured.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.blackPiecesCaptured.Size = new System.Drawing.Size(205, 126);
-            this.blackPiecesCaptured.TabIndex = 7;
-            // 
-            // placeholder
-            // 
-            this.placeholder.Enabled = false;
-            this.placeholder.Location = new System.Drawing.Point(60, 80);
-            this.placeholder.Name = "placeholder";
-            this.placeholder.Size = new System.Drawing.Size(400, 400);
-            this.placeholder.TabIndex = 7;
-            this.placeholder.Visible = false;
+            this.white_turn_panel.BackColor = System.Drawing.Color.White;
+            this.white_turn_panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.white_turn_panel.Location = new System.Drawing.Point(433, 489);
+            this.white_turn_panel.Name = "white_turn_panel";
+            this.white_turn_panel.Size = new System.Drawing.Size(13, 14);
+            this.white_turn_panel.TabIndex = 9;
+            this.white_turn_panel.Visible = false;
             // 
             // Display
             // 
@@ -193,6 +215,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.OldLace;
             this.ClientSize = new System.Drawing.Size(901, 561);
+            this.Controls.Add(this.white_turn_panel);
+            this.Controls.Add(this.black_turn_panel);
             this.Controls.Add(this.placeholder);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.menuStrip1);
@@ -200,28 +224,28 @@
             this.MinimumSize = new System.Drawing.Size(800, 600);
             this.Name = "Display";
             this.Text = "Chess";
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem menuItem_add_Board;
-        private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.Button concedeButton;
         private System.Windows.Forms.ListBox message_box;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel placeholder;
-        private System.Windows.Forms.TableLayoutPanel whitePiecesCaptured;
         private System.Windows.Forms.TableLayoutPanel blackPiecesCaptured;
-        private System.Windows.Forms.ToolStripMenuItem abandonGameToolStripMenuItem;
+        private System.Windows.Forms.TableLayoutPanel whitePiecesCaptured;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem menuItem_add_Board;
         private System.Windows.Forms.ToolStripMenuItem loadGameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem abandonGameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.Panel black_turn_panel;
+        private System.Windows.Forms.Panel white_turn_panel;
     }
 }

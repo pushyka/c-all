@@ -94,7 +94,7 @@ namespace chess.View
             this.genericBoardBase.RowCount = 8;
             this.genericBoardBase.ColumnCount = 8;
 
-            this.genericBoardBase.Location = new System.Drawing.Point(60, 80);
+            this.genericBoardBase.Location = new System.Drawing.Point(46, 83);
             this.genericBoardBase.Name = "genericBoardBase";
             //this.genericBoardBase.BackColor = Color.Transparent;
             this.genericBoardBase.Size = new System.Drawing.Size(400, 400);
@@ -165,55 +165,51 @@ namespace chess.View
             // if dont disable this menu option, it can be clicked multiple times causing
             // for example these handlers to be registered multiple times , so ensure 
             // this menu item is not clickeed multiple times
+
+
+
+
+            this.gameController.initModelandEval();
+            // register event handlers
+            this.gameController.PropertyChanged += message_PropertyChanged;
+            this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
+            this.gameController.ChessModel.PlayerChanged += model_PlayerChanged;
+            // setup the game (populate)
+            this.gameController.setUp();
+            
+
+            // update the view to match the model 
+            //todoREMOVE THIS AND MOVE BOardChanged Handler above REGISTERED BEFORE THE MODEL CODE
+            this.updateView(this.gameController.ChessModel.Board);
+
+            //finally register the view to the model.BoardChanged event so it will update itself on future changes
+            this.gameController.ChessModel.BoardChanged += model_BoardChanged;
+
             this.menuItem_add_Board.Enabled = false;
             this.loadGameToolStripMenuItem.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = true;
-
-
-
-
-            // setup the model (populate)
-            this.gameController.setUp();
-
-            // update the view to match the model 
-            //todo
-            this.updateView(this.gameController.ChessModel.Board);
-
-
-
-
-            // make the board visible
-            //this.genericBoardBase.Visible = true;
             this.genericBoardBase.Enabled = true;
             this.message_box.Enabled = true;
             this.concedeButton.Visible = true;
 
 
-            //finally register the view to the model.BoardChanged event so it will update itself on future changes
 
-            // the view sees a change to the model and updates accordingly
-            // an event hander in the view subscribes to an event in the model
-            this.gameController.ChessModel.BoardChanged += model_BoardChanged;
-
-
-
-            // the display code to update the message box will subscribe to this Message.propertyChanged event
-            this.gameController.PropertyChanged += message_PropertyChanged;
-
-            this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
             this.gameController.startGameLoop();
 
         }
 
 
         private void abandonGameToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // deregister display handlers from the model
+        {    
+            // stop the game loop thread
+            this.gameController.tearDown();
+            // deregister handlers from the model
             this.gameController.ChessModel.BoardChanged -= model_BoardChanged;
             this.gameController.PropertyChanged -= message_PropertyChanged;
             this.gameController.ChessModel.CapturedChanged -= model_CapturedChanged;
-            // clear model data and abort the gameloop worker thread
-            this.gameController.tearDown();
+            this.gameController.ChessModel.PlayerChanged -= model_PlayerChanged;
+            // clear the model and evaluator
+            this.gameController.uninitModeandEval();
             // clear display
             resetView();
             this.genericBoardBase.Enabled = false;
@@ -385,30 +381,23 @@ namespace chess.View
             else // else the first click has already been added to usermove, so add the second
             {
                 USRMOVE += ' ' + tileClicked;
-                
-                
                 this.gameController.Input = USRMOVE;
-
-                //Thread.Sleep(250); // this is actually causing the delay to responding to the update event
-                // so cant have my highlight on second click pause without pausing the same threads dsplay update of the pieces
-
                 // clear USRMOVE for next turn
                 USRMOVE = "";
                 // clear those highlights now
+                Thread.Sleep(100);
                 removeTint();
             }
-
-
-
-            // when have 2 ready, form the string to be sent to the evaluator
-            
         }
 
+
+        /// <summary>
+        /// Creates a tinted panel to be layered on to the top of the topmost control on the tile.
+        /// This could be the tile panel if empty or a picturebox if its occupied.
+        /// </summary>
+        /// <param name="tileref"></param>
         private void addTint(Control tileref)
         {
-            // could be adding tint to picturebox or panel
-
-            // and add the tile to a ref array so that the tint may be later removed
 
             this.tintRef.Add(tileref);
             
@@ -419,14 +408,8 @@ namespace chess.View
             tintPane.BackColor = Color.FromArgb(70, Color.Yellow);
             tintPane.Click += OnTileClick;
             tileref.Controls.Add(tintPane);
-
-            
-            
-
-            //tintPane.BringToFront();
-            
-            
         }
+
 
         private void removeTint()
         {
@@ -471,8 +454,7 @@ namespace chess.View
                 List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
                 foreach (Tuple<int, int> pos in positionsChanged)
                 {
-                    // update the display to match the model 
-
+                    
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
 
@@ -592,6 +574,33 @@ namespace chess.View
 
                     
 
+            }
+        }
+
+
+        delegate void model_PlayerChangedCallback(object sender, EventArgs e);
+
+        private void model_PlayerChanged(object sender, EventArgs e)
+        {
+            if (this.genericBoardBase.InvokeRequired)
+            {
+                model_PlayerChangedCallback d = new model_PlayerChangedCallback(model_PlayerChanged);
+                this.genericBoardBase.Invoke(d, new object[] { sender, e });
+            }
+            else
+            {
+                // update captured display current player turn indicator squares to the model.player value
+                // which has recently been changed
+                char curPlayer = this.gameController.ChessModel.Player;
+                this.white_turn_panel.Visible = false;
+                this.black_turn_panel.Visible = false;
+
+                if (curPlayer == 'w')
+                    this.white_turn_panel.Visible = true;
+
+                else if (curPlayer == 'b')
+                    this.black_turn_panel.Visible = true;
+                
             }
         }
 
