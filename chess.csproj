@@ -63,6 +63,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Util\CaptureStyle.cs" />
     <Compile Include="Util\Evaluator.cs" />
     <Compile Include="Model\FormedMove.cs" />
     <Compile Include="Controller\GameController.cs" />

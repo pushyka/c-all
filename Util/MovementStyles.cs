@@ -19,6 +19,11 @@ namespace chess.Util
             return new MovementStyle(pieceOnPosA);
         }
 
-        // public static CaptureStyle ..
+        public static CaptureStyle getCaptureStyle(Square pieceOnPosA)
+        {
+            // subclass of movementstyle, pawn definitions are overridden 
+            return new CaptureStyle(pieceOnPosA);
+        }
+        
     }
 }

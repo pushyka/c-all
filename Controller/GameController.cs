@@ -104,6 +104,12 @@ namespace chess.Controller
                 attackerPositions.Clear();
 
                 this.Message = "Player " + chessModel.Player + "'s turn";
+
+                // its the start of the player's turn so if he had any pawns that could have been captured
+                // en passant during hte oponents turn, they will now be unable to be captured en passant
+                chessModel.clearEnPassantPawns(chessModel.Player);
+
+
                 // check if there is a potential move before evaluating the input FOR CURRENT PLAYER
                 // , else IsGame = false
                 // if not in check and no legal move : stalemate

@@ -140,8 +140,8 @@ namespace chess.Util
 
                         //outcome = bool;
                         // IF OUTCOME :
-                        outcome = true;
-                            moveType = "capture";
+                        outcome = canPieceALegallyCapturePieceOnPosB(move, board);
+                        moveType = "capture";
                         return outcome;
                     }
                     else if (isEmptyPieceOnPosB(move, board, ref pieceOnPosB))
@@ -306,6 +306,97 @@ namespace chess.Util
 
 
             return coordsPieceACanMoveTo;
+        }
+
+        private bool canPieceALegallyCapturePieceOnPosB(FormedMove move, Square[,] board)
+        {
+            Tuple<int, int> posA = move.PosA;
+            Square pieceOnPosA = board[posA.Item1, posA.Item2];
+            CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA);
+            List<Tuple<int, int>> coordsWithPiecesPieceACanCapture = getCoordsWithPiecesPieceACanCapture(posA, style, board);
+
+            return coordsWithPiecesPieceACanCapture.Contains(move.PosB);
+        }
+
+
+        private List<Tuple<int, int>> getCoordsWithPiecesPieceACanCapture(Tuple<int, int> posA, CaptureStyle style, Square[,] board)
+        {
+            List<Tuple<int, int>> coordsPieceACanCapture = new List<Tuple<int, int>>();
+            char posAPlayer = (char.IsUpper(board[posA.Item1, posA.Item2].pID)) ? 'b' : 'w';
+            // foreach move direction form a list of any coords which have tiles can be captured (one per direction at most)
+            foreach (Tuple<int, int> attackDirection in style.dirs)
+            {
+                int coordsNum = 1;
+                while (coordsNum <= style.maxIterations)
+                {
+                    //generate the new coordinate by adding 1 unit of direction to the initial posA
+                    Tuple<int, int> newPos;
+                    int newPosRank = posA.Item1 + (coordsNum * attackDirection.Item1);
+                    int newPosFile = posA.Item2 + (coordsNum * attackDirection.Item2);
+                    newPos = Tuple.Create(newPosRank, newPosFile);
+                    // if the newPos is not on the board, dont add it to the list
+                    // and break since movement along this direction cannot continue
+                    if ((newPosRank < 0 || newPosRank > 7) ||
+                        (newPosFile < 0 || newPosFile > 7))
+                        break;
+                    // if reach a piece and the piece is not empty
+                    if (board[newPos.Item1, newPos.Item2].pID != 'e')
+                    {
+                        //and the piece is of opponent
+                        char owner = (char.IsUpper(board[newPos.Item1, newPos.Item2].pID)) ? 'b' : 'w';
+                        if (owner != posAPlayer)
+                        {
+                            coordsPieceACanCapture.Add(newPos);
+                            // add it to the list
+                            break;
+                        }
+
+                        // else its own piece
+                        else
+                            break;
+                    }
+                    // otherwise its empty so the attack direction is not blocked etc
+                    coordsNum++;
+                }
+            }
+            // for the pawn in addition to the normal capture completed above, also check the positions adjacent to the posA
+            // IF they -contain an enemy pawn
+            //         -the enemy pawn is.canBeCapturedEnPassant (this also implies the capturing pawn is in correct position)
+            // THEN add the diagonal coord to coordspieceacancapture
+            if (board[posA.Item1, posA.Item2].pID == 'p' || board[posA.Item1, posA.Item2].pID == 'P')
+            {
+                foreach (Tuple<int, int> attackDirection in style.dirs)
+                {
+                    Tuple<int, int> attackPos;
+                    int attackPosRank = posA.Item1 + attackDirection.Item1;
+                    int attackPosFile = posA.Item2 + attackDirection.Item2;
+                    attackPos = Tuple.Create(attackPosRank, attackPosFile);
+                    Tuple<int, int> passantPos;
+                    int passantPosRank = posA.Item1; // adjacent
+                    int passantPosFile = attackPosFile;
+                    passantPos = Tuple.Create(passantPosRank, passantPosFile);
+                    Square pieceOnPassantPos = board[passantPos.Item1, passantPos.Item2];
+                    // if passant piece is a pawn
+                    if (pieceOnPassantPos.pID == 'p' || pieceOnPassantPos.pID == 'P')
+                    {
+                        // and its the other players piece
+                        char pieceOnPassantPosOwner = (char.IsUpper(pieceOnPassantPos.pID)) ? 'b' : 'w';
+                        if (pieceOnPassantPosOwner != posAPlayer)
+                        {
+                            // and it can be captured enpassant
+                            if (pieceOnPassantPos.canBeCapturedEnPassant)
+                                // then add the attackPos to the list of valid capture to positions
+                                coordsPieceACanCapture.Add(attackPos);
+                        }
+                    }
+                }
+            }
+            // in the apply move function as a capture, and the piece is  pawn and there IS NOTHING in the posB, then this means it was
+            // an en passant capture.
+
+
+
+            return coordsPieceACanCapture;
         }
 
 

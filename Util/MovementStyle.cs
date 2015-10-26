@@ -14,6 +14,8 @@ namespace chess.Util
 
         public int maxIterations { get; set; }
 
+        public string type { get; set; }
+
         /// <summary>
         /// Create movement style object which contains two public fields.
         /// dirs : the directions of propagation on the board, eg 1,-1 (knight eg 1,-2
@@ -78,6 +80,8 @@ namespace chess.Util
             // only moves one tile
             this.maxIterations = 1;
 
+            this.type = "king";
+
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
@@ -93,6 +97,8 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(+1, -1));
 
             this.maxIterations = 7;
+
+            this.type = "queen";
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
@@ -105,6 +111,8 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(+1, -1));
 
             this.maxIterations = 7;
+
+            this.type = "bishop";
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
@@ -120,6 +128,8 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(+2, -1));
 
             this.maxIterations = 1;
+
+            this.type = "knight";
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
@@ -131,10 +141,12 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create( 0, -1));
 
             this.maxIterations = 7;
+
+            this.type = "rook";
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createBlackPawnMovement(Square piece)
+        public virtual void createBlackPawnMovement(Square piece)
         {
             // y / row direction for advancement is positive
             
@@ -144,11 +156,12 @@ namespace chess.Util
                 this.maxIterations = 2;
             else
                 this.maxIterations = 1;
-                
+
+            this.type = "pawn";
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createWhitePawnMovement(Square piece)
+        public virtual void createWhitePawnMovement(Square piece)
         {
             // y / row direction for advancement is negative
             this.dirs.Add(Tuple.Create(-1, 0));
@@ -156,6 +169,8 @@ namespace chess.Util
                 this.maxIterations = 2;
             else
                 this.maxIterations = 1;
+
+            this.type = "pawn";
         }
 
 

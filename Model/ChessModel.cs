@@ -159,28 +159,24 @@ namespace chess.Model
             //  pawn stuff
             if (fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P')
             {
+
+                // if its a pawn and it hasnt been moved prior
+                if (!fromSquareVal.movedOnce)
+                    //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
+                    if (Math.Abs((fromSquareLoc.Item1 - toSquareLoc.Item1)) == 2)
+                        fromSquareVal.canBeCapturedEnPassant = true;
+
                 // the pawn has been moved atleast once so
                 fromSquareVal.movedOnce = true;
             }
-            // also need to add pawn en passant property
-            // if is pawn and was moved 2 squares, set to true
-            // then in capture, allow this to be significant
 
 
             // copy the piece from the fromSquare to the toSquare
             changeSquare(toSquareLoc, fromSquareVal);
 
 
-            // TODO PAWN
-            // IF moving piece TYPE is pawn, and has reached king row (0-7)
-            //if ((toTile.piece.Equals('p')) || toTile.piece.Equals('P'))
-            //{
-            //    // toTile yPos is posB.Item1
-            //    if (move.PosB.Item1 == 0 || move.PosB.Item1 == (dim-1))
-            //    {
-            //        promotePawn(toTile);
-            //    }
-            //}
+
+
 
         }
 
@@ -196,33 +192,49 @@ namespace chess.Model
             Tuple<int, int> toSquareLoc = move.PosB;
             // get the piece from the toSquare (which is being captured)
             Square toSquareVal = getSquare(toSquareLoc);
-
-
-
-
-            // copy the piece from the fromSquare to the toSquare
             Square fromSquareVal = getSquare(fromSquareLoc);
-            changeSquare(toSquareLoc, fromSquareVal);
 
-            // delete the piece from the fromTile by..
-            // (update the from location with a empty sq)
-            Square emptySquareVal = new Square('e');
-            changeSquare(fromSquareLoc, emptySquareVal);
+            // pawn intermission
+            // if the capturing piece is a pawn and the target is empty
+            if ((fromSquareVal.pID == 'p' || fromSquareVal.pID == 'P') &&
+                (toSquareVal.pID == 'e'))
+                {
+                    // then this is an en passant capture
+                    // add the passant square to the captured list
 
-            // add the captured to the list
-            addToCaptured(toSquareVal.pID);
+                    // move the pawn to the to square (copy)
+                    changeSquare(toSquareLoc, fromSquareVal);
+                    // empty the from square
+                    Square emptySquareVal = new Square('e');
+                    changeSquare(fromSquareLoc, emptySquareVal);
+                    // clear the passant square -> empty
+                    Tuple<int, int> passantSquareLoc;
+                    int passantSquareLocRank = fromSquareLoc.Item1;
+                    int passantSquareLocFile = toSquareLoc.Item2;
+                    passantSquareLoc = Tuple.Create(passantSquareLocRank, passantSquareLocFile);
+                    Square passantSquareVal = getSquare(passantSquareLoc);
+                    Square emptySquareVal2 = new Square('e');
+                    changeSquare(passantSquareLoc, emptySquareVal2);
+                    // add the passant square to the captured list
+                    addToCaptured(passantSquareVal.pID);
+                    System.Console.WriteLine("en passant move registered");
+                }
+            // otherwise its not an en passant type capture
+            else
+            {
+                    // move the piece to the to square (copy)
+                    changeSquare(toSquareLoc, fromSquareVal);
+                    // empty the from square
+                    Square emptySquareVal = new Square('e');
+                    changeSquare(fromSquareLoc, emptySquareVal);
 
-            // TODO PAWN
-            // IF moving piece TYPE is pawn, and has reached king row (0-7)
-            //if ((toTile.piece.Equals('p')) || toTile.piece.Equals('P'))
-            //{
-            //    // toTile yPos is posB.Item1
-            //    if (move.PosB.Item1 == 0 || move.PosB.Item1 == (dim-1))
-            //    {
-            //        promotePawn(toTile);
-            //    }
-            //}
+                    // add the captured to the list
+                    addToCaptured(toSquareVal.pID);
+            }
         }
+
+
+
 
         /// <summary>
         /// Performs the CASTLE operation (a specific
@@ -257,7 +269,17 @@ namespace chess.Model
             System.Console.WriteLine("pawn promoted to queen");
         }
 
-
+        public void clearEnPassantPawns(char player)
+        {
+            for (int row = 0; row < dim; row++)
+            {
+                for (int col = 0; col < dim; col++)
+                {
+                    if (board[row, col].canBeCapturedEnPassant)
+                        board[row, col].canBeCapturedEnPassant = false;
+                }
+            }
+        }
 
 
 
