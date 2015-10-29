@@ -10,10 +10,10 @@ namespace chess.Util
     class CaptureStyle : MovementStyle
     {
         // all non pawn pieces create an object with same properties as movement style
-        public CaptureStyle(Square piece) : base(piece) { }
+        public CaptureStyle(Tile piece) : base(piece) { }
 
         // override the pawn methods of movement style
-        public override void createBlackPawnMovement(Square piece)
+        public override void createBlackPawnMovement(Tile piece)
         {
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create(+1, -1));
@@ -22,7 +22,7 @@ namespace chess.Util
             this.type = "pawn";
         }
 
-        public override void createWhitePawnMovement(Square piece)
+        public override void createWhitePawnMovement(Tile piece)
         {
             this.dirs.Add(Tuple.Create(-1, +1));
             this.dirs.Add(Tuple.Create(-1, -1));

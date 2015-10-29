@@ -56,7 +56,8 @@
   <ItemGroup>
     <Compile Include="Controller\IGameController.cs" />
     <Compile Include="Model\BoardChangedEventArgs.cs" />
-    <Compile Include="Model\ChessModel.cs" />
+    <Compile Include="Model\ChessPosition.cs" />
+    <Compile Include="Model\ChessPositionModel.cs" />
     <Compile Include="Model\IChessModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

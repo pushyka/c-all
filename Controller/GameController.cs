@@ -20,7 +20,7 @@ namespace chess.Controller
         
         private string input;
         private string message;
-        private ChessModel chessModel;
+        private ChessPositionModel chessModel;
         private Evaluator evaluator;
         private GameControlState state;
         private Thread t;
@@ -38,7 +38,7 @@ namespace chess.Controller
 
         public void initModelandEval()
         {
-            chessModel = new ChessModel(); // model
+            chessModel = new ChessPositionModel(); // model
             evaluator = new Evaluator(); // utility
         }
 
@@ -103,7 +103,6 @@ namespace chess.Controller
                 moveType = null;
                 attackerPositions.Clear();
 
-                this.Message = "Player " + chessModel.Player + "'s turn";
 
 
 
@@ -134,14 +133,14 @@ namespace chess.Controller
                     {
                         // then move is non null
 
-                        if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, ref moveType))
+                        if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, chessModel.enPassantPos, ref moveType))
                         {
-                            
+                            //this.Message = "move passed validation";
                             chessModel.applyMove(move, moveType);
-                            
 
+                            
                             // change display message here rather than whos turn
-                            System.Console.WriteLine("have applied move of type {0}", moveType);
+                            //System.Console.WriteLine("have applied move of type {0}", moveType);
 
                             // change the player
                             chessModel.Player = (chessModel.Player == 'b') ? 'w' : 'b';
@@ -149,6 +148,8 @@ namespace chess.Controller
                             // en passant during hte oponents turn, they will now be unable to be captured en passant
                             System.Console.WriteLine(" CLEARING PASSANTS");
                             chessModel.clearEnPassantPawns(chessModel.Player);
+                            this.Message = "Player " + chessModel.Player + "'s turn";
+                            this.Message = "passant sq if any is " + chessModel.enPassantPos;
 
 
                         }
@@ -162,7 +163,7 @@ namespace chess.Controller
                 }
                 Thread.Sleep(1000);
                 //System.Console.WriteLine("I am still alive");
-                System.Console.WriteLine("99 NOWABOUTS PASSANT y:3 x:5 {0}", chessModel.Board[3, 5].canBeCapturedEnPassant);
+                //System.Console.WriteLine("99 NOWABOUTS PASSANT y:3 x:5 {0}", chessModel.Board[3, 5].canBeCapturedEnPassant);
             }
 
             this.Message = "The game has ended, loop thread detached";
@@ -177,7 +178,7 @@ namespace chess.Controller
 
         
 
-        public ChessModel ChessModel
+        public ChessPositionModel ChessModel
         {
             get
             {

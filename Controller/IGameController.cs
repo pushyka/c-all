@@ -36,7 +36,7 @@ namespace chess.Controller
         void stopGameLoop();
 
         // The view etc can access the model via the controller
-        ChessModel ChessModel { get; }
+        ChessPositionModel ChessModel { get; }
         // message is mostly set by the controller but sometimes the
         // view might wish to update it with something
         string Message { get; set; }

@@ -14,12 +14,12 @@ namespace chess.Util
     /// </summary>
     class MovementStyles
     {
-        public static MovementStyle getMovementStyle(Square pieceOnPosA)
+        public static MovementStyle getMovementStyle(Tile pieceOnPosA)
         {
             return new MovementStyle(pieceOnPosA);
         }
 
-        public static CaptureStyle getCaptureStyle(Square pieceOnPosA)
+        public static CaptureStyle getCaptureStyle(Tile pieceOnPosA)
         {
             // subclass of movementstyle, pawn definitions are overridden 
             return new CaptureStyle(pieceOnPosA);

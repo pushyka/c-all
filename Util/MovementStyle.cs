@@ -24,7 +24,7 @@ namespace chess.Util
         /// On construction the fields are filled according to the piece type passed to the constructor.
         /// </summary>
         /// <param name="piece"></param>
-        public MovementStyle(Square piece)
+        public MovementStyle(Tile piece)
         {
             this.dirs = new List<Tuple<int, int>>();
 
@@ -65,7 +65,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createKingMovement(Square piece)
+        private void createKingMovement(Tile piece)
         {
             // king moves all y, x directions
             this.dirs.Add(Tuple.Create(+1,  0));
@@ -85,7 +85,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createQueenMovement(Square piece)
+        private void createQueenMovement(Tile piece)
         {
             this.dirs.Add(Tuple.Create(+1, 0));
             this.dirs.Add(Tuple.Create(+1, +1));
@@ -102,7 +102,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createBishopMovement(Square piece)
+        private void createBishopMovement(Tile piece)
         {
             // diagonals only
             this.dirs.Add(Tuple.Create(+1, +1));
@@ -116,7 +116,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createKnightMovement(Square piece)
+        private void createKnightMovement(Tile piece)
         {
             this.dirs.Add(Tuple.Create(+2, +1));
             this.dirs.Add(Tuple.Create(+1, +2));
@@ -133,7 +133,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createRookMovement(Square piece)
+        private void createRookMovement(Tile piece)
         {
             this.dirs.Add(Tuple.Create(+1,  0));
             this.dirs.Add(Tuple.Create( 0, +1));
@@ -146,7 +146,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        public virtual void createBlackPawnMovement(Square piece)
+        public virtual void createBlackPawnMovement(Tile piece)
         {
             // y / row direction for advancement is positive
             
@@ -161,7 +161,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        public virtual void createWhitePawnMovement(Square piece)
+        public virtual void createWhitePawnMovement(Tile piece)
         {
             // y / row direction for advancement is negative
             this.dirs.Add(Tuple.Create(-1, 0));

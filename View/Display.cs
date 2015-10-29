@@ -246,7 +246,7 @@ namespace chess.View
         /// and will only seek to update the few tiles which have changed.
         /// </summary>
         /// <param name="board"></param>
-        private void updateView(Square[, ] board)
+        private void updateView(Tile[, ] board)
         {
             // go through the model tiles, when find a piece on a tile,
             for (int row = 0; row < 8; row ++)
