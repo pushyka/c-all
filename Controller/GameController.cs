@@ -96,14 +96,14 @@ namespace chess.Controller
             FormedMove move;
             List<Tuple<int, int>> attackerPositions = new List<Tuple<int, int>>();
 
+
+
             // this bool will be set false when the game ends
             while (state == GameControlState.Game)
             {
                 move = null;
                 moveType = null;
                 attackerPositions.Clear();
-
-
 
 
 
@@ -133,7 +133,7 @@ namespace chess.Controller
                     {
                         // then move is non null
 
-                        if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, chessModel.enPassantPos, ref moveType))
+                        if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, chessModel.enPassantSq, ref moveType))
                         {
                             //this.Message = "move passed validation";
                             chessModel.applyMove(move, moveType);
@@ -149,7 +149,7 @@ namespace chess.Controller
                             System.Console.WriteLine(" CLEARING PASSANTS");
                             chessModel.clearEnPassantPawns(chessModel.Player);
                             this.Message = "Player " + chessModel.Player + "'s turn";
-                            this.Message = "passant sq if any is " + chessModel.enPassantPos;
+                            this.Message = "passant sq if any is " + chessModel.enPassantSq;
 
 
                         }
@@ -162,8 +162,6 @@ namespace chess.Controller
                     input = null;
                 }
                 Thread.Sleep(1000);
-                //System.Console.WriteLine("I am still alive");
-                //System.Console.WriteLine("99 NOWABOUTS PASSANT y:3 x:5 {0}", chessModel.Board[3, 5].canBeCapturedEnPassant);
             }
 
             this.Message = "The game has ended, loop thread detached";

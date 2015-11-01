@@ -11,8 +11,8 @@ namespace chess.Model
         protected int dim;
         protected Tile[, ] board;
         protected char player;
-        protected Dictionary<string, string> castle;
-        public Tuple<int, int> enPassantPos;
+        protected Dictionary<char, bool> castle;
+        public Tuple<int, int> enPassantSq;
         protected int halfmoveClock;
         protected List<char> piecesCapd;//x2 
 
@@ -23,7 +23,7 @@ namespace chess.Model
         public ChessPosition(int dim,
                              Tile[,] board,
                              char player,
-                             Dictionary<string, string> castle,
+                             Dictionary<char, bool> castle,
                              Tuple<int, int> enPassantSq,
                              int halfmoveClock)
         {
@@ -31,7 +31,7 @@ namespace chess.Model
             this.board = board;
             this.player = player;
             this.castle = castle;
-            this.enPassantPos = enPassantSq;
+            this.enPassantSq = enPassantSq;
             this.halfmoveClock = halfmoveClock;
         }
 
@@ -88,7 +88,7 @@ namespace chess.Model
                 //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
                 if (Math.Abs((frSqPos.Item1 - toSqPos.Item1)) == 2)
                 {
-                    this.enPassantPos = toSqPos;
+                    this.enPassantSq = toSqPos;
                 }
                 // the pawn has been moved atleast once so
                 frSqTl.movedOnce = true;
@@ -211,11 +211,11 @@ namespace chess.Model
         {
             //System.Console.WriteLine(" www {0}", board.);
             
-            if (enPassantPos != null)
+            if (enPassantSq != null)
             {
-                if ((char.IsUpper(getTile(enPassantPos).pID) && player == 'b') ||
-                    (char.IsLower(getTile(enPassantPos).pID) && player == 'w'))
-                    enPassantPos = null;
+                if ((char.IsUpper(getTile(enPassantSq).pID) && player == 'b') ||
+                    (char.IsLower(getTile(enPassantSq).pID) && player == 'w'))
+                    enPassantSq = null;
             }
 
         }
@@ -267,6 +267,37 @@ namespace chess.Model
         protected virtual void addToCaptured(char piece)
         {
             this.piecesCapd.Add(piece);
+        }
+
+
+        /// <summary>
+        /// This method of the chess position object returns a clone of the chess position without the listeners and
+        /// captured list etc, a version which can be modified during evaluation of positions (used in search & checkcheck after move) 
+        /// independantly of the chess position model object used for final moves and updating display.
+        /// This copy is required during evaluation (for check checking) and also during generation
+        /// of positions as nodes in the search (parent node copied and modified by one move to create a child node)
+        /// </summary>
+        /// <returns></returns>
+        public ChessPosition getEvaluateableChessPosition()
+        {
+            int dimCopy = dim;
+            // copy piece placement
+            Tile[,] boardCopy = (Tile[,]) board.Clone();
+            // side to move from player
+            char playerCopy = player;
+            // castling status
+            Dictionary<char, bool> castleCopy = new Dictionary<char, bool>(castle);
+            // cur en passant sq
+            Tuple<int, int> enPassantSqCopy = (enPassantSq == null) ? null : Tuple.Create(enPassantSq.Item1, enPassantSq.Item2);
+            // halfmove clock
+            int halfmoveClockCopy = halfmoveClock;
+            ChessPosition cpos = new ChessPosition(dimCopy,
+                                              boardCopy,
+                                              playerCopy,
+                                              castleCopy,
+                                              enPassantSqCopy,
+                                              halfmoveClockCopy);
+            return cpos;
         }
 
     }

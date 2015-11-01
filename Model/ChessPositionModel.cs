@@ -37,7 +37,11 @@ namespace chess.Model
             
             this.dim = 8;
             this.board = new Tile[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
-             // hence 2,2 becomes the top left origin
+                                             // hence 2,2 becomes the top left origin
+                                             // initial=te the capture list
+            this.piecesCapd = new List<char>();
+            this.castle = new Dictionary<char, bool>();
+            this.halfmoveClock = 0;
 
         }
 
@@ -47,8 +51,7 @@ namespace chess.Model
         {
 
 
-            // initial=te the capture list
-            this.piecesCapd = new List<char>();
+
 
 
             // black row 2
@@ -202,27 +205,6 @@ namespace chess.Model
         }
 
 
-        /// <summary>
-        /// This method of the chess position object returns a clone of the chess position without the listeners and
-        /// captured list etc, a version which can be modified during evaluation of positions (used in search & checkcheck after move) 
-        /// independantly of the chess position model object used for final moves and updating display
-        /// </summary>
-        /// <returns></returns>
-        public ChessPositionModel getEvaluateableChessPosition()
-        {
-
-            // copy piece placement
-            // side to move from player
-            // castling status
-            // cur en passant sq
-            // halfmove clock
-
-            //ChessPosition cpos = new ChessPosition();
-            
-
-
-            return null;
-        }
 
     }
 
