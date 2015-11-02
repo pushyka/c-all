@@ -25,7 +25,7 @@ namespace chess.Util
         /// <param name="cur_turn"></param>
         /// <param name="moveType"></param>
         /// <returns></returns>
-        bool validateMove(FormedMove move, Tile[,] board, char cur_turn, Tuple<int, int> enPassantSq, ref string moveType);
+        bool validateMove(FormedMove move, ChessPosition cpm, ref string moveType);
 
         /// <summary>
         /// given a board context and a current player, return true / false if the players king is
@@ -36,6 +36,6 @@ namespace chess.Util
         /// <param name="player"></param>
         /// <param name="attackerPositions"></param>
         /// <returns></returns>
-        bool isKingInCheck(Tile[,] board, char player, ref List<Tuple<int, int>> attackerPositions);
+        bool isKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> attackerPositions);
     }
 }

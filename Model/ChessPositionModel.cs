@@ -181,7 +181,7 @@ namespace chess.Model
         }
 
 
-        public char Player
+        public override char Player
         {
             get
             {
@@ -189,6 +189,7 @@ namespace chess.Model
             }
             set
             {
+                // this is the override
                 this.player = value;
                 OnPlayerChanged(EventArgs.Empty);
             }

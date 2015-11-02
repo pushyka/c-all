@@ -97,11 +97,12 @@ namespace chess.Util
         /// <param name="board"></param>
         /// <param name="moveType"></param>
         /// <returns></returns>
-        public bool validateMove(FormedMove move, Tile[,] board, char cur_turn, Tuple<int, int> enPassantSq, ref string moveType)
+        public bool validateMove(FormedMove move, ChessPosition cpm, ref string moveType)
         {
             // 1 a formed move is already guaranteed to be within the board bounds (from formatMove)
             // 2 check to and from pos are not the same
             // 3 check from pos contains piece of current player
+            
 
 
             bool outcome = false; 
@@ -110,7 +111,7 @@ namespace chess.Util
 
             if (toAndFromPositionsDistinct(move))
             {
-                if (isCurTurnPieceOnPosA(move, board, cur_turn, ref pieceOnPosA))
+                if (isCurTurnPieceOnPosA(move, cpm, ref pieceOnPosA))
                 {
                     // pieceOnPosA now contains the piece on posA (which is of cur turn player)
                     // good, if it was anything else (oponent or empty its immediatly invalid)
@@ -118,7 +119,7 @@ namespace chess.Util
 
 
 
-                    if (isCurTurnPieceOnPosB(move, board, cur_turn, ref pieceOnPosB))
+                    if (isCurTurnPieceOnPosB(move, cpm, ref pieceOnPosB))
                     {
                         // now both posA and posB contains cur player pieces
 
@@ -131,7 +132,7 @@ namespace chess.Util
                              moveType = "castle";
                         return outcome;
                     }
-                    else if (isOponentTurnPieceOnPosB(move, board, cur_turn, ref pieceOnPosB))
+                    else if (isOponentTurnPieceOnPosB(move, cpm, ref pieceOnPosB))
                     {
                         // posA is cur player, posB is opponent
 
@@ -140,21 +141,21 @@ namespace chess.Util
 
                         //outcome = bool;
                         // IF OUTCOME :
-                        outcome = canPieceALegallyCapturePieceOnPosB(move, board);
+                        outcome = canPieceALegallyCapturePieceOnPosB(move, cpm);
                         moveType = "capture";
                         return outcome;
                     }
-                    else if (isEmptyPieceOnPosB(move, board, ref pieceOnPosB))
+                    else if (isEmptyPieceOnPosB(move, cpm, ref pieceOnPosB))
                     {
                        
                         // possibly a movement move or a en passant move
 
-                        if (outcome = canPieceALegallyMoveToPosB(move, board))
+                        if (outcome = canPieceALegallyMoveToPosB(move, cpm))
                         {
                             moveType = "movement";
                         }
                             
-                        else if (outcome = canPieceALegallyMoveEnPassantToPosB(move, board, enPassantSq))
+                        else if (outcome = canPieceALegallyMoveEnPassantToPosB(move, cpm))
                         {
                             moveType = "enpassantcapture";
                         }
@@ -194,14 +195,14 @@ namespace chess.Util
             return (posA.Item1 == posB.Item1 && posA.Item2 == posB.Item2) ? false : true;
         }
 
-        private bool isCurTurnPieceOnPosA(FormedMove move, Tile[,] board, char cur_turn, ref Tile posA)
+        private bool isCurTurnPieceOnPosA(FormedMove move, ChessPosition cpm, ref Tile posA)
         {
             bool result = false;
-            posA = board[move.PosA.Item1, move.PosA.Item2];
+            posA = cpm.Board[move.PosA.Item1, move.PosA.Item2];
             ;
             if (posA.pID != 'e')
             {
-                if ((cur_turn == 'b' && Char.IsUpper(posA.pID)) || (cur_turn == 'w' && Char.IsLower(posA.pID)))
+                if ((cpm.Player == 'b' && Char.IsUpper(posA.pID)) || (cpm.Player == 'w' && Char.IsLower(posA.pID)))
                 {
                     result = true;
                 }
@@ -210,14 +211,14 @@ namespace chess.Util
             return result;
         }
 
-        private bool isCurTurnPieceOnPosB(FormedMove move, Tile[,] board, char cur_turn, ref Tile posB)
+        private bool isCurTurnPieceOnPosB(FormedMove move, ChessPosition cpm, ref Tile posB)
         {
             bool result = false;
-            posB = board[move.PosB.Item1, move.PosB.Item2];
+            posB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             ;
             if (posB.pID != 'e')
             {
-                if ((cur_turn == 'b' && Char.IsUpper(posB.pID)) || (cur_turn == 'w' && Char.IsLower(posB.pID)))
+                if ((cpm.Player == 'b' && Char.IsUpper(posB.pID)) || (cpm.Player == 'w' && Char.IsLower(posB.pID)))
                 {
                     result = true;
                 }
@@ -226,15 +227,15 @@ namespace chess.Util
             return result;
         }
 
-        private bool isOponentTurnPieceOnPosB(FormedMove move, Tile[,] board, char cur_turn, ref Tile posB)
+        private bool isOponentTurnPieceOnPosB(FormedMove move, ChessPosition cpm, ref Tile posB)
         {
             bool result = false;
-            posB = board[move.PosB.Item1, move.PosB.Item2];
+            posB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             ;
             if (posB.pID != 'e')
             {
                 // player b uses the upper case chars, so this means piece is owned by the opposite to player b and vice versa
-                if ((cur_turn == 'b' && Char.IsLower(posB.pID)) || (cur_turn == 'w' && Char.IsUpper(posB.pID)))
+                if ((cpm.Player == 'b' && Char.IsLower(posB.pID)) || (cpm.Player == 'w' && Char.IsUpper(posB.pID)))
                 {
                     result = true;
                 }
@@ -244,21 +245,21 @@ namespace chess.Util
         }
 
 
-        private bool isEmptyPieceOnPosB(FormedMove move, Tile[,] board, ref Tile posB)
+        private bool isEmptyPieceOnPosB(FormedMove move, ChessPosition cpm, ref Tile posB)
         {
             bool result;
-            posB = board[move.PosB.Item1, move.PosB.Item2];
+            posB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             ;
             result = (posB.pID == 'e') ? true : false;
             return result;
         }
 
-        private bool canPieceALegallyMoveToPosB(FormedMove move, Tile[,] board)
+        private bool canPieceALegallyMoveToPosB(FormedMove move, ChessPosition cpm)
         {
            
             Tuple<int, int> posA = move.PosA;
             // contains infor relevant for pawns
-            Tile pieceOnPosA = board[posA.Item1, posA.Item2];
+            Tile pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
             // generate the coords which piece could move to given its starting position and rule, and board context
 
 
@@ -268,7 +269,8 @@ namespace chess.Util
             // apply the movement style to posA to generate valid positions pieceA can go to
             // do this until maximum iterations reached or another piece in the way
 
-            List<Tuple<int, int>> coordsPieceACanMoveTo = getCoordsPieceACanMoveTo(posA, style, board);
+            // this is going to change up t the preload array lookup
+            List<Tuple<int, int>> coordsPieceACanMoveTo = getCoordsPieceACanMoveTo(posA, style, cpm);
             ;
 
             // if move.posB exists in the resulting list of coords, then piece on posA can move to it
@@ -276,7 +278,7 @@ namespace chess.Util
 
         }
 
-        private List<Tuple<int, int>> getCoordsPieceACanMoveTo(Tuple<int, int> posA, MovementStyle style, Tile[,] board)
+        private List<Tuple<int, int>> getCoordsPieceACanMoveTo(Tuple<int, int> posA, MovementStyle style, ChessPosition cpm)
         {
             List<Tuple<int, int>> coordsPieceACanMoveTo = new List<Tuple<int, int>>();
             
@@ -298,11 +300,11 @@ namespace chess.Util
                         break;
                     // if the newPos is occupied by a non e, then movement along this path is blocked
                     // so dont add it to the list and also break since movement cannot continue
-                    if (board[newPos.Item1, newPos.Item2].pID != 'e')
+                    if (cpm.Board[newPos.Item1, newPos.Item2].pID != 'e')
                         break;
                     //otherwise its empty so add it to the coords and continue along the path
                     // no index error since already checked its not off the board
-                    if (board[newPos.Item1, newPos.Item2].pID == 'e')
+                    if (cpm.Board[newPos.Item1, newPos.Item2].pID == 'e')
                         coordsPieceACanMoveTo.Add(newPos);
 
 
@@ -313,10 +315,10 @@ namespace chess.Util
             return coordsPieceACanMoveTo;
         }
 
-        private bool canPieceALegallyMoveEnPassantToPosB(FormedMove move, Tile[,] board, Tuple<int, int> enPassantSq)
+        private bool canPieceALegallyMoveEnPassantToPosB(FormedMove move, ChessPosition cpm)
         {
 
-            List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = getCoordsPieceALegallyMoveEnPassantToPosB(move, board, enPassantSq);
+            List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = getCoordsPieceALegallyMoveEnPassantToPosB(move, cpm);
             return coordsPieceACanMoveEnPassantTo.Contains(move.PosB);
 
         }
@@ -331,8 +333,9 @@ namespace chess.Util
 
 
 
-        private List<Tuple<int, int>> getCoordsPieceALegallyMoveEnPassantToPosB(FormedMove move, Tile[,] board, Tuple<int, int> enPassantSq)
+        private List<Tuple<int, int>> getCoordsPieceALegallyMoveEnPassantToPosB(FormedMove move, ChessPosition cpm)
         {
+            
             // THE EN PASSANT CAPTURE IS A ->MOVE<- WITH A SECONDARY CAPTURE SIDE EFFECT
             // check the positions adjacent to the posA:
             // IF they -contain an enemy pawn
@@ -340,7 +343,7 @@ namespace chess.Util
             // THEN add the diagonal coord to coordspieceacancapture
             List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = new List<Tuple<int, int>>();
             Tuple<int, int> posA = move.PosA;
-            Tile pieceOnPosA = board[posA.Item1, posA.Item2];
+            Tile pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
             char posAPlayer = (char.IsUpper(pieceOnPosA.pID)) ? 'b' : 'w';
             if (pieceOnPosA.pID == 'p' || pieceOnPosA.pID == 'P')
             {
@@ -361,7 +364,7 @@ namespace chess.Util
                         (passantPosFile < 0 || passantPosFile > 7))
                         break;
                     ; // correct here
-                    Tile pieceOnPassantPos = board[passantPos.Item1, passantPos.Item2];
+                    Tile pieceOnPassantPos = cpm.Board[passantPos.Item1, passantPos.Item2];
                     // if passant piece is a pawn
                     ;
                     if (pieceOnPassantPos.pID == 'p' || pieceOnPassantPos.pID == 'P')
@@ -372,7 +375,7 @@ namespace chess.Util
                         {
                             // and it can be captured enpassant
 
-                            if (passantPos.Equals(enPassantSq))
+                            if (passantPos.Equals(cpm.EnPassantSq))
                             {
                                 // then add the attackPos to the list of valid capture to positions
                                 coordsPieceACanMoveEnPassantTo.Add(attackPos);
@@ -389,12 +392,13 @@ namespace chess.Util
 
 
 
-        private bool canPieceALegallyCapturePieceOnPosB(FormedMove move, Tile[,] board)
+        private bool canPieceALegallyCapturePieceOnPosB(FormedMove move, ChessPosition cpm)
         {
             Tuple<int, int> posA = move.PosA;
-            Tile pieceOnPosA = board[posA.Item1, posA.Item2];
+            Tile pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
             CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA);
-            List<Tuple<int, int>> coordsWithPiecesPieceACanCapture = getCoordsWithPiecesPieceACanCapture(posA, style, board);
+            // todo change to pre lookup method
+            List<Tuple<int, int>> coordsWithPiecesPieceACanCapture = getCoordsWithPiecesPieceACanCapture(posA, style, cpm.Board);
 
             return coordsWithPiecesPieceACanCapture.Contains(move.PosB);
         }
@@ -449,20 +453,29 @@ namespace chess.Util
 
 
 
-
-        public bool isKingInCheck(Tile[,] board, char player, ref List<Tuple<int, int>> attackerPositions)
+        /// <summary>
+        /// This function is passed the reference to the chessPosModel. It uses the information contained in this object
+        /// to determine whether or not the current player to move's king is being threatened by check from the other player
+        /// returning true if so. If it is being checked by the opposing player a list of the one / two coords containing the 
+        /// attacking piece's is built in 'kingCheckedBy'
+        /// </summary>
+        /// <param name="cpm"></param>
+        /// <param name="kingCheckedBy"></param>
+        /// <returns></returns>
+        public bool isKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> kingCheckedBy)
         {
             // find the king
-            Tuple<int, int> kingPos;
+            char cur_player = cpm.Player;
+            Tuple<int, int> cur_playerKingPos;
             for (int row = 0; row < 8; row ++)
             {
                 for (int col = 0; col < 8; col ++)
                 {
-                    char piece = board[row, col].pID;
-                    if ((player == 'w' && piece == 'k') ||
-                        (player == 'b' && piece == 'K'))
+                    char piece = cpm.Board[row, col].pID;
+                    if ((cur_player == 'w' && piece == 'k') ||
+                        (cur_player == 'b' && piece == 'K'))
                     {
-                        kingPos = Tuple.Create(row, col);
+                        cur_playerKingPos = Tuple.Create(row, col);
                         break;
                     }
                 }

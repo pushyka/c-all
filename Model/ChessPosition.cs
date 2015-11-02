@@ -12,7 +12,7 @@ namespace chess.Model
         protected Tile[, ] board;
         protected char player;
         protected Dictionary<char, bool> castle;
-        public Tuple<int, int> enPassantSq;
+        protected Tuple<int, int> enPassantSq;
         protected int halfmoveClock;
         protected List<char> piecesCapd;//x2 
 
@@ -223,17 +223,7 @@ namespace chess.Model
 
 
 
-        /// <summary>
-        /// 
-        /// Possibly don't need anymore since array of strings (base type) copied by value
-        /// </summary>
-        public Tile[,] Board
-        {
-            get
-            {
-                return this.board;
-            }
-        }
+
 
         /// <summary>
         /// Given a Tuple(int,int) position, return a reference
@@ -298,6 +288,44 @@ namespace chess.Model
                                               enPassantSqCopy,
                                               halfmoveClockCopy);
             return cpos;
+        }
+
+
+        public virtual char Player
+        {
+            get
+            {
+                return this.player;
+            }
+            set
+            {
+                this.player = value;
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// Possibly don't need anymore since array of strings (base type) copied by value
+        /// </summary>
+        public Tile[,] Board
+        {
+            get
+            {
+                return this.board;
+            }
+        }
+
+        public Tuple<int, int> EnPassantSq
+        {
+            get
+            {
+                return this.enPassantSq;
+            }
+            set
+            {
+                this.enPassantSq = value;
+            }
         }
 
     }

@@ -20,7 +20,7 @@ namespace chess.Controller
         
         private string input;
         private string message;
-        private ChessPositionModel chessModel;
+        private ChessPositionModel cpm;
         private Evaluator evaluator;
         private GameControlState state;
         private Thread t;
@@ -29,7 +29,7 @@ namespace chess.Controller
         {
             input = null;
             message = null;
-            chessModel = null;
+            cpm = null;
             evaluator = null;
             t = null;
             state = GameControlState.Initial;
@@ -38,13 +38,13 @@ namespace chess.Controller
 
         public void initModelandEval()
         {
-            chessModel = new ChessPositionModel(); // model
+            cpm = new ChessPositionModel(); // model
             evaluator = new Evaluator(); // utility
         }
 
         public void uninitModeandEval()
         {
-            chessModel = null;
+            cpm = null;
             evaluator = null;
         }
 
@@ -52,8 +52,8 @@ namespace chess.Controller
         public void setUp()
         {
 
-            chessModel.populate();
-            chessModel.Player = 'w';
+            cpm.populate();
+            cpm.Player = 'w';
             state = GameControlState.Game;
             this.Message = "Game is setup";
             
@@ -66,7 +66,7 @@ namespace chess.Controller
 
             input = null;
             message = null;
-            chessModel.Player = '\0';
+            cpm.Player = '\0';
 
             
             state = GameControlState.Initial;
@@ -94,25 +94,25 @@ namespace chess.Controller
         {
             string moveType;
             FormedMove move;
-            List<Tuple<int, int>> attackerPositions = new List<Tuple<int, int>>();
-
-
+            List<Tuple<int, int>> kingCheckedBy = new List<Tuple<int, int>>();
 
             // this bool will be set false when the game ends
             while (state == GameControlState.Game)
             {
+                // start of new turn, clear variables
                 move = null;
                 moveType = null;
-                attackerPositions.Clear();
+                kingCheckedBy.Clear();
 
 
-
+                // TODO
                 // check if there is a potential move before evaluating the input FOR CURRENT PLAYER
                 // , else IsGame = false
                 // if not in check and no legal move : stalemate
                 // if in check and no legal move to remove attack : checkmate
-                if (evaluator.isKingInCheck(chessModel.Board, chessModel.Player, ref attackerPositions))
-                    this.Message = $"Player {chessModel.Player}'s king is in check";
+
+                if (evaluator.isKingInCheck(cpm, ref kingCheckedBy))
+                    this.Message = $"Player {cpm.Player}'s king is in check";
 
                 // break statemetns to exit the loop
                 // validateMove will also ensure the move does not leave the king in check
@@ -133,23 +133,23 @@ namespace chess.Controller
                     {
                         // then move is non null
 
-                        if (evaluator.validateMove(move, chessModel.Board, chessModel.Player, chessModel.enPassantSq, ref moveType))
+                        if (evaluator.validateMove(move, cpm, ref moveType))
                         {
                             //this.Message = "move passed validation";
-                            chessModel.applyMove(move, moveType);
+                            cpm.applyMove(move, moveType);
 
                             
                             // change display message here rather than whos turn
                             //System.Console.WriteLine("have applied move of type {0}", moveType);
 
                             // change the player
-                            chessModel.Player = (chessModel.Player == 'b') ? 'w' : 'b';
+                            cpm.Player = (cpm.Player == 'b') ? 'w' : 'b';
                             // its the start of the player's turn so if he had any pawns that could have been captured
                             // en passant during hte oponents turn, they will now be unable to be captured en passant
                             System.Console.WriteLine(" CLEARING PASSANTS");
-                            chessModel.clearEnPassantPawns(chessModel.Player);
-                            this.Message = "Player " + chessModel.Player + "'s turn";
-                            this.Message = "passant sq if any is " + chessModel.enPassantSq;
+                            cpm.clearEnPassantPawns(cpm.Player);
+                            this.Message = "Player " + cpm.Player + "'s turn";
+                            this.Message = "passant sq if any is " + cpm.EnPassantSq;
 
 
                         }
@@ -170,8 +170,8 @@ namespace chess.Controller
         
         private void conceded()
         {
-            this.Message = "Player " + chessModel.Player + " has conceded!";
-            chessModel.Player = '\0';
+            this.Message = "Player " + cpm.Player + " has conceded!";
+            cpm.Player = '\0';
         }
 
         
@@ -180,7 +180,7 @@ namespace chess.Controller
         {
             get
             {
-                return this.chessModel;
+                return this.cpm;
             }
         }
 
