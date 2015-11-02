@@ -101,6 +101,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Resources\File-Chess_bdt60.png" />
   </ItemGroup>
   <ItemGroup>

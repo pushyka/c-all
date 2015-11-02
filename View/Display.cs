@@ -638,5 +638,15 @@ namespace chess.View
             // now end the main thread
             this.Close();
         }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (e.CloseReason == CloseReason.WindowsShutDown) return;
+
+            // else user is closing also need to stop this loop if its running
+            gameController.stopGameLoop();
+        }
     }
 }
