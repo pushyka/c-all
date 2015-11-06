@@ -12,6 +12,8 @@ namespace chess.Util
         // all non pawn pieces create an object with same properties as movement style
         public CaptureStyle(Tile piece) : base(piece) { }
 
+        public CaptureStyle() : base() { }
+
         // override the pawn methods of movement style
         public override void createBlackPawnMovement(Tile piece)
         {
@@ -30,7 +32,6 @@ namespace chess.Util
             this.maxIterations = 1;
             this.type = "pawn";
         }
-
 
     }
 }

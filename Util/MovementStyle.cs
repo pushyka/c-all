@@ -16,6 +16,8 @@ namespace chess.Util
 
         public string type { get; set; }
 
+
+        public MovementStyle() { }
         /// <summary>
         /// Create movement style object which contains two public fields.
         /// dirs : the directions of propagation on the board, eg 1,-1 (knight eg 1,-2

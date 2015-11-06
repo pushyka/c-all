@@ -133,7 +133,7 @@ namespace chess.Controller
                     {
                         // then move is non null
 
-                        if (evaluator.validateMove(move, cpm, ref moveType))
+                        if (evaluator.validateMove(move, cpm, ref moveType, ref kingCheckedBy))
                         {
                             //this.Message = "move passed validation";
                             cpm.applyMove(move, moveType);
@@ -155,6 +155,7 @@ namespace chess.Controller
                         }
                         else
                             System.Console.WriteLine("The move was not valid");
+                        // anything in kingcheckedby?
                     }
                     else
                         System.Console.WriteLine("The input was not valid");

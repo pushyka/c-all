@@ -97,15 +97,15 @@ namespace chess.Util
         /// <param name="board"></param>
         /// <param name="moveType"></param>
         /// <returns></returns>
-        public bool validateMove(FormedMove move, ChessPosition cpm, ref string moveType)
+        public bool validateMove(FormedMove move, ChessPosition cpm, ref string moveType, ref List<Tuple<int, int>> kingCheckedBy)
         {
             // 1 a formed move is already guaranteed to be within the board bounds (from formatMove)
             // 2 check to and from pos are not the same
             // 3 check from pos contains piece of current player
-            
 
 
-            bool outcome = false; 
+
+            bool outcome = false;
             Tile pieceOnPosA = new Tile();
             Tile pieceOnPosB = new Tile();
 
@@ -129,8 +129,7 @@ namespace chess.Util
                         //outcome = bool;
                         // IF OUTCOME:
                         outcome = false;
-                             moveType = "castle";
-                        return outcome;
+                        moveType = "castle";
                     }
                     else if (isOponentTurnPieceOnPosB(move, cpm, ref pieceOnPosB))
                     {
@@ -143,48 +142,50 @@ namespace chess.Util
                         // IF OUTCOME :
                         outcome = canPieceALegallyCapturePieceOnPosB(move, cpm);
                         moveType = "capture";
-                        return outcome;
                     }
                     else if (isEmptyPieceOnPosB(move, cpm, ref pieceOnPosB))
                     {
-                       
+
                         // possibly a movement move or a en passant move
 
                         if (outcome = canPieceALegallyMoveToPosB(move, cpm))
                         {
                             moveType = "movement";
                         }
-                            
+
                         else if (outcome = canPieceALegallyMoveEnPassantToPosB(move, cpm))
                         {
                             moveType = "enpassantcapture";
                         }
-                        return outcome;
+                    }
+                    
+                    else
+                    {
+                        // invalid (posA is either non player allegiance or empty)
+                        System.Console.WriteLine("posA was nota player piece");
                     }
                 }
+
                 else
                 {
-                    // invalid (posA is either non player allegiance or empty)
-                    System.Console.WriteLine("posA was nota player piece");
+                    System.Console.WriteLine("positions are not distinct");
                 }
-            }
 
-            else
+
+
+                
+            }
+            // if outcomevalid is true so far, finally check the move wont leave a check
+            if (outcome)
             {
-                System.Console.WriteLine("positions are not distinct");
+                ChessPosition cpmCopy = cpm.getEvaluateableChessPosition();
+                cpmCopy.applyMove(move, moveType); // this cpm is not used by the view
+                outcome = isKingInCheck(cpmCopy, ref kingCheckedBy);
             }
 
 
 
 
-
-
-
-
-            //outcome of the final check (path check / check check)
-            // if that check is not reached (fails on distinct check)
-            // returns the default false value of outcome :)
-            // if control reaches here, then it hasnt dentified a valid move
             return outcome;
         }
 
@@ -462,16 +463,16 @@ namespace chess.Util
         /// <param name="cpm"></param>
         /// <param name="kingCheckedBy"></param>
         /// <returns></returns>
-        public bool isKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> kingCheckedBy)
+        public bool isKingInCheck(ChessPosition cpmCopy, ref List<Tuple<int, int>> kingCheckedBy)
         {
             // find the king
-            char cur_player = cpm.Player;
+            char cur_player = cpmCopy.Player;
             Tuple<int, int> cur_playerKingPos;
-            for (int row = 0; row < 8; row ++)
+            for (int row = 0; row < cpmCopy.Dim; row ++)
             {
-                for (int col = 0; col < 8; col ++)
+                for (int col = 0; col < cpmCopy.Dim; col ++)
                 {
-                    char piece = cpm.Board[row, col].pID;
+                    char piece = cpmCopy.Board[row, col].pID;
                     if ((cur_player == 'w' && piece == 'k') ||
                         (cur_player == 'b' && piece == 'K'))
                     {
@@ -482,7 +483,15 @@ namespace chess.Util
             }
 
             // look along all possible attack vectors for isUpper if 'b' or usLower if 'w' using kingpos as origin
+            // bishop vectors : break when find one of queen, bishop, pawn(?)
+            // rook vectors : queen, rook
+            // knight vectors : knight
+            // king vectors : king
 
+           // this will match the pre compute ray array forall computation
+            // want to get a series of rays for each of the above pieces on the king pos
+            // eg bishop (4 rays), then foreach ray: starting from the ray origin: if find queen, bishop, pawn(?) of opponent piece
+            //    in this, the bishop ray, then break as this piece threatens the king on origin
             return false;
             
         }

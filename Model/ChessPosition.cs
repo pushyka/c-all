@@ -328,5 +328,14 @@ namespace chess.Model
             }
         }
 
+        public int Dim
+        {
+            get
+            {
+                return this.dim;
+            }
+            
+        }
+
     }
 }
