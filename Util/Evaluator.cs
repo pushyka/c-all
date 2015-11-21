@@ -11,7 +11,8 @@ namespace chess.Util
 {
     class Evaluator : IEvaluator
     {
-        
+
+        //List<Ray>[][,] rayArray;
 
         /// <summary>
         /// Ensures the user input matches the expected format (B2 etc), then convert the input to the 
@@ -181,9 +182,8 @@ namespace chess.Util
                 ChessPosition cpmCopy = cpm.getEvaluateableChessPosition();
                 cpmCopy.applyMove(move, moveType); // this cpm is not used by the view
                 outcome = isKingInCheck(cpmCopy, ref kingCheckedBy);
+                // if this is true the outcome should really be FALSE (for valid)
             }
-
-
 
 
             return outcome;
@@ -198,6 +198,7 @@ namespace chess.Util
 
         private bool isCurTurnPieceOnPosA(FormedMove move, ChessPosition cpm, ref Tile posA)
         {
+
             bool result = false;
             posA = cpm.Board[move.PosA.Item1, move.PosA.Item2];
             ;
@@ -208,7 +209,7 @@ namespace chess.Util
                     result = true;
                 }
             }
-
+            System.Console.WriteLine("JAJAJA" + cpm.Player + posA.pID + result);
             return result;
         }
 
@@ -492,8 +493,16 @@ namespace chess.Util
             // want to get a series of rays for each of the above pieces on the king pos
             // eg bishop (4 rays), then foreach ray: starting from the ray origin: if find queen, bishop, pawn(?) of opponent piece
             //    in this, the bishop ray, then break as this piece threatens the king on origin
-            return false;
+            return true;
             
+        }
+
+
+        public void preloadRayArray()
+        {
+            // 12 length array of 8x8 m-dim array of Lists of Rays or coords
+            // add ray class
+            //rayArray = new List<Ray>[12][,];
         }
     }
 }

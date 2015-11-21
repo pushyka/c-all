@@ -40,6 +40,7 @@ namespace chess.Controller
         {
             cpm = new ChessPositionModel(); // model
             evaluator = new Evaluator(); // utility
+            evaluator.preloadRayArray();
         }
 
         public void uninitModeandEval()

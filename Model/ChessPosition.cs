@@ -25,7 +25,8 @@ namespace chess.Model
                              char player,
                              Dictionary<char, bool> castle,
                              Tuple<int, int> enPassantSq,
-                             int halfmoveClock)
+                             int halfmoveClock,
+                             List<char> piecesCapd)
         {
             this.dim = dim;
             this.board = board;
@@ -33,6 +34,7 @@ namespace chess.Model
             this.castle = castle;
             this.enPassantSq = enPassantSq;
             this.halfmoveClock = halfmoveClock;
+            this.piecesCapd = piecesCapd;
         }
 
 
@@ -281,12 +283,15 @@ namespace chess.Model
             Tuple<int, int> enPassantSqCopy = (enPassantSq == null) ? null : Tuple.Create(enPassantSq.Item1, enPassantSq.Item2);
             // halfmove clock
             int halfmoveClockCopy = halfmoveClock;
+            //capdsofar
+            List<char> piecesCapdCopy = new List<char>(piecesCapd);
             ChessPosition cpos = new ChessPosition(dimCopy,
                                               boardCopy,
                                               playerCopy,
                                               castleCopy,
                                               enPassantSqCopy,
-                                              halfmoveClockCopy);
+                                              halfmoveClockCopy,
+                                              piecesCapdCopy);
             return cpos;
         }
 

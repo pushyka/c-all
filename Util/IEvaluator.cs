@@ -37,5 +37,7 @@ namespace chess.Util
         /// <param name="attackerPositions"></param>
         /// <returns></returns>
         bool isKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> attackerPositions);
+
+        void preloadRayArray();
     }
 }
