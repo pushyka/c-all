@@ -9,10 +9,11 @@ using chess.Model;
 
 namespace chess.Util
 {
-    class Evaluator : IEvaluator
+    public class Evaluator : IEvaluator
     {
 
-        //List<Ray>[][,] rayArray;
+        //List<List<Tuple<int, int>>>[][,] rayArray;
+        public int[][,] rayArray;
 
         /// <summary>
         /// Ensures the user input matches the expected format (B2 etc), then convert the input to the 
@@ -325,16 +326,6 @@ namespace chess.Util
 
         }
 
-
-
-
-
-
-
-
-
-
-
         private List<Tuple<int, int>> getCoordsPieceALegallyMoveEnPassantToPosB(FormedMove move, ChessPosition cpm)
         {
             
@@ -391,8 +382,6 @@ namespace chess.Util
             // an en passant capture.
             return coordsPieceACanMoveEnPassantTo;
         }
-
-
 
         private bool canPieceALegallyCapturePieceOnPosB(FormedMove move, ChessPosition cpm)
         {
@@ -500,9 +489,34 @@ namespace chess.Util
 
         public void preloadRayArray()
         {
-            // 12 length array of 8x8 m-dim array of Lists of Rays or coords
-            // add ray class
-            //rayArray = new List<Ray>[12][,];
+            
+            //rayArray = new List<List<Tuple<int, int>>>[12][,];
+            // init 12 element array
+            rayArray = new int[12][,];
+            // 12 pieces
+            //      8 rows per piece
+            //              8 columns per row       //
+            //                      1 List
+            //                              n Lists
+            //                                  n Tuple<int, int>
+
+            for (int i = 0; i < rayArray.Length; i++)
+            {
+                // init each multidim array
+                rayArray[i] = new int[8, 8];
+                for (int j = 0; j < 8; j++) // row
+                {
+                    for (int k = 0; k < 8; k++) // col
+                    {
+                        // now create the list and add the results of piece i at pos j,k
+                        rayArray[i][j, k] = 1;
+
+                    }
+
+                }
+
+            }
+        
         }
     }
 }
