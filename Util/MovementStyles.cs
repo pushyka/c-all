@@ -16,7 +16,13 @@ namespace chess.Util
     {
         public static MovementStyle getMovementStyle(Tile pieceOnPosA)
         {
+           
             return new MovementStyle(pieceOnPosA);
+        }
+
+        public static MovementStyle getMovementStyle(Pieces piece)
+        {
+            return new MovementStyle(piece);
         }
 
         public static CaptureStyle getCaptureStyle(Tile pieceOnPosA)

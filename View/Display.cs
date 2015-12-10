@@ -648,5 +648,11 @@ namespace chess.View
             // else user is closing also need to stop this loop if its running
             gameController.stopGameLoop();
         }
+
+        private void menuItem_test_Click(object sender, EventArgs e)
+        {
+            this.gameController.initModelandEval();
+            this.gameController.testStuff();
+        }
     }
 }

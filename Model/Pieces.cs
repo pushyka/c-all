@@ -8,9 +8,7 @@ namespace chess.Model
 {
     public enum Pieces
     {
-        p=-6, r, n, b, q, k,
-        e=0,
-        P =1, R, N, B, Q, K
+        p, r, n, b, q, k, P, R, N, B, Q, K
     }
 
 

@@ -66,8 +66,46 @@ namespace chess.Util
             }
         }
 
+        public MovementStyle(Pieces piece)
+        {
+            this.dirs = new List<Tuple<int, int>>();
+
+            switch (piece)
+            {
+                case Pieces.p:
+                    createWhitePawnMovement(piece);
+                    break;
+                case Pieces.P:
+                    createBlackPawnMovement(piece);
+                    break;
+                case Pieces.r:
+                case Pieces.R:
+                    createRookMovement();
+                    break;
+                case Pieces.n:
+                case Pieces.N:
+                    createKnightMovement();
+                    break;
+                case Pieces.b:
+                case Pieces.B:
+                    createBishopMovement();
+                    break;
+                case Pieces.q:
+                case Pieces.Q:
+                    createQueenMovement();
+                    break;
+                case Pieces.k:
+                case Pieces.K:
+                    createKingMovement();
+                    break;
+                default:
+                    Console.WriteLine("MovementStyle switch error");
+                    break;
+            }
+        }
+
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createKingMovement(Tile piece)
+        private void createKingMovement(Tile piece=new Tile())
         {
             // king moves all y, x directions
             this.dirs.Add(Tuple.Create(+1,  0));
@@ -87,7 +125,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createQueenMovement(Tile piece)
+        private void createQueenMovement(Tile piece= new Tile())
         {
             this.dirs.Add(Tuple.Create(+1, 0));
             this.dirs.Add(Tuple.Create(+1, +1));
@@ -104,7 +142,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createBishopMovement(Tile piece)
+        private void createBishopMovement(Tile piece= new Tile())
         {
             // diagonals only
             this.dirs.Add(Tuple.Create(+1, +1));
@@ -118,7 +156,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createKnightMovement(Tile piece)
+        private void createKnightMovement(Tile piece= new Tile())
         {
             this.dirs.Add(Tuple.Create(+2, +1));
             this.dirs.Add(Tuple.Create(+1, +2));
@@ -135,7 +173,7 @@ namespace chess.Util
         }
 
         // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createRookMovement(Tile piece)
+        private void createRookMovement(Tile piece= new Tile())
         {
             this.dirs.Add(Tuple.Create(+1,  0));
             this.dirs.Add(Tuple.Create( 0, +1));
@@ -171,6 +209,29 @@ namespace chess.Util
                 this.maxIterations = 2;
             else
                 this.maxIterations = 1;
+
+            this.type = "pawn";
+        }
+
+
+        // TUPLES SHOULD BE Y,X format since ROW,COL
+        public virtual void createBlackPawnMovement(Pieces piece)
+        {
+            // y / row direction for advancement is positive
+
+
+            this.dirs.Add(Tuple.Create(+1, 0));
+            this.maxIterations = 2;
+
+            this.type = "pawn";
+        }
+
+        // TUPLES SHOULD BE Y,X format since ROW,COL
+        public virtual void createWhitePawnMovement(Pieces piece)
+        {
+            // y / row direction for advancement is negative
+            this.dirs.Add(Tuple.Create(-1, 0));
+            this.maxIterations = 2;
 
             this.type = "pawn";
         }

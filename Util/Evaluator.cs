@@ -9,11 +9,16 @@ using chess.Model;
 
 namespace chess.Util
 {
+    
+
     public class Evaluator : IEvaluator
     {
 
+        const int UNIQUE_PIECE_NUM = 12;
+        
+
         //List<List<Tuple<int, int>>>[][,] rayArray;
-        public int[][,] rayArray;
+        public List<List<Tuple<int, int>>>[][,] rayArray;
 
         /// <summary>
         /// Ensures the user input matches the expected format (B2 etc), then convert the input to the 
@@ -492,7 +497,7 @@ namespace chess.Util
             
             //rayArray = new List<List<Tuple<int, int>>>[12][,];
             // init 12 element array
-            rayArray = new int[12][,];
+            rayArray = new List<List<Tuple<int,int>>>[UNIQUE_PIECE_NUM][,];
             // 12 pieces
             //      8 rows per piece
             //              8 columns per row       //
@@ -502,14 +507,42 @@ namespace chess.Util
 
             for (int i = 0; i < rayArray.Length; i++)
             {
-                // init each multidim array
-                rayArray[i] = new int[8, 8];
+                // foreach of the i piece types, create 64 tiles each containing a number of rays (n directions)
+                MovementStyle style = MovementStyles.getMovementStyle((Pieces)i);
+                rayArray[i] = new List<List<Tuple<int,int>>>[8, 8];
                 for (int j = 0; j < 8; j++) // row
                 {
                     for (int k = 0; k < 8; k++) // col
                     {
                         // now create the list and add the results of piece i at pos j,k
-                        rayArray[i][j, k] = 1;
+                        List<List<Tuple<int, int>>> rays = new List<List<Tuple<int, int>>>();
+                        // get the set of rays of the given piece and location
+
+                        foreach (Tuple<int, int> dir in style.dirs)
+                        {
+                            List<Tuple<int, int>> ray = new List<Tuple<int, int>>();
+                            int coordsNum = 1;
+
+                            while (coordsNum <= style.maxIterations)
+                            {
+                                //generate the new coordinate by adding 1 unit of direction to the initial posA
+                                Tuple<int, int> newPos;
+                                int newPosRank = j + (coordsNum * dir.Item1);
+                                int newPosFile = k + (coordsNum * dir.Item2);
+                                newPos = Tuple.Create(newPosRank, newPosFile);
+                                // if the newPos is not on the board, dont add it to the list
+                                // and break since movement along this direction cannot continue
+                                if ((newPosRank < 0 || newPosRank > 7) ||
+                                    (newPosFile < 0 || newPosFile > 7))
+                                    break;
+                                ;
+                                ray.Add(newPos);
+
+                                coordsNum++;
+                            }
+                            rays.Add(ray);
+                        }
+                        rayArray[i][j, k] = rays;
 
                     }
 
@@ -517,6 +550,33 @@ namespace chess.Util
 
             }
         
+        }
+
+        /// <summary>
+        /// Takes a piece and a y,x board location and returns one List containing
+        /// a List for each valid direction of movement containing a sequence of board locations that
+        /// the piece could potentially move to.
+        /// 
+        /// e.g. piece=r, location=(3,6)
+        /// </summary>
+        /// <param name="piece"></param>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public List<List<Tuple<int, int>>> rayArrayGet(Pieces piece, Tuple<int, int> location)
+        {
+            if (rayArray == null)
+                throw new Exception("ray array not instantiated");
+            ;
+            System.Console.WriteLine($"> There are {rayArray[(int)piece][location.Item1, location.Item2].Count} direction rays");
+            System.Console.WriteLine($"> for piece {piece} at location {location}");
+            foreach (List<Tuple<int, int>> ray in rayArray[(int)piece][location.Item1, location.Item2])
+            {
+                System.Console.WriteLine($"> counts: {ray.Count}");
+            }
+            
+            return rayArray[(int)piece][location.Item1, location.Item2];
+
+
         }
     }
 }

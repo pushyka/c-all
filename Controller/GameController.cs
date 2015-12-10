@@ -42,7 +42,14 @@ namespace chess.Controller
             evaluator = new Evaluator(); // utility
             // add timer
             evaluator.preloadRayArray();
+            System.Console.WriteLine($"preload complete");
             ;
+        }
+
+        public void testStuff()
+        {
+            // preloaded array
+            evaluator.rayArrayGet(Pieces.R, Tuple.Create(3, 6));
         }
 
         public void uninitModeandEval()

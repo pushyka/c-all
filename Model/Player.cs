@@ -23,8 +23,8 @@ namespace chess.Model
         public bool has(Pieces piece)
         {
             bool result;
-            result = (this.curPlayer == "white" && piece < 0) ||
-                     (this.curPlayer == "black" && piece > 0);
+            result = (this.curPlayer == "white" && (int)piece < 6) ||
+                     (this.curPlayer == "black" && (int)piece >= 6);
             return result;
         }
 
