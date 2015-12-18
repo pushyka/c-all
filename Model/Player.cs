@@ -24,8 +24,13 @@ namespace chess.Model
         {
             bool result;
             result = (this.curPlayer == "white" && (int)piece < 6) ||
-                     (this.curPlayer == "black" && (int)piece >= 6);
+                     (this.curPlayer == "black" && (int)piece >= 6 && (int)piece < 12);
             return result;
+        }
+
+        public void set(string player)
+        {
+            this.curPlayer = player;
         }
 
         public string CurPlayer

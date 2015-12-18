@@ -36,12 +36,13 @@ namespace chess.Model
         {
             
             this.dim = 8;
-            this.board = new Tile[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
+            this.board = new TileStruct[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
                                              // hence 2,2 becomes the top left origin
                                              // initial=te the capture list
-            this.piecesCapd = new List<char>();
+            this.piecesCapd = new List<Pieces>();
             this.castle = new Dictionary<char, bool>();
             this.halfmoveClock = 0;
+            this.player = new Player("white");
 
         }
 
@@ -55,20 +56,20 @@ namespace chess.Model
 
 
             // black row 2
-            this.board[0, 0] = new Tile('R'); // top left origin
-            this.board[0, 1] = new Tile('N');
-            this.board[0, 2] = new Tile('B');
-            this.board[0, 3] = new Tile('Q');
-            this.board[0, 4] = new Tile('K');
-            this.board[0, 5] = new Tile('B');
-            this.board[0, 6] = new Tile('N');
-            this.board[0, 7] = new Tile('R');
+            this.board[0, 0] = new TileStruct(new Piece(Pieces.R)); // top left origin
+            this.board[0, 1] = new TileStruct(new Piece(Pieces.N));
+            this.board[0, 2] = new TileStruct(new Piece(Pieces.B));
+            this.board[0, 3] = new TileStruct(new Piece(Pieces.queenB));
+            this.board[0, 4] = new TileStruct(new Piece(Pieces.K));
+            this.board[0, 5] = new TileStruct(new Piece(Pieces.B));
+            this.board[0, 6] = new TileStruct(new Piece(Pieces.N));
+            this.board[0, 7] = new TileStruct(new Piece(Pieces.R));
 
 
             // black row 3 (pawns)
             for (int col = 0; col < dim; col++)
             {
-                this.board[1, col] = new Tile('P'); ; // pawns have 2 additional properties {movedOnce=false : used to allow +1/+2 advance for FIRST move}
+                this.board[1, col] = new TileStruct(new Piece(Pieces.pawnB)); ; // pawns have 2 additional properties {movedOnce=false : used to allow +1/+2 advance for FIRST move}
                                                         //                                    {canBeCapEnPassant=false : set=true if pawn advances +2, function 
                                                         //to set=false for every pawn of oposite player at the end of current players turn.
                                                         //seems naive, implement last anyway
@@ -79,25 +80,25 @@ namespace chess.Model
             {
                 for (int col = 0; col < dim; col++)
                 {
-                    this.board[row, col] = new Tile('e'); // empty 
+                    this.board[row, col] = new TileStruct();
                 }
             }
 
             // white row 8 (pawns)
             for (int col = 0; col < dim; col++)
             {
-                this.board[6, col] = new Tile('p'); ; // as above
+                this.board[6, col] = new TileStruct(new Piece(Pieces.pawnW)); ; // as above
             }
 
             // white row 9
-            this.board[7, 0] = new Tile('r');
-            this.board[7, 1] = new Tile('n');
-            this.board[7, 2] = new Tile('b');
-            this.board[7, 3] = new Tile('q');
-            this.board[7, 4] = new Tile('k');
-            this.board[7, 5] = new Tile('b');
-            this.board[7, 6] = new Tile('n');
-            this.board[7, 7] = new Tile('r'); // 9,9 the bottomright (rather than 7,7) due to the 2x off board buffer
+            this.board[7, 0] = new TileStruct(new Piece(Pieces.r));
+            this.board[7, 1] = new TileStruct(new Piece(Pieces.n));
+            this.board[7, 2] = new TileStruct(new Piece(Pieces.b));
+            this.board[7, 3] = new TileStruct(new Piece(Pieces.queenW));
+            this.board[7, 4] = new TileStruct(new Piece(Pieces.k));
+            this.board[7, 5] = new TileStruct(new Piece(Pieces.b));
+            this.board[7, 6] = new TileStruct(new Piece(Pieces.n));
+            this.board[7, 7] = new TileStruct(new Piece(Pieces.r)); // 9,9 the bottomright (rather than 7,7) due to the 2x off board buffer
 
 
 
@@ -110,7 +111,7 @@ namespace chess.Model
             {
                 for (int col = 0; col < dim; col++)
                 {
-                    System.Console.Write("{0,-2} ", this.board[row, col].pID); // each entry allotted 2 chars, with 1 char space
+                    System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry allotted 2 chars, with 1 char space
                 }
                 System.Console.WriteLine(); // each row on a new line
             }
@@ -125,12 +126,12 @@ namespace chess.Model
         /// </summary>
         /// <param name="toTile"></param>
         /// <param name="fromTile"></param>
-        protected override void changeTile(Tuple<int,int> location, Tile newValues)
+        protected override void updateTileWithPiece(Tuple<int,int> location, Piece newPiece)
         {
             int row = location.Item1;
             int col = location.Item2;
 
-            this.board[row, col] = newValues;
+            this.board[row, col].piece = newPiece;
 
             // finally fire the BoardChanged event!
             // EventArgs could be the tile coordinates which have changed
@@ -146,13 +147,13 @@ namespace chess.Model
         
 
 
-        protected override void addToCaptured(char piece)
+        protected override void addToCaptured(Pieces piece)
         {
             this.piecesCapd.Add(piece);
             OnCapturedChanged(EventArgs.Empty);
         }
 
-        public List<char> PiecesCapd
+        public List<Pieces> PiecesCapd
         {
             get
             {
@@ -181,7 +182,7 @@ namespace chess.Model
         }
 
 
-        public override char Player
+        public override Player Player
         {
             get
             {
@@ -190,7 +191,7 @@ namespace chess.Model
             set
             {
                 // this is the override
-                this.player = value;
+                this.player.change();
                 OnPlayerChanged(EventArgs.Empty);
             }
         }

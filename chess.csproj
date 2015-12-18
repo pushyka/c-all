@@ -74,6 +74,7 @@
     <Compile Include="Model\ChessPosition.cs" />
     <Compile Include="Model\ChessPositionModel.cs" />
     <Compile Include="Model\IChessModel.cs" />
+    <Compile Include="Model\Piece.cs" />
     <Compile Include="Model\Pieces.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -87,10 +88,11 @@
     <Compile Include="Controller\GameController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Model\SquareStruct.cs" />
+    <Compile Include="Model\TileStruct.cs" />
     <Compile Include="Util\IEvaluator.cs" />
     <Compile Include="Util\MovementStyle.cs" />
     <Compile Include="Util\MovementStyles.cs" />
+    <Compile Include="Util\utility.cs" />
     <Compile Include="View\Display.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -42,6 +42,7 @@ namespace chess.Controller
             evaluator = new Evaluator(); // utility
             // add timer
             evaluator.preloadRayArray();
+            evaluator.preloadRayArrayPawnCapture();
             System.Console.WriteLine($"preload complete");
             ;
         }
@@ -49,7 +50,7 @@ namespace chess.Controller
         public void testStuff()
         {
             // preloaded array
-            evaluator.rayArrayGet(Pieces.R, Tuple.Create(3, 6));
+            evaluator.getRays(Pieces.R, Tuple.Create(3, 6));
         }
 
         public void uninitModeandEval()
@@ -63,7 +64,6 @@ namespace chess.Controller
         {
 
             cpm.populate();
-            cpm.Player = 'w';
             state = GameControlState.Game;
             this.Message = "Game is setup";
             
@@ -76,7 +76,7 @@ namespace chess.Controller
 
             input = null;
             message = null;
-            cpm.Player = '\0';
+            cpm.Player = null;
 
             
             state = GameControlState.Initial;
@@ -122,7 +122,7 @@ namespace chess.Controller
                 // if in check and no legal move to remove attack : checkmate
 
                 if (evaluator.isKingInCheck(cpm, ref kingCheckedBy))
-                    this.Message = $"Player {cpm.Player}'s king is in check";
+                    this.Message = $"Player {cpm.Player.CurPlayer}'s king is in check";
 
                 // break statemetns to exit the loop
                 // validateMove will also ensure the move does not leave the king in check
@@ -146,6 +146,7 @@ namespace chess.Controller
                         if (evaluator.validateMove(move, cpm, ref moveType, ref kingCheckedBy))
                         {
                             //this.Message = "move passed validation";
+                            ;
                             cpm.applyMove(move, moveType);
 
                             
@@ -153,12 +154,12 @@ namespace chess.Controller
                             //System.Console.WriteLine("have applied move of type {0}", moveType);
 
                             // change the player
-                            cpm.Player = (cpm.Player == 'b') ? 'w' : 'b';
+                            cpm.Player.change();
                             // its the start of the player's turn so if he had any pawns that could have been captured
                             // en passant during hte oponents turn, they will now be unable to be captured en passant
-                            System.Console.WriteLine(" CLEARING PASSANTS");
+                            //System.Console.WriteLine(" CLEARING PASSANTS");
                             cpm.clearEnPassantPawns(cpm.Player);
-                            this.Message = "Player " + cpm.Player + "'s turn";
+                            this.Message = "Player " + cpm.Player.CurPlayer + "'s turn";
                             this.Message = "passant sq if any is " + cpm.EnPassantSq;
 
 
@@ -181,8 +182,8 @@ namespace chess.Controller
         
         private void conceded()
         {
-            this.Message = "Player " + cpm.Player + " has conceded!";
-            cpm.Player = '\0';
+            this.Message = "Player " + cpm.Player.CurPlayer + " has conceded!";
+            cpm.Player = null;
         }
 
         

@@ -9,24 +9,24 @@ namespace chess.Model
     public class ChessPosition
     {
         protected int dim;
-        protected Tile[, ] board;
-        protected char player;
+        protected TileStruct[, ] board;
+        protected Player player;
         protected Dictionary<char, bool> castle;
         protected Tuple<int, int> enPassantSq;
         protected int halfmoveClock;
-        protected List<char> piecesCapd;//x2 
+        protected List<Pieces> piecesCapd;//x2 
 
         // used when creating a chess position model
         protected ChessPosition() { } 
 
         // used when creating a chess position
         public ChessPosition(int dim,
-                             Tile[,] board,
-                             char player,
+                             TileStruct[,] board,
+                             Player player,
                              Dictionary<char, bool> castle,
                              Tuple<int, int> enPassantSq,
                              int halfmoveClock,
-                             List<char> piecesCapd)
+                             List<Pieces> piecesCapd)
         {
             this.dim = dim;
             this.board = board;
@@ -80,12 +80,12 @@ namespace chess.Model
             Tuple<int, int> frSqPos = move.PosA;
             Tuple<int, int> toSqPos = move.PosB;
 
-            Tile frSqTl = getTile(frSqPos);
-            Tile toSqTl = getTile(toSqPos);
+            TileStruct frSqTl = getTile(frSqPos);
+            TileStruct toSqTl = getTile(toSqPos);
 
             //  if moving piece is a pawn and its its first move
-            if ((frSqTl.pID == 'p' || frSqTl.pID == 'P') &&
-                (!frSqTl.movedOnce))
+            if ((frSqTl.piece.Val == Pieces.pawnW || frSqTl.piece.Val == Pieces.pawnB) &&
+                (!frSqTl.piece.MovedOnce))
             {
                 //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
                 if (Math.Abs((frSqPos.Item1 - toSqPos.Item1)) == 2)
@@ -93,25 +93,25 @@ namespace chess.Model
                     this.enPassantSq = toSqPos;
                 }
                 // the pawn has been moved atleast once so
-                frSqTl.movedOnce = true;
+                frSqTl.piece.MovedOnce = true;
             }
             // if moving piece is a pawn check if its promoted
-            if (frSqTl.pID == 'p' || frSqTl.pID == 'P')
+            if (frSqTl.piece.Val == Pieces.pawnW || frSqTl.piece.Val == Pieces.pawnB)
                 if (checkPromotion(frSqTl, toSqPos))
                 {
                     // then prompt player for piece to change pawn to
                     // atm just do queen
                     // update it to the new selection
-                    char q = (char.IsUpper(frSqTl.pID)) ? 'Q' : 'q';
-                    frSqTl = new Tile(q);
+                    Pieces q = ((frSqTl.piece.Val == Pieces.pawnW)) ? Pieces.queenW : Pieces.queenB;
+                    // fix later
+                    frSqTl = new TileStruct(new Piece(q));
                 }
 
 
             // move the piece to the to square (copy)
-            changeTile(toSqPos, frSqTl);
+            updateTileWithPiece(toSqPos, frSqTl.piece);
             // empty the from square
-            Tile emSqTl = new Tile('e');
-            changeTile(frSqPos, emSqTl);
+            updateTileWithPiece(frSqPos, null);
         }
 
 
@@ -127,27 +127,26 @@ namespace chess.Model
             Tuple<int, int> frSqPos = move.PosA;
             Tuple<int, int> toSqPos = move.PosB;
             // get the piece from the toSquare (which is being captured)
-            Tile toSqTl = getTile(toSqPos);
-            Tile frSqTl = getTile(frSqPos);
+            TileStruct toSqTl = getTile(toSqPos);
+            TileStruct frSqTl = getTile(frSqPos);
 
             // if moving piece is a pawn check if its promoted
-            if (frSqTl.pID == 'p' || frSqTl.pID == 'P')
+            if (frSqTl.piece.Val == Pieces.pawnW || frSqTl.piece.Val == Pieces.pawnB)
                 if (checkPromotion(frSqTl, toSqPos))
                 {
                     // then prompt player for piece to change pawn to
                     // atm just do queen
                     // update it to the new selection
-                    char q = (char.IsUpper(frSqTl.pID)) ? 'Q' : 'q';
-                    frSqTl = new Tile(q);
+                    Pieces q = ((int)frSqTl.piece.Val < 6) ? Pieces.queenW : Pieces.queenB;
+                    frSqTl = new TileStruct(new Piece(q));
                 }
             // move the piece to the to square (copy)
-            changeTile(toSqPos, frSqTl);
+            updateTileWithPiece(toSqPos, frSqTl.piece);
             // empty the from square
-            Tile emptySquareVal = new Tile('e');
-            changeTile(frSqPos, emptySquareVal);
+            updateTileWithPiece(frSqPos, null);
 
             // add the captured to the list
-            addToCaptured(toSqTl.pID);
+            addToCaptured(toSqTl.piece.Val);
         }
 
         private void applyEnPassantCapture(FormedMove move)
@@ -158,24 +157,23 @@ namespace chess.Model
             Tuple<int, int> fromSquareLoc = move.PosA;
             Tuple<int, int> toSquareLoc = move.PosB;
 
-            Tile fromSquareVal = getTile(fromSquareLoc);
-            Tile toSquareVal = getTile(toSquareLoc);
+            TileStruct fromSquareVal = getTile(fromSquareLoc);
+            TileStruct toSquareVal = getTile(toSquareLoc);
 
             // move the pawn to the to square (copy)
-            changeTile(toSquareLoc, fromSquareVal);
+            updateTileWithPiece(toSquareLoc, fromSquareVal.piece);
             // empty the from square
-            Tile emptySquareVal = new Tile('e');
-            changeTile(fromSquareLoc, emptySquareVal);
+            updateTileWithPiece(fromSquareLoc, null);
             // clear the passant square -> empty
             Tuple<int, int> passantSquareLoc;
             int passantSquareLocRank = fromSquareLoc.Item1;
             int passantSquareLocFile = toSquareLoc.Item2;
             passantSquareLoc = Tuple.Create(passantSquareLocRank, passantSquareLocFile);
-            Tile passantSquareVal = getTile(passantSquareLoc);
-            changeTile(passantSquareLoc, emptySquareVal);
+            TileStruct passantSquareVal = getTile(passantSquareLoc);
+            updateTileWithPiece(passantSquareLoc, null);
             // add the passant square to the captured list
-            addToCaptured(passantSquareVal.pID);
-            System.Console.WriteLine("en passant move registered");
+            addToCaptured(passantSquareVal.piece.Val);
+            //System.Console.WriteLine("en passant move registered");
 
         }
 
@@ -193,11 +191,11 @@ namespace chess.Model
             // todo
         }
 
-        private bool checkPromotion(Tile frSqTl, Tuple<int, int> toSqPos)
+        private bool checkPromotion(TileStruct frSqTl, Tuple<int, int> toSqPos)
         {
             bool isP = false;
-            if ((frSqTl.pID == 'p' && toSqPos.Item1 == 0) ||
-                (frSqTl.pID == 'P' && toSqPos.Item1 == dim - 1))
+            if ((frSqTl.piece.Val == Pieces.pawnW && toSqPos.Item1 == 0) ||
+                (frSqTl.piece.Val == Pieces.pawnB && toSqPos.Item1 == dim - 1))
             {
                 isP = true;
                 System.Console.WriteLine("PROMOTION TOOK PLACE");
@@ -209,14 +207,13 @@ namespace chess.Model
         }
 
 
-        public void clearEnPassantPawns(char player)
+        public void clearEnPassantPawns(Player player)
         {
             //System.Console.WriteLine(" www {0}", board.);
             
             if (enPassantSq != null)
             {
-                if ((char.IsUpper(getTile(enPassantSq).pID) && player == 'b') ||
-                    (char.IsLower(getTile(enPassantSq).pID) && player == 'w'))
+                if (player.has(getTile(enPassantSq).piece.Val))
                     enPassantSq = null;
             }
 
@@ -231,7 +228,7 @@ namespace chess.Model
         /// Given a Tuple(int,int) position, return a reference
         /// to the Tile object located at that at that position on the board.
         /// </summary>
-        private Tile getTile(Tuple<int, int> position)
+        private TileStruct getTile(Tuple<int, int> position)
         {
            return this.board[position.Item1, position.Item2];
         }
@@ -246,17 +243,17 @@ namespace chess.Model
         /// </summary>
         /// <param name="location"></param>
         /// <param name="newValues"></param>
-        protected virtual void changeTile(Tuple<int, int> location, Tile newValues)
+        protected virtual void updateTileWithPiece(Tuple<int, int> location, Piece newPiece)
         {
             int row = location.Item1;
             int col = location.Item2;
-            board[row, col] = newValues;
+            board[row, col].piece = newPiece;
         }
         /// <summary>
         /// same reasoning as above function
         /// </summary>
         /// <param name="piece"></param>
-        protected virtual void addToCaptured(char piece)
+        protected virtual void addToCaptured(Pieces piece)
         {
             this.piecesCapd.Add(piece);
         }
@@ -272,11 +269,36 @@ namespace chess.Model
         /// <returns></returns>
         public ChessPosition getEvaluateableChessPosition()
         {
-            int dimCopy = dim;
-            // copy piece placement
-            Tile[,] boardCopy = (Tile[,]) board.Clone();
+            int dimCopy = dim; // fix
+
+            // ============  Deep copy the board Manually =================
+            TileStruct[,] boardCopy = new TileStruct[dimCopy, dimCopy];
+            for (int j = 0; j < dimCopy; j ++)
+            {
+                for (int k = 0; k < dimCopy; k ++)
+                {
+                    // foreach tile create a new tile struct, copy the piece from the original, add it to the tilestrcut, add the tilestruct to the array
+                    TileStruct tileCopy = new TileStruct();
+                    // copy the piece into the tile if there is one
+                    if (!board[j,k].IsEmpty())
+                    {
+                        Piece piece = board[j, k].piece;
+                        Pieces val = piece.Val;
+                        bool mv = piece.MovedOnce;
+                        Piece pieceCopy = new Piece(val);
+                        pieceCopy.MovedOnce = mv;
+                        tileCopy.piece = pieceCopy;
+                    }
+
+                    boardCopy[j, k] = tileCopy;
+                }
+            }
+            // done
+            // =============================================================
+
+
             // side to move from player
-            char playerCopy = player;
+            Player playerCopy = player;
             // castling status
             Dictionary<char, bool> castleCopy = new Dictionary<char, bool>(castle);
             // cur en passant sq
@@ -284,7 +306,7 @@ namespace chess.Model
             // halfmove clock
             int halfmoveClockCopy = halfmoveClock;
             //capdsofar
-            List<char> piecesCapdCopy = new List<char>(piecesCapd);
+            List<Pieces> piecesCapdCopy = new List<Pieces>(piecesCapd);
             ChessPosition cpos = new ChessPosition(dimCopy,
                                               boardCopy,
                                               playerCopy,
@@ -296,7 +318,7 @@ namespace chess.Model
         }
 
 
-        public virtual char Player
+        public virtual Player Player
         {
             get
             {
@@ -313,7 +335,7 @@ namespace chess.Model
         /// 
         /// Possibly don't need anymore since array of strings (base type) copied by value
         /// </summary>
-        public Tile[,] Board
+        public TileStruct[,] Board
         {
             get
             {

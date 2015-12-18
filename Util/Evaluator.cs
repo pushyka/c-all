@@ -19,6 +19,7 @@ namespace chess.Util
 
         //List<List<Tuple<int, int>>>[][,] rayArray;
         public List<List<Tuple<int, int>>>[][,] rayArray;
+        public List<List<Tuple<int, int>>>[][,] rayArrayPawnCapture;
 
         /// <summary>
         /// Ensures the user input matches the expected format (B2 etc), then convert the input to the 
@@ -113,57 +114,52 @@ namespace chess.Util
 
 
             bool outcome = false;
-            Tile pieceOnPosA = new Tile();
-            Tile pieceOnPosB = new Tile();
+            // move is loaded into these A -> B tiles
+            TileStruct tileA = new TileStruct();
+            TileStruct tileB = new TileStruct();
 
             if (toAndFromPositionsDistinct(move))
             {
-                if (isCurTurnPieceOnPosA(move, cpm, ref pieceOnPosA))
+                System.Console.WriteLine("is distinct");
+
+                if (isTileACurrentPlayer(move, cpm, ref tileA))
                 {
-                    // pieceOnPosA now contains the piece on posA (which is of cur turn player)
-                    // good, if it was anything else (oponent or empty its immediatly invalid)
+                    System.Console.WriteLine("is current player");
 
-
-
-
-                    if (isCurTurnPieceOnPosB(move, cpm, ref pieceOnPosB))
+                    if (isTileBCurrentPlayer(move, cpm, ref tileB))
                     {
-                        // now both posA and posB contains cur player pieces
-
-                        // possibly a castling .. to do later
-
-
+                        System.Console.WriteLine("1");
                         //outcome = bool;
                         // IF OUTCOME:
                         outcome = false;
                         moveType = "castle";
+                        System.Console.WriteLine($"Movetype should be a {moveType} and it is?:{outcome}");
                     }
-                    else if (isOponentTurnPieceOnPosB(move, cpm, ref pieceOnPosB))
+
+                    else if (isTileBOtherPlayer(move, cpm, ref tileB))
                     {
-                        // posA is cur player, posB is opponent
-
-                        // possibly a capture
-
-
+                        System.Console.WriteLine("2");
                         //outcome = bool;
                         // IF OUTCOME :
-                        outcome = canPieceALegallyCapturePieceOnPosB(move, cpm);
+                        outcome = isMoveLegalCapture(move, cpm);                            //        <--  done (todo: pawns, horses)
                         moveType = "capture";
+                        System.Console.WriteLine($"Movetype should be a {moveType} and it is?:{outcome}");
                     }
-                    else if (isEmptyPieceOnPosB(move, cpm, ref pieceOnPosB))
+
+                    else if (isTileBEmpty(move, cpm, ref tileB))
                     {
-
-                        // possibly a movement move or a en passant move
-
-                        if (outcome = canPieceALegallyMoveToPosB(move, cpm))
+                        if (outcome = isMoveLegalMovement(move, cpm))                      //          <-- done
                         {
+                            System.Console.WriteLine("3");
                             moveType = "movement";
                         }
 
-                        else if (outcome = canPieceALegallyMoveEnPassantToPosB(move, cpm))
+                        else if (outcome = isMoveLegalEP(move, cpm))                       //          <-- todo
                         {
                             moveType = "enpassantcapture";
+                            System.Console.WriteLine("4");
                         }
+                        System.Console.WriteLine($"Movetype should be a {moveType} and it is?:{outcome}");
                     }
                     
                     else
@@ -178,7 +174,7 @@ namespace chess.Util
                     System.Console.WriteLine("positions are not distinct");
                 }
 
-
+                ;
 
                 
             }
@@ -199,34 +195,35 @@ namespace chess.Util
         {
             Tuple<int, int> posA = move.PosA;
             Tuple<int, int> posB = move.PosB;
+            // The .Equals method of the Tuple does this
             return (posA.Item1 == posB.Item1 && posA.Item2 == posB.Item2) ? false : true;
         }
 
-        private bool isCurTurnPieceOnPosA(FormedMove move, ChessPosition cpm, ref Tile posA)
+        private bool isTileACurrentPlayer(FormedMove move, ChessPosition cpm, ref TileStruct posA)
         {
 
             bool result = false;
             posA = cpm.Board[move.PosA.Item1, move.PosA.Item2];
             ;
-            if (posA.pID != 'e')
+            if (!posA.IsEmpty())
             {
-                if ((cpm.Player == 'b' && Char.IsUpper(posA.pID)) || (cpm.Player == 'w' && Char.IsLower(posA.pID)))
+                if (cpm.Player.has(posA.piece.Val))
                 {
                     result = true;
                 }
             }
-            System.Console.WriteLine("JAJAJA" + cpm.Player + posA.pID + result);
+            //System.Console.WriteLine("JAJAJA" + cpm.Player + posA.piece + result);
             return result;
         }
 
-        private bool isCurTurnPieceOnPosB(FormedMove move, ChessPosition cpm, ref Tile posB)
+        private bool isTileBCurrentPlayer(FormedMove move, ChessPosition cpm, ref TileStruct posB)
         {
             bool result = false;
             posB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             ;
-            if (posB.pID != 'e')
+            if (!posB.IsEmpty())
             {
-                if ((cpm.Player == 'b' && Char.IsUpper(posB.pID)) || (cpm.Player == 'w' && Char.IsLower(posB.pID)))
+                if ((cpm.Player.has(posB.piece.Val)))
                 {
                     result = true;
                 }
@@ -235,54 +232,90 @@ namespace chess.Util
             return result;
         }
 
-        private bool isOponentTurnPieceOnPosB(FormedMove move, ChessPosition cpm, ref Tile posB)
+        private bool isTileBOtherPlayer(FormedMove move, ChessPosition cpm, ref TileStruct tileB)
         {
             bool result = false;
-            posB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
+            tileB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             ;
-            if (posB.pID != 'e')
+            if (!tileB.IsEmpty())
             {
                 // player b uses the upper case chars, so this means piece is owned by the opposite to player b and vice versa
-                if ((cpm.Player == 'b' && Char.IsLower(posB.pID)) || (cpm.Player == 'w' && Char.IsUpper(posB.pID)))
-                {
+                if (!cpm.Player.has(tileB.piece.Val))
                     result = true;
-                }
             }
 
             return result;
         }
 
 
-        private bool isEmptyPieceOnPosB(FormedMove move, ChessPosition cpm, ref Tile posB)
+        private bool isTileBEmpty(FormedMove move, ChessPosition cpm, ref TileStruct posB)
         {
             bool result;
             posB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             ;
-            result = (posB.pID == 'e') ? true : false;
+            result = (posB.IsEmpty()) ? true : false;
             return result;
         }
 
-        private bool canPieceALegallyMoveToPosB(FormedMove move, ChessPosition cpm)
+        /// <summary>
+        /// Check if a given movement FormedMove is valid on the current board.
+        /// </summary>
+        /// <param name="move"></param>
+        /// <param name="cpm"></param>
+        /// <returns></returns>
+        private bool isMoveLegalMovement(FormedMove move, ChessPosition cpm)
         {
-           
+
+            bool isMoveLegalMovement = true;
+
             Tuple<int, int> posA = move.PosA;
-            // contains infor relevant for pawns
-            Tile pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
-            // generate the coords which piece could move to given its starting position and rule, and board context
+            Tuple<int, int> posB = move.PosB;
 
+            TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
+            List<List<Tuple<int, int>>> rays;
+                // get a list of movement rays for the Apiece on the board
+            rays = getRays(tileA.piece.Val, posA);
 
-            // get a movement style for a given piece
-            MovementStyle style = MovementStyles.getMovementStyle(pieceOnPosA);
+            // get the ray which contains the capture (it will have posB)
+            List<Tuple<int, int>> moveRay = null;
+            foreach (List<Tuple<int, int>> ray in rays)
+            {
+                if (ray.Contains(posB))
+                {
+                    moveRay = ray;
+                    break;
+                }
+                    
+            }
+                ;
+            // check all intermediate tiles before posB are empty
+            if (moveRay != null)
+                foreach (Tuple<int, int> position in moveRay)
+                {
 
-            // apply the movement style to posA to generate valid positions pieceA can go to
-            // do this until maximum iterations reached or another piece in the way
+                    // if an intermediate tile not empty, stop checking and set valid move to false
+                    TileStruct tileAtPosition = cpm.Board[position.Item1, position.Item2];
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        isMoveLegalMovement = false;
+                        break;
+                    }
+                        
+                    // if reached the tileB, (and so far so good) break on still true
+                    if (position.Equals(posB))
+                    {
+                        ;
+                        break;
+                    }
+                }
+            //else posB not in any of the rays (ie not even on the naive rays
+            else
+                isMoveLegalMovement = false;
 
-            // this is going to change up t the preload array lookup
-            List<Tuple<int, int>> coordsPieceACanMoveTo = getCoordsPieceACanMoveTo(posA, style, cpm);
-            ;
+            //List<Tuple<int, int>> coordsWithPiecesPieceACanCapture = getCoordsWithPiecesPieceACanCapture(posA, style, cpm.Board);
 
-            // if move.posB exists in the resulting list of coords, then piece on posA can move to it
-            return coordsPieceACanMoveTo.Contains(move.PosB);
+            //return coordsWithPiecesPieceACanCapture.Contains(move.PosB);
+            return isMoveLegalMovement;
 
         }
 
@@ -308,11 +341,11 @@ namespace chess.Util
                         break;
                     // if the newPos is occupied by a non e, then movement along this path is blocked
                     // so dont add it to the list and also break since movement cannot continue
-                    if (cpm.Board[newPos.Item1, newPos.Item2].pID != 'e')
+                    if (!cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
                         break;
                     //otherwise its empty so add it to the coords and continue along the path
                     // no index error since already checked its not off the board
-                    if (cpm.Board[newPos.Item1, newPos.Item2].pID == 'e')
+                    if (cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
                         coordsPieceACanMoveTo.Add(newPos);
 
 
@@ -323,7 +356,7 @@ namespace chess.Util
             return coordsPieceACanMoveTo;
         }
 
-        private bool canPieceALegallyMoveEnPassantToPosB(FormedMove move, ChessPosition cpm)
+        private bool isMoveLegalEP(FormedMove move, ChessPosition cpm)
         {
 
             List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = getCoordsPieceALegallyMoveEnPassantToPosB(move, cpm);
@@ -341,12 +374,12 @@ namespace chess.Util
             // THEN add the diagonal coord to coordspieceacancapture
             List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = new List<Tuple<int, int>>();
             Tuple<int, int> posA = move.PosA;
-            Tile pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
-            char posAPlayer = (char.IsUpper(pieceOnPosA.pID)) ? 'b' : 'w';
-            if (pieceOnPosA.pID == 'p' || pieceOnPosA.pID == 'P')
+            TileStruct pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
+            char posAPlayer = ((int)pieceOnPosA.piece.Val < 6) ? 'w' : 'b';
+            if (pieceOnPosA.piece.Val == Pieces.pawnW || pieceOnPosA.piece.Val == Pieces.pawnB)
             {
                 ;
-                CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA);
+                CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA.piece);
                 foreach (Tuple<int, int> attackDirection in style.dirs)
                 {
                     Tuple<int, int> attackPos;
@@ -362,13 +395,13 @@ namespace chess.Util
                         (passantPosFile < 0 || passantPosFile > 7))
                         break;
                     ; // correct here
-                    Tile pieceOnPassantPos = cpm.Board[passantPos.Item1, passantPos.Item2];
+                    TileStruct pieceOnPassantPos = cpm.Board[passantPos.Item1, passantPos.Item2];
                     // if passant piece is a pawn
                     ;
-                    if (pieceOnPassantPos.pID == 'p' || pieceOnPassantPos.pID == 'P')
+                    if (pieceOnPassantPos.piece.Val == Pieces.pawnW || pieceOnPassantPos.piece.Val == Pieces.pawnB)
                     {
                         // and its the other players piece
-                        char pieceOnPassantPosOwner = (char.IsUpper(pieceOnPassantPos.pID)) ? 'b' : 'w';
+                        char pieceOnPassantPosOwner = ((int)pieceOnPassantPos.piece.Val < 6) ? 'w' : 'b';
                         if (pieceOnPassantPosOwner != posAPlayer)
                         {
                             // and it can be captured enpassant
@@ -388,22 +421,78 @@ namespace chess.Util
             return coordsPieceACanMoveEnPassantTo;
         }
 
-        private bool canPieceALegallyCapturePieceOnPosB(FormedMove move, ChessPosition cpm)
-        {
-            Tuple<int, int> posA = move.PosA;
-            Tile pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
-            CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA);
-            // todo change to pre lookup method
-            List<Tuple<int, int>> coordsWithPiecesPieceACanCapture = getCoordsWithPiecesPieceACanCapture(posA, style, cpm.Board);
 
-            return coordsWithPiecesPieceACanCapture.Contains(move.PosB);
+
+        /* Takes a move object which contains a piece of current player on position A
+           and a piece of opposite player on position B (garunteed). Uses the cpm board to determine
+           if the capture can be made. I.e it is not blocked by any pieces en route.
+        */
+        private bool isMoveLegalCapture(FormedMove move, ChessPosition cpm)
+        {
+            bool isMoveLegalCapture = true;
+
+            Tuple<int, int> posA = move.PosA;
+            Tuple<int, int> posB = move.PosB;
+
+            TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
+            List<List<Tuple<int, int>>> rays;
+            // if the moving piece IS a pawn, then the capture rays are different than the normal movement ray
+            if (tileA.piece.Val == Pieces.pawnB || tileA.piece.Val == Pieces.pawnW)
+            {
+                rays = getRaysPawnCapture(tileA.piece.Val, posA);
+            }
+
+            // if the moving piece is not a pawn
+            else
+            {
+                // get a list of movement rays for the Apiece on the board
+                rays = getRays(tileA.piece.Val, posA);
+            }
+
+            // get the ray which contains the capture (it will have posB)
+            List<Tuple<int, int>> capRay = null;
+            foreach (List<Tuple<int, int>> ray in rays)
+            {
+                if (ray.Contains(posB))
+                {
+                    capRay = ray;
+                    break;
+                }
+                    
+            }
+                ;
+            // check all intermediate tiles before posB are empty
+            if (capRay != null)
+                foreach (Tuple<int, int> position in capRay)
+                {
+                    // if reached the target, stop checking the intermediate tiles
+                    if (position.Equals(posB))
+                        break;
+                    // if an intermediate tile not empty, stop checking and set valid move to false
+                    TileStruct tileAtPosition = cpm.Board[position.Item1, position.Item2];
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        isMoveLegalCapture = false;
+                        break;
+                    }
+                        
+                }
+            //else posB not in any of the rays (ie not even on the naive rays
+            else
+                isMoveLegalCapture = false;
+
+            //List<Tuple<int, int>> coordsWithPiecesPieceACanCapture = getCoordsWithPiecesPieceACanCapture(posA, style, cpm.Board);
+
+            //return coordsWithPiecesPieceACanCapture.Contains(move.PosB);
+            return isMoveLegalCapture;
         }
 
 
-        private List<Tuple<int, int>> getCoordsWithPiecesPieceACanCapture(Tuple<int, int> posA, CaptureStyle style, Tile[,] board)
+
+        private List<Tuple<int, int>> getCoordsWithPiecesPieceACanCapture(Tuple<int, int> posA, CaptureStyle style, TileStruct[,] board)
         {
             List<Tuple<int, int>> coordsPieceACanCapture = new List<Tuple<int, int>>();
-            char posAPlayer = (char.IsUpper(board[posA.Item1, posA.Item2].pID)) ? 'b' : 'w';
+            char posAPlayer = ((int)board[posA.Item1, posA.Item2].piece.Val < 6) ? 'w' : 'b';
             // foreach move direction form a list of any coords which have tiles can be captured (one per direction at most)
             foreach (Tuple<int, int> attackDirection in style.dirs)
             {
@@ -421,10 +510,10 @@ namespace chess.Util
                         (newPosFile < 0 || newPosFile > 7))
                         break;
                     // if reach a piece and the piece is not empty
-                    if (board[newPos.Item1, newPos.Item2].pID != 'e')
+                    if (!board[newPos.Item1, newPos.Item2].IsEmpty())
                     {
                         //and the piece is of opponent
-                        char owner = (char.IsUpper(board[newPos.Item1, newPos.Item2].pID)) ? 'b' : 'w';
+                        char owner = ((int)board[newPos.Item1, newPos.Item2].piece.Val < 6) ? 'w' : 'b';
                         if (owner != posAPlayer)
                         {
                             coordsPieceACanCapture.Add(newPos);
@@ -461,19 +550,23 @@ namespace chess.Util
         public bool isKingInCheck(ChessPosition cpmCopy, ref List<Tuple<int, int>> kingCheckedBy)
         {
             // find the king
-            char cur_player = cpmCopy.Player;
+            Player cur_player = cpmCopy.Player;
             Tuple<int, int> cur_playerKingPos;
             for (int row = 0; row < cpmCopy.Dim; row ++)
             {
                 for (int col = 0; col < cpmCopy.Dim; col ++)
                 {
-                    char piece = cpmCopy.Board[row, col].pID;
-                    if ((cur_player == 'w' && piece == 'k') ||
-                        (cur_player == 'b' && piece == 'K'))
+                    TileStruct tile = cpmCopy.Board[row, col];
+                    if (!tile.IsEmpty())
                     {
-                        cur_playerKingPos = Tuple.Create(row, col);
-                        break;
+                        if ((tile.piece.Val == Pieces.k || tile.piece.Val == Pieces.K) &&
+                            (cur_player.has(tile.piece.Val)))
+                        {
+                            cur_playerKingPos = Tuple.Create(row, col);
+                            break;
+                        }
                     }
+
                 }
             }
 
@@ -490,6 +583,26 @@ namespace chess.Util
             return true;
             
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         public void preloadRayArray()
@@ -552,6 +665,59 @@ namespace chess.Util
         
         }
 
+        public void preloadRayArrayPawnCapture()
+        {
+            // 2 unique pawn pieces
+            rayArrayPawnCapture = new List<List<Tuple<int, int>>>[2][,];
+            CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(Pieces.pawnW);
+            CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(Pieces.pawnB);
+
+            rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[8, 8]; // white
+            rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[8, 8]; // black
+
+            for (int j = 0; j < 8; j ++)
+            {
+                for (int k = 0; k < 8; k ++)
+                {
+                    List<List<Tuple<int, int>>> whiteRays = new List<List<Tuple<int, int>>>();
+                    List<List<Tuple<int, int>>> blackRays = new List<List<Tuple<int, int>>>();
+
+                    foreach (Tuple<int, int> dir in WhitePawnCaptureStyle.dirs)
+                    {
+                        List<Tuple<int, int>> whiteRay = new List<Tuple<int, int>>();
+                        Tuple<int, int> newPos;
+                        int newPosRank = j + dir.Item1;
+                        int newPosFile = k + dir.Item2;
+                        newPos = Tuple.Create(newPosRank, newPosFile);
+                        if ((newPosRank < 0 || newPosRank > 7) ||
+                            (newPosFile < 0 || newPosFile > 7))
+                            break;
+                        whiteRay.Add(newPos);
+                        whiteRays.Add(whiteRay);
+                    }
+
+                    foreach (Tuple<int, int> dir in BlackPawnCaptureStyle.dirs)
+                    {
+                        List<Tuple<int, int>> blackRay = new List<Tuple<int, int>>();
+                        Tuple<int, int> newPos;
+                        int newPosRank = j + dir.Item1;
+                        int newPosFile = k + dir.Item2;
+                        newPos = Tuple.Create(newPosRank, newPosFile);
+                        if ((newPosRank < 0 || newPosRank > 7) ||
+                            (newPosFile < 0 || newPosFile > 7))
+                            break;
+                        blackRay.Add(newPos);
+                        blackRays.Add(blackRay);
+                    }
+
+                    rayArrayPawnCapture[0][j, k] = whiteRays;
+                    rayArrayPawnCapture[1][j, k] = blackRays;
+
+                }
+            }
+
+        }
+
         /// <summary>
         /// Takes a piece and a y,x board location and returns one List containing
         /// a List for each valid direction of movement containing a sequence of board locations that
@@ -562,7 +728,7 @@ namespace chess.Util
         /// <param name="piece"></param>
         /// <param name=""></param>
         /// <returns></returns>
-        public List<List<Tuple<int, int>>> rayArrayGet(Pieces piece, Tuple<int, int> location)
+        public List<List<Tuple<int, int>>> getRays(Pieces piece, Tuple<int, int> location)
         {
             if (rayArray == null)
                 throw new Exception("ray array not instantiated");
@@ -577,6 +743,21 @@ namespace chess.Util
             return rayArray[(int)piece][location.Item1, location.Item2];
 
 
+        }
+
+        public List<List<Tuple<int,int>>> getRaysPawnCapture(Pieces piece, Tuple<int, int> location)
+        {
+            if (rayArrayPawnCapture == null)
+                throw new Exception("ray array (pawns) noy instantiated");
+
+            int pieceIndex = (piece == Pieces.pawnW) ? 0 : 1;
+            System.Console.WriteLine($"> There are {rayArray[pieceIndex][location.Item1, location.Item2].Count} direction rays");
+            System.Console.WriteLine($"> for piece {piece} at location {location}");
+            foreach (List<Tuple<int, int>> ray in rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2])
+            {
+                System.Console.WriteLine($"> counts: {ray.Count}");
+            }
+            return rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2];
         }
     }
 }

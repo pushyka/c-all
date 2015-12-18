@@ -50,21 +50,21 @@ namespace chess.View
             {7, 1}
         };
 
-        private Dictionary<char, Image> gamePieces = new Dictionary<char, Image>
+        private Dictionary<Pieces, Image> gamePieces = new Dictionary<Pieces, Image>
         {
             
-            {'K', chess.Properties.Resources.Chess_kdt60},
-            {'Q', chess.Properties.Resources.Chess_qdt60},
-            {'B', chess.Properties.Resources.Chess_bdt60},
-            {'N', chess.Properties.Resources.Chess_ndt60},
-            {'R', chess.Properties.Resources.Chess_rdt60},
-            {'P', chess.Properties.Resources.Chess_pdt60},
-            {'k', chess.Properties.Resources.Chess_klt60},
-            {'q', chess.Properties.Resources.Chess_qlt60},
-            {'b', chess.Properties.Resources.Chess_blt60},
-            {'n', chess.Properties.Resources.Chess_nlt60},
-            {'r', chess.Properties.Resources.Chess_rlt60},
-            {'p', chess.Properties.Resources.Chess_plt60},
+            {Pieces.K, chess.Properties.Resources.Chess_kdt60},
+            {Pieces.queenB, chess.Properties.Resources.Chess_qdt60},
+            {Pieces.B, chess.Properties.Resources.Chess_bdt60},
+            {Pieces.N, chess.Properties.Resources.Chess_ndt60},
+            {Pieces.R, chess.Properties.Resources.Chess_rdt60},
+            {Pieces.pawnB, chess.Properties.Resources.Chess_pdt60},
+            {Pieces.k, chess.Properties.Resources.Chess_klt60},
+            {Pieces.queenW, chess.Properties.Resources.Chess_qlt60},
+            {Pieces.b, chess.Properties.Resources.Chess_blt60},
+            {Pieces.n, chess.Properties.Resources.Chess_nlt60},
+            {Pieces.r, chess.Properties.Resources.Chess_rlt60},
+            {Pieces.pawnW, chess.Properties.Resources.Chess_plt60},
         };
 
         public Display(GameController gc)
@@ -246,19 +246,20 @@ namespace chess.View
         /// and will only seek to update the few tiles which have changed.
         /// </summary>
         /// <param name="board"></param>
-        private void updateView(Tile[, ] board)
+        private void updateView(TileStruct[, ] board)
         {
             // go through the model tiles, when find a piece on a tile,
             for (int row = 0; row < 8; row ++)
             {
                 for (int col = 0; col < 8; col ++)
                 {
-                    char mPiece = board[row, col].pID;
+
+                    TileStruct tile = board[row, col];
                     // if the tile isnt empty
-                    if (mPiece != 'e')
+                    if (!tile.IsEmpty())
                     {
                         // get the piece graphic (dict?)
-                        PictureBox gPiece = getGuiPiece(mPiece);
+                        PictureBox gPiece = getGuiPiece(tile.piece.Val);
 
                         // get the associated display tile
                         Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(col, row);
@@ -273,7 +274,7 @@ namespace chess.View
             
         }
 
-        private PictureBox getGuiPiece(char mPiece)
+        private PictureBox getGuiPiece(Pieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";
@@ -285,7 +286,7 @@ namespace chess.View
             return pb;
         }
 
-        private PictureBox getGuiPiece2(char mPiece)
+        private PictureBox getGuiPiece2(Pieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";
@@ -349,7 +350,7 @@ namespace chess.View
                     pos = this.genericBoardBase.GetPositionFromControl(tile);
                 }
 
-                System.Console.WriteLine("I am the view and I have registered a click: {0}", pos);
+                //System.Console.WriteLine("I am the view and I have registered a click: {0}", pos);
                 tileClicked += colToFile[pos.Column].ToString() + rowToRank[pos.Row].ToString();
             }
 
@@ -362,7 +363,7 @@ namespace chess.View
                 Panel tile = (Panel)picture.Parent;
 
                 TableLayoutPanelCellPosition pos = this.genericBoardBase.GetPositionFromControl(tile);
-                System.Console.WriteLine("I am the view and I have registered a click: {0}", pos);
+                //System.Console.WriteLine("I am the view and I have registered a click: {0}", pos);
                 tileClicked += colToFile[pos.Column].ToString() + rowToRank[pos.Row].ToString();
             }
             
@@ -457,8 +458,16 @@ namespace chess.View
                     
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
-
-                    char mPiece = this.gameController.ChessModel.Board[pos.Item1, pos.Item2].pID;
+                    Pieces mPiece;
+                    if (!this.gameController.ChessModel.Board[pos.Item1, pos.Item2].IsEmpty())
+                    {
+                        mPiece = this.gameController.ChessModel.Board[pos.Item1, pos.Item2].piece.Val;
+                    }
+                    else
+                    {
+                        // give it the empty value
+                        mPiece = Pieces.empty;
+                    }
 
                     // remove all existing items on the tile (picture boxes if any)
                     foreach (Control pb in gTile.Controls.OfType<PictureBox>())
@@ -474,13 +483,13 @@ namespace chess.View
                         PictureBox gPiece = getGuiPiece(mPiece);
                         gTile.Controls.Add(gPiece);
                     }
-                    else if (mPiece == 'e')
+                    else if (mPiece == Pieces.empty)
                     {
                         // then the clearing is already done
                     }
                     else
                     {
-                        System.Console.WriteLine("model piece is some unexpected value");
+                        //System.Console.WriteLine("model piece is some unexpected value");
                     }
 
                 }
@@ -537,7 +546,7 @@ namespace chess.View
 
         private void model_CapturedChanged(object sender, EventArgs e)
         {
-            System.Console.WriteLine("I have registered a capture");
+            //System.Console.WriteLine("I have registered a capture");
             // todo cross thread etc
             if (this.genericBoardBase.InvokeRequired)
             {
@@ -552,16 +561,16 @@ namespace chess.View
                 try
                 {
                     // get the last item
-                    char capturedPiece = gameController.ChessModel.PiecesCapd[gameController.ChessModel.PiecesCapd.Count - 1];
+                    Pieces capturedPiece = gameController.ChessModel.PiecesCapd[gameController.ChessModel.PiecesCapd.Count - 1];
                     ;
                     // uses version of the function which doesnt add click handler
                     PictureBox gCapturedPiece = getGuiPiece2(capturedPiece);
-                    if (char.IsUpper(capturedPiece))
+                    if ((int)(capturedPiece) >= 6 && (int)capturedPiece < 12)
                     {
                         // add to the black display
                         this.blackPiecesCaptured.Controls.Add(gCapturedPiece);
                     }
-                    else if (char.IsLower(capturedPiece))
+                    else if ((int)capturedPiece < 6)
                     {
                         this.whitePiecesCaptured.Controls.Add(gCapturedPiece);
                     }
@@ -591,14 +600,14 @@ namespace chess.View
             {
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
-                char curPlayer = this.gameController.ChessModel.Player;
+                string curPlayer = this.gameController.ChessModel.Player.CurPlayer;
                 this.white_turn_panel.Visible = false;
                 this.black_turn_panel.Visible = false;
 
-                if (curPlayer == 'w')
+                if (curPlayer == "white")
                     this.white_turn_panel.Visible = true;
 
-                else if (curPlayer == 'b')
+                else if (curPlayer == "black")
                     this.black_turn_panel.Visible = true;
                 
             }
@@ -621,7 +630,7 @@ namespace chess.View
             this.abandonGameToolStripMenuItem.Enabled = false;
 
             DialogResult result = this.loadform.ShowDialog();
-            System.Console.WriteLine(result.ToString());
+            //System.Console.WriteLine(result.ToString());
             // worker thread to select the file and load method
             // load game by applying moves etc
             // when this thread completed :

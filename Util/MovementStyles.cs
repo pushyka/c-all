@@ -14,21 +14,29 @@ namespace chess.Util
     /// </summary>
     class MovementStyles
     {
-        public static MovementStyle getMovementStyle(Tile pieceOnPosA)
-        {
-           
-            return new MovementStyle(pieceOnPosA);
-        }
 
-        public static MovementStyle getMovementStyle(Pieces piece)
+        public static MovementStyle getMovementStyle(Piece piece)
         {
             return new MovementStyle(piece);
         }
 
-        public static CaptureStyle getCaptureStyle(Tile pieceOnPosA)
+
+        public static CaptureStyle getCaptureStyle(Piece piece)
         {
             // subclass of movementstyle, pawn definitions are overridden 
-            return new CaptureStyle(pieceOnPosA);
+            return new CaptureStyle(piece);
+        }
+
+        // the preloadray array doesnt have piece objects
+        public static MovementStyle getMovementStyle(Pieces piece)
+        {
+            return new MovementStyle(new Piece(piece));
+        }
+
+        // the preloadray array doesnt have piece objects
+        public static CaptureStyle getCaptureStyle(Pieces piece)
+        {
+            return new CaptureStyle(new Piece(piece));
         }
         
     }
