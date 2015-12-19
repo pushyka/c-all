@@ -121,7 +121,7 @@ namespace chess.Controller
                 // if not in check and no legal move : stalemate
                 // if in check and no legal move to remove attack : checkmate
 
-                if (evaluator.isKingInCheck(cpm, ref kingCheckedBy))
+                if (evaluator.IsKingInCheck(cpm, ref kingCheckedBy))
                     this.Message = $"Player {cpm.Player.CurPlayer}'s king is in check";
 
                 // break statemetns to exit the loop
@@ -139,11 +139,11 @@ namespace chess.Controller
                         break;
                     }
 
-                    else if (evaluator.validateInput(input, ref move))
+                    else if (evaluator.ValidateInput(input, ref move))
                     {
                         // then move is non null
 
-                        if (evaluator.validateMove(move, cpm, ref moveType, ref kingCheckedBy))
+                        if (evaluator.ValidateMove(move, cpm, ref moveType, ref kingCheckedBy))
                         {
                             //this.Message = "move passed validation";
                             ;

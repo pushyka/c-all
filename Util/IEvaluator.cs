@@ -15,7 +15,7 @@ namespace chess.Util
         /// <param name="input"></param>
         /// <param name="move"></param>
         /// <returns></returns>
-        bool validateInput(string input, ref FormedMove move);
+        bool ValidateInput(string input, ref FormedMove move);
 
         /// <summary>
         /// 
@@ -25,7 +25,7 @@ namespace chess.Util
         /// <param name="cur_turn"></param>
         /// <param name="moveType"></param>
         /// <returns></returns>
-        bool validateMove(FormedMove move, ChessPosition cpm, ref string moveType, ref List<Tuple<int, int>> kingCheckedBy);
+        bool ValidateMove(FormedMove move, ChessPosition cpm, ref string moveType, ref List<Tuple<int, int>> kingCheckedBy);
 
         /// <summary>
         /// given a board context and a current player, return true / false if the players king is
@@ -36,7 +36,7 @@ namespace chess.Util
         /// <param name="player"></param>
         /// <param name="attackerPositions"></param>
         /// <returns></returns>
-        bool isKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> attackerPositions);
+        bool IsKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> attackerPositions);
 
         void preloadRayArray();
     }

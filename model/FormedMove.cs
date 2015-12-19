@@ -14,15 +14,12 @@ namespace chess.Model
     {
         private Tuple<int, int> posA;
         private Tuple<int, int> posB;
-        private bool isCompletelyFormed;
-        private bool isValidNow;
-
+        private bool isValid;
         public FormedMove()
         {
             this.posA = null;
             this.posB = null;
-            this.isCompletelyFormed = false;
-            this.isValidNow = false;
+            this.isValid = false;
         }
 
         /// <summary>
@@ -46,29 +43,21 @@ namespace chess.Model
             {
                 this.posB = t;
                 // when the second is added, then this move is completly formed
-                this.isCompletelyFormed = true;
+                this.isValid = true;
             }
         }
 
-        public bool IsCompletelyFormed
+        public bool IsValid
         {
             get
             {
-                return this.isCompletelyFormed;
-            }
-        }
-
-        public bool IsValidNow
-        {
-            get
-            {
-                return this.isValidNow;
+                return this.isValid;
             }
         }
 
         public override string ToString()
         {
-            if (this.isCompletelyFormed)
+            if (this.isValid)
             {
                 return this.posA.ToString() + this.posB.ToString();
             }

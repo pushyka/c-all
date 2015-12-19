@@ -213,7 +213,7 @@ namespace chess.Model
             
             if (enPassantSq != null)
             {
-                if (player.has(getTile(enPassantSq).piece.Val))
+                if (player.Owns(getTile(enPassantSq).piece))
                     enPassantSq = null;
             }
 

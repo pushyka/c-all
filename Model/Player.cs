@@ -8,36 +8,36 @@ namespace chess.Model
 {
     public class Player
     {
-        private string curPlayer;
+        private string playerValue;
         
         public Player(string player)
         {
-            this.curPlayer = player;
+            this.playerValue = player;
         } 
 
         public void change()
         {
-            this.curPlayer = (curPlayer == "white") ? "black" : "white";
+            this.playerValue = (playerValue == "white") ? "black" : "white";
         }
 
-        public bool has(Pieces piece)
+        public bool Owns(Piece piece)
         {
             bool result;
-            result = (this.curPlayer == "white" && (int)piece < 6) ||
-                     (this.curPlayer == "black" && (int)piece >= 6 && (int)piece < 12);
+            result = (this.playerValue == "white" && (int)piece.Val < 6) ||
+                     (this.playerValue == "black" && (int)piece.Val >= 6 && (int)piece.Val < 12);
             return result;
         }
 
         public void set(string player)
         {
-            this.curPlayer = player;
+            this.playerValue = player;
         }
 
         public string CurPlayer
         {
             get
             {
-                return this.curPlayer;
+                return this.playerValue;
             }
         }
     }
