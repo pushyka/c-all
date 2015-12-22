@@ -169,13 +169,13 @@ namespace chess.View
 
 
 
-            this.gameController.initModelandEval();
+            this.gameController.InitialiseChessObjects();
             // register event handlers
             this.gameController.PropertyChanged += message_PropertyChanged;
             this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
             this.gameController.ChessModel.PlayerChanged += model_PlayerChanged;
             // setup the game (populate)
-            this.gameController.setUp();
+            this.gameController.InitialSetupChess();
             
 
             // update the view to match the model 
@@ -194,7 +194,7 @@ namespace chess.View
 
 
 
-            this.gameController.startGameLoop();
+            this.gameController.StartChessGameLoop();
 
         }
 
@@ -202,14 +202,14 @@ namespace chess.View
         private void abandonGameToolStripMenuItem_Click(object sender, EventArgs e)
         {    
             // stop the game loop thread
-            this.gameController.tearDown();
+            this.gameController.TerminateChess();
             // deregister handlers from the model
             this.gameController.ChessModel.BoardChanged -= model_BoardChanged;
             this.gameController.PropertyChanged -= message_PropertyChanged;
             this.gameController.ChessModel.CapturedChanged -= model_CapturedChanged;
             this.gameController.ChessModel.PlayerChanged -= model_PlayerChanged;
             // clear the model and evaluator
-            this.gameController.uninitModeandEval();
+            this.gameController.UnInitialiseChessObjects();
             // clear display
             resetView();
             this.genericBoardBase.Enabled = false;
@@ -660,7 +660,7 @@ namespace chess.View
 
         private void menuItem_test_Click(object sender, EventArgs e)
         {
-            this.gameController.initModelandEval();
+            this.gameController.InitialiseChessObjects();
             this.gameController.testStuff();
         }
     }

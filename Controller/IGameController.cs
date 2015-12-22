@@ -14,19 +14,19 @@ namespace chess.Controller
         /// sets the model to the initial populated game state
         /// sets the initial player
         /// </summary>
-        void setUp();
+        void InitialSetupChess();
 
         /// <summary>
         /// nulls the model and evaluator
         /// terminates the gameloop thread
         /// </summary>
-        void tearDown();
+        void TerminateChess();
 
         /// <summary>
         /// creates and starts the gameloop thread
         /// this is called following a setUp call
         /// </summary>
-        void startGameLoop();
+        void StartTTTGameLoop();
 
         /// <summary>
         /// stops the gameloop by terminating the gameloop thread

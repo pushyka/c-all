@@ -10,6 +10,7 @@ using chess.View;
 using chess.Util;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace chess.Controller
 {
@@ -21,6 +22,7 @@ namespace chess.Controller
         private string input;
         private string message;
         private ChessPositionModel cpm;
+        private IGameModel model;
         private Evaluator evaluator;
         private GameControlState state;
         private Thread t;
@@ -30,21 +32,25 @@ namespace chess.Controller
             input = null;
             message = null;
             cpm = null;
+            model = null;
             evaluator = null;
             t = null;
             state = GameControlState.Initial;
         }
 
 
-        public void initModelandEval()
+        public void InitialiseChessObjects()
         {
-            cpm = new ChessPositionModel(); // model
-            evaluator = new Evaluator(); // utility
-            // add timer
+            cpm = new ChessPositionModel();
+            evaluator = new Evaluator();
             evaluator.preloadRayArray();
             evaluator.preloadRayArrayPawnCapture();
-            System.Console.WriteLine($"preload complete");
-            ;
+            System.Console.WriteLine("preload complete");
+        }
+
+        public void InitialiseTTTObjects()
+        {
+            model = new TTTModel();
         }
 
         public void testStuff()
@@ -53,14 +59,19 @@ namespace chess.Controller
             evaluator.getRays(Pieces.R, Tuple.Create(3, 6));
         }
 
-        public void uninitModeandEval()
+        public void UnInitialiseChessObjects()
         {
             cpm = null;
             evaluator = null;
         }
 
-        // following are test methodss
-        public void setUp()
+        public void UnInitialiseTTTObjects()
+        {
+            model = null;
+        }
+
+       
+        public void InitialSetupChess()
         {
 
             cpm.populate();
@@ -69,7 +80,7 @@ namespace chess.Controller
             
         }
 
-        public void tearDown()
+        public void TerminateChess()
         {
             //terminate t, if its running
             stopGameLoop();
@@ -77,11 +88,26 @@ namespace chess.Controller
             input = null;
             message = null;
             cpm.Player = null;
-
-            
             state = GameControlState.Initial;
-            this.Message = "Game is teared down";
+            this.Message = "Game is terminated";
         }
+
+        public void InitialSetupTTT()
+        {
+            state = GameControlState.Game;
+            this.Message = "Game is setup";
+        }
+
+        public void TerminateTTT()
+        {
+            stopGameLoop();
+            input = null;
+            message = null;
+            model.Player = null;
+            state = GameControlState.Initial;
+            this.Message = "Game is terminated";
+        }
+
 
         public void stopGameLoop()
         {
@@ -93,14 +119,14 @@ namespace chess.Controller
         }
 
 
-        public void startGameLoop()
+        public void StartChessGameLoop()
         {
-            t = new Thread(gameLoop);
+            t = new Thread(ChessGameLoop);
             t.Start();
             this.Message = "Game has started";
         }
 
-        private void gameLoop()
+        private void ChessGameLoop()
         {
             string moveType;
             FormedMove move;
@@ -173,13 +199,54 @@ namespace chess.Controller
 
                     input = null;
                 }
+                //Thread.Sleep(1000);
+            }
+
+            this.Message = "The game has ended, loop thread detached";
+        }
+
+
+        public void StartTTTGameLoop()
+        {
+            t = new Thread(TTTGameLoop);
+            t.Start();
+            this.Message = "Game has started";
+        }
+
+        private void TTTGameLoop()
+        {
+            
+            while (state == GameControlState.Game)
+            {
+                
+                
+                // check if display has provided a move
+                if (input != null)
+                {
+                    if (input == "concede")
+                    {
+                        // c.Player has conceded
+                        conceded();
+                        input = null;
+                        break;
+                    }
+                    else
+                        System.Console.WriteLine("The input was not valid");
+
+                    input = null;
+                }
+                else
+                {
+                    // Do Stuff..
+                }
                 Thread.Sleep(1000);
             }
 
             this.Message = "The game has ended, loop thread detached";
         }
 
-        
+
+
         private void conceded()
         {
             this.Message = "Player " + cpm.Player.CurPlayer + " has conceded!";

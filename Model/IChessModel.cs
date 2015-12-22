@@ -30,5 +30,7 @@ namespace chess.Model
         /// </summary>
         List<Pieces> PiecesCapd { get; }
 
+        Player Player { get; set; }
+
     }
 }

@@ -512,12 +512,12 @@ namespace chess.Util
             if (rayArray == null)
                 throw new Exception("ray array not instantiated");
             ;
-            System.Console.WriteLine($"> There are {rayArray[(int)piece][location.Item1, location.Item2].Count} direction rays");
-            System.Console.WriteLine($"> for piece {piece} at location {location}");
-            foreach (List<Tuple<int, int>> ray in rayArray[(int)piece][location.Item1, location.Item2])
-            {
-                System.Console.WriteLine($"> counts: {ray.Count}");
-            }
+            //System.Console.WriteLine($"> There are {rayArray[(int)piece][location.Item1, location.Item2].Count} direction rays");
+            //System.Console.WriteLine($"> for piece {piece} at location {location}");
+            //foreach (List<Tuple<int, int>> ray in rayArray[(int)piece][location.Item1, location.Item2])
+            //{
+            //    System.Console.WriteLine($"> counts: {ray.Count}");
+            //}
             
             return rayArray[(int)piece][location.Item1, location.Item2];
 
@@ -530,12 +530,12 @@ namespace chess.Util
                 throw new Exception("ray array (pawns) noy instantiated");
 
             int pieceIndex = (piece == Pieces.pawnW) ? 0 : 1;
-            System.Console.WriteLine($"> There are {rayArray[pieceIndex][location.Item1, location.Item2].Count} direction rays");
-            System.Console.WriteLine($"> for piece {piece} at location {location}");
-            foreach (List<Tuple<int, int>> ray in rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2])
-            {
-                System.Console.WriteLine($"> counts: {ray.Count}");
-            }
+            //System.Console.WriteLine($"> There are {rayArray[pieceIndex][location.Item1, location.Item2].Count} direction rays");
+            //System.Console.WriteLine($"> for piece {piece} at location {location}");
+            //foreach (List<Tuple<int, int>> ray in rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2])
+            //{
+            //    System.Console.WriteLine($"> counts: {ray.Count}");
+            //}
             return rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2];
         }
 
