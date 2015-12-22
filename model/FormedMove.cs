@@ -15,12 +15,14 @@ namespace chess.Model
         private Tuple<int, int> posA;
         private Tuple<int, int> posB;
         private bool isValid;
+        
         public FormedMove()
         {
             this.posA = null;
             this.posB = null;
             this.isValid = false;
         }
+
 
         /// <summary>
         /// Takes a tuple t (representing a position on the board)
@@ -32,20 +34,15 @@ namespace chess.Model
         /// <param name="t"></param>
         public void Add(Tuple<int, int> t)
         {
-            // if posA is null, then assign the first coord position to it
             if (posA == null)
-            {
                 this.posA = t;
-            }
             else
-            // posA assigned, so assign 2nd position to posB
-            // Note: the Evaluator.formatMove method will only send TWO positions to this class
             {
                 this.posB = t;
-                // when the second is added, then this move is completly formed
                 this.isValid = true;
             }
         }
+
 
         public bool IsValid
         {
@@ -55,6 +52,7 @@ namespace chess.Model
             }
         }
 
+
         public override string ToString()
         {
             if (this.isValid)
@@ -63,10 +61,10 @@ namespace chess.Model
             }
             else
             {
-                return "no move created";
+                return "EMPTYMOVE";
             }
-            
         }
+
 
         public Tuple<int,int> PosA
         {
@@ -76,6 +74,7 @@ namespace chess.Model
             }
         }
 
+
         public Tuple<int,int> PosB
         {
             get
@@ -83,6 +82,5 @@ namespace chess.Model
                 return this.posB;
             }
         }
-
     }
 }
