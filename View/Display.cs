@@ -50,30 +50,32 @@ namespace chess.View
             {7, 1}
         };
 
-        private Dictionary<Pieces, Image> gamePieces = new Dictionary<Pieces, Image>
+        private Dictionary<GamePieces, Image> gamePieces = new Dictionary<GamePieces, Image>
         {
             
-            {Pieces.K, chess.Properties.Resources.Chess_kdt60},
-            {Pieces.queenB, chess.Properties.Resources.Chess_qdt60},
-            {Pieces.B, chess.Properties.Resources.Chess_bdt60},
-            {Pieces.N, chess.Properties.Resources.Chess_ndt60},
-            {Pieces.R, chess.Properties.Resources.Chess_rdt60},
-            {Pieces.pawnB, chess.Properties.Resources.Chess_pdt60},
-            {Pieces.k, chess.Properties.Resources.Chess_klt60},
-            {Pieces.queenW, chess.Properties.Resources.Chess_qlt60},
-            {Pieces.b, chess.Properties.Resources.Chess_blt60},
-            {Pieces.n, chess.Properties.Resources.Chess_nlt60},
-            {Pieces.r, chess.Properties.Resources.Chess_rlt60},
-            {Pieces.pawnW, chess.Properties.Resources.Chess_plt60},
+            {GamePieces.BlackKing, chess.Properties.Resources.Chess_kdt60},
+            {GamePieces.BlackQueen, chess.Properties.Resources.Chess_qdt60},
+            {GamePieces.BlackBishop, chess.Properties.Resources.Chess_bdt60},
+            {GamePieces.BlackKnight, chess.Properties.Resources.Chess_ndt60},
+            {GamePieces.BlackRook, chess.Properties.Resources.Chess_rdt60},
+            {GamePieces.BlackPawn, chess.Properties.Resources.Chess_pdt60},
+            {GamePieces.WhiteKing, chess.Properties.Resources.Chess_klt60},
+            {GamePieces.WhiteQueen, chess.Properties.Resources.Chess_qlt60},
+            {GamePieces.WhiteBishop, chess.Properties.Resources.Chess_blt60},
+            {GamePieces.WhiteKnight, chess.Properties.Resources.Chess_nlt60},
+            {GamePieces.WhiteRook, chess.Properties.Resources.Chess_rlt60},
+            {GamePieces.WhitePawn, chess.Properties.Resources.Chess_plt60},
         };
 
         public Display(GameController gc)
         {
             this.gameController = gc;
+            this.gameController.InitialiseAllObjects();
             // tripple buffer>
             InitializeComponent();
             InitializeComponent2();
             InitGenericBoard();
+            // will need to create the ttt board too...
             
             
 
@@ -167,23 +169,26 @@ namespace chess.View
             // this menu item is not clickeed multiple times
 
 
+            // could change following to make an initial ref to the model rather than long lines ,,
+
+            
+            // register event handlers to the chess model
+            this.gameController.PropertyChanged += message_PropertyChanged; // message
+            this.gameController.Model(GameModels.Chess).CapturedChanged += model_CapturedChanged;
+            this.gameController.Model(GameModels.Chess).PlayerChanged += model_PlayerChanged;
 
 
-            this.gameController.InitialiseChessObjects();
-            // register event handlers
-            this.gameController.PropertyChanged += message_PropertyChanged;
-            this.gameController.ChessModel.CapturedChanged += model_CapturedChanged;
-            this.gameController.ChessModel.PlayerChanged += model_PlayerChanged;
+            //finally register the view to the model.BoardChanged event so it will update itself on future changes
+            this.gameController.Model(GameModels.Chess).BoardChanged += model_BoardChanged;
             // setup the game (populate)
-            this.gameController.InitialSetupChess();
+            this.gameController.PrepareChessModel();
             
 
             // update the view to match the model 
             //todoREMOVE THIS AND MOVE BOardChanged Handler above REGISTERED BEFORE THE MODEL CODE
-            this.updateView(this.gameController.ChessModel.Board);
+            //this.updateView(this.gameController.Model(GameModels.Chess).Board);
 
-            //finally register the view to the model.BoardChanged event so it will update itself on future changes
-            this.gameController.ChessModel.BoardChanged += model_BoardChanged;
+
 
             this.menuItem_add_Board.Enabled = false;
             this.loadGameToolStripMenuItem.Enabled = false;
@@ -202,14 +207,14 @@ namespace chess.View
         private void abandonGameToolStripMenuItem_Click(object sender, EventArgs e)
         {    
             // stop the game loop thread
-            this.gameController.TerminateChess();
+            this.gameController.Terminate();
             // deregister handlers from the model
-            this.gameController.ChessModel.BoardChanged -= model_BoardChanged;
+            this.gameController.Model(GameModels.Chess).BoardChanged -= model_BoardChanged;
             this.gameController.PropertyChanged -= message_PropertyChanged;
-            this.gameController.ChessModel.CapturedChanged -= model_CapturedChanged;
-            this.gameController.ChessModel.PlayerChanged -= model_PlayerChanged;
-            // clear the model and evaluator
-            this.gameController.UnInitialiseChessObjects();
+            this.gameController.Model(GameModels.Chess).CapturedChanged -= model_CapturedChanged;
+            this.gameController.Model(GameModels.Chess).PlayerChanged -= model_PlayerChanged;
+            // reinitialise the objects
+            this.gameController.InitialiseAllObjects();
             // clear display
             resetView();
             this.genericBoardBase.Enabled = false;
@@ -240,41 +245,9 @@ namespace chess.View
         }
 
 
-        /// <summary>
-        /// Called once to initially draw the state of the model onto the
-        /// display. Successive updates will be BoardChanged event driven
-        /// and will only seek to update the few tiles which have changed.
-        /// </summary>
-        /// <param name="board"></param>
-        private void updateView(TileStruct[, ] board)
-        {
-            // go through the model tiles, when find a piece on a tile,
-            for (int row = 0; row < 8; row ++)
-            {
-                for (int col = 0; col < 8; col ++)
-                {
 
-                    TileStruct tile = board[row, col];
-                    // if the tile isnt empty
-                    if (!tile.IsEmpty())
-                    {
-                        // get the piece graphic (dict?)
-                        PictureBox gPiece = getGuiPiece(tile.piece.Val);
 
-                        // get the associated display tile
-                        Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(col, row);
-                        //dispTile.BackColor = Color.Yellow;
-                        // draw the graphic onto the display tile (graphic must inherit Click ability)
-                        gTile.Controls.Add(gPiece);
-                        
-
-                    }
-                }
-            }
-            
-        }
-
-        private PictureBox getGuiPiece(Pieces mPiece)
+        private PictureBox getGuiPiece(GamePieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";
@@ -286,7 +259,7 @@ namespace chess.View
             return pb;
         }
 
-        private PictureBox getGuiPiece2(Pieces mPiece)
+        private PictureBox getGuiPiece2(GamePieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";
@@ -452,21 +425,24 @@ namespace chess.View
             }
             else
             {
+                
+                // only update the pos which have changed
                 List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
+                System.Console.WriteLine($"BoardChanged raised with {e.PositionsChanged.Count} locations");
                 foreach (Tuple<int, int> pos in positionsChanged)
                 {
-                    
+
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
-                    Pieces mPiece;
-                    if (!this.gameController.ChessModel.Board[pos.Item1, pos.Item2].IsEmpty())
+                    GamePieces mPiece;
+                    if (!this.gameController.Model(GameModels.Chess).Board[pos.Item1, pos.Item2].IsEmpty())
                     {
-                        mPiece = this.gameController.ChessModel.Board[pos.Item1, pos.Item2].piece.Val;
+                        mPiece = this.gameController.Model(GameModels.Chess).Board[pos.Item1, pos.Item2].piece.Val;
                     }
                     else
                     {
                         // give it the empty value
-                        mPiece = Pieces.empty;
+                        mPiece = GamePieces.empty;
                     }
 
                     // remove all existing items on the tile (picture boxes if any)
@@ -483,7 +459,7 @@ namespace chess.View
                         PictureBox gPiece = getGuiPiece(mPiece);
                         gTile.Controls.Add(gPiece);
                     }
-                    else if (mPiece == Pieces.empty)
+                    else if (mPiece == GamePieces.empty)
                     {
                         // then the clearing is already done
                     }
@@ -492,6 +468,7 @@ namespace chess.View
                         //System.Console.WriteLine("model piece is some unexpected value");
                     }
 
+                    
                 }
             }
             
@@ -561,7 +538,7 @@ namespace chess.View
                 try
                 {
                     // get the last item
-                    Pieces capturedPiece = gameController.ChessModel.PiecesCapd[gameController.ChessModel.PiecesCapd.Count - 1];
+                    GamePieces capturedPiece = gameController.Model(GameModels.Chess).PiecesCapd[gameController.Model(GameModels.Chess).PiecesCapd.Count - 1];
                     ;
                     // uses version of the function which doesnt add click handler
                     PictureBox gCapturedPiece = getGuiPiece2(capturedPiece);
@@ -600,7 +577,7 @@ namespace chess.View
             {
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
-                string curPlayer = this.gameController.ChessModel.Player.CurPlayer;
+                string curPlayer = this.gameController.Model(GameModels.Chess).Player.CurPlayer;
                 this.white_turn_panel.Visible = false;
                 this.black_turn_panel.Visible = false;
 
@@ -643,7 +620,7 @@ namespace chess.View
         private void menuItem_close_Click(object sender, EventArgs e)
         {
             // make sure to terminate the gameloop thread if its running
-            gameController.stopGameLoop();
+            gameController.StopGameLoop();
             // now end the main thread
             this.Close();
         }
@@ -655,12 +632,12 @@ namespace chess.View
             if (e.CloseReason == CloseReason.WindowsShutDown) return;
 
             // else user is closing also need to stop this loop if its running
-            gameController.stopGameLoop();
+            gameController.StopGameLoop();
         }
 
         private void menuItem_test_Click(object sender, EventArgs e)
         {
-            this.gameController.InitialiseChessObjects();
+            this.gameController.InitialiseAllObjects();
             this.gameController.testStuff();
         }
     }

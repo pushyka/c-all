@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
-    interface IGameModel
+    public class BaseModel
     {
 
-        void applyMove(FormedMove move, string moveType);
-
-        Player Player { get; set; }
     }
 }

@@ -34,30 +34,30 @@ namespace chess.Util
 
             switch (piece.Val)
             {
-                case Pieces.pawnW:
+                case GamePieces.WhitePawn:
                     createWhitePawnMovement(piece);
                     break;
-                case Pieces.pawnB:
+                case GamePieces.BlackPawn:
                     createBlackPawnMovement(piece);
                     break;
-                case Pieces.r:
-                case Pieces.R:
+                case GamePieces.WhiteRook:
+                case GamePieces.BlackRook:
                     createRookMovement();
                     break;
-                case Pieces.n:
-                case Pieces.N:
+                case GamePieces.WhiteKnight:
+                case GamePieces.BlackKnight:
                     createKnightMovement();
                     break;
-                case Pieces.b:
-                case Pieces.B:
+                case GamePieces.WhiteBishop:
+                case GamePieces.BlackBishop:
                     createBishopMovement();
                     break;
-                case Pieces.queenW:
-                case Pieces.queenB:
+                case GamePieces.WhiteQueen:
+                case GamePieces.BlackQueen:
                     createQueenMovement();
                     break;
-                case Pieces.k:
-                case Pieces.K:
+                case GamePieces.WhiteKing:
+                case GamePieces.BlackKing:
                     createKingMovement();
                     break;
                 default:

@@ -15,6 +15,7 @@ namespace chess.Model
             this.positionsChanged.Add(pos);
         }
 
+
         public List<Tuple<int,int>> PositionsChanged
         {
             get
@@ -23,6 +24,4 @@ namespace chess.Model
             }
         }
     }
-
-
 }

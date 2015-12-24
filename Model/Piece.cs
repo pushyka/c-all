@@ -8,16 +8,16 @@ namespace chess.Model
 {
     public class Piece
     {
-        private Pieces val;
+        private GamePieces val;
         private bool movedOnce;
 
-        public Piece(Pieces val)
+        public Piece(GamePieces val)
         {
             this.val = val;
             this.movedOnce = false;
         }
 
-        public Pieces Val
+        public GamePieces Val
         {
             get
             {

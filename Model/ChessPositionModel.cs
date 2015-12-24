@@ -13,7 +13,7 @@ namespace chess.Model
 
     public delegate void BoardChanged(object sender, BoardChangedEventArgs e);
 
-    public class ChessPositionModel : ChessPosition, IChessModel
+    public class ChessPositionModel : ChessPosition, IDisplayableModel
     {
 
         // using multi-dimensional array since rows of equal lengths
@@ -39,7 +39,7 @@ namespace chess.Model
             this.board = new TileStruct[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
                                              // hence 2,2 becomes the top left origin
                                              // initial=te the capture list
-            this.piecesCapd = new List<Pieces>();
+            this.piecesCapd = new List<GamePieces>();
             this.castle = new Dictionary<char, bool>();
             this.halfmoveClock = 0;
             this.player = new Player("white");
@@ -48,7 +48,7 @@ namespace chess.Model
 
 
 
-        public void populate()
+        public void Setup()
         {
 
 
@@ -56,20 +56,20 @@ namespace chess.Model
 
 
             // black row 2
-            this.board[0, 0] = new TileStruct(new Piece(Pieces.R)); // top left origin
-            this.board[0, 1] = new TileStruct(new Piece(Pieces.N));
-            this.board[0, 2] = new TileStruct(new Piece(Pieces.B));
-            this.board[0, 3] = new TileStruct(new Piece(Pieces.queenB));
-            this.board[0, 4] = new TileStruct(new Piece(Pieces.K));
-            this.board[0, 5] = new TileStruct(new Piece(Pieces.B));
-            this.board[0, 6] = new TileStruct(new Piece(Pieces.N));
-            this.board[0, 7] = new TileStruct(new Piece(Pieces.R));
+            this.board[0, 0] = new TileStruct(new Piece(GamePieces.BlackRook)); // top left origin
+            this.board[0, 1] = new TileStruct(new Piece(GamePieces.BlackKnight));
+            this.board[0, 2] = new TileStruct(new Piece(GamePieces.BlackBishop));
+            this.board[0, 3] = new TileStruct(new Piece(GamePieces.BlackQueen));
+            this.board[0, 4] = new TileStruct(new Piece(GamePieces.BlackKing));
+            this.board[0, 5] = new TileStruct(new Piece(GamePieces.BlackBishop));
+            this.board[0, 6] = new TileStruct(new Piece(GamePieces.BlackKnight));
+            this.board[0, 7] = new TileStruct(new Piece(GamePieces.BlackRook));
 
 
             // black row 3 (pawns)
             for (int col = 0; col < dim; col++)
             {
-                this.board[1, col] = new TileStruct(new Piece(Pieces.pawnB)); ; // pawns have 2 additional properties {movedOnce=false : used to allow +1/+2 advance for FIRST move}
+                this.board[1, col] = new TileStruct(new Piece(GamePieces.BlackPawn)); ; // pawns have 2 additional properties {movedOnce=false : used to allow +1/+2 advance for FIRST move}
                                                         //                                    {canBeCapEnPassant=false : set=true if pawn advances +2, function 
                                                         //to set=false for every pawn of oposite player at the end of current players turn.
                                                         //seems naive, implement last anyway
@@ -87,21 +87,30 @@ namespace chess.Model
             // white row 8 (pawns)
             for (int col = 0; col < dim; col++)
             {
-                this.board[6, col] = new TileStruct(new Piece(Pieces.pawnW)); ; // as above
+                this.board[6, col] = new TileStruct(new Piece(GamePieces.WhitePawn)); ; // as above
             }
 
             // white row 9
-            this.board[7, 0] = new TileStruct(new Piece(Pieces.r));
-            this.board[7, 1] = new TileStruct(new Piece(Pieces.n));
-            this.board[7, 2] = new TileStruct(new Piece(Pieces.b));
-            this.board[7, 3] = new TileStruct(new Piece(Pieces.queenW));
-            this.board[7, 4] = new TileStruct(new Piece(Pieces.k));
-            this.board[7, 5] = new TileStruct(new Piece(Pieces.b));
-            this.board[7, 6] = new TileStruct(new Piece(Pieces.n));
-            this.board[7, 7] = new TileStruct(new Piece(Pieces.r)); // 9,9 the bottomright (rather than 7,7) due to the 2x off board buffer
+            this.board[7, 0] = new TileStruct(new Piece(GamePieces.WhiteRook));
+            this.board[7, 1] = new TileStruct(new Piece(GamePieces.WhiteKnight));
+            this.board[7, 2] = new TileStruct(new Piece(GamePieces.WhiteBishop));
+            this.board[7, 3] = new TileStruct(new Piece(GamePieces.WhiteQueen));
+            this.board[7, 4] = new TileStruct(new Piece(GamePieces.WhiteKing));
+            this.board[7, 5] = new TileStruct(new Piece(GamePieces.WhiteBishop));
+            this.board[7, 6] = new TileStruct(new Piece(GamePieces.WhiteKnight));
+            this.board[7, 7] = new TileStruct(new Piece(GamePieces.WhiteRook)); // 9,9 the bottomright (rather than 7,7) due to the 2x off board buffer
 
-
-
+            // fire the board changed event marked as ALL locations
+            BoardChangedEventArgs e = new BoardChangedEventArgs();
+            // add all of the positions of the board to the changedevent
+            for (int row = 0; row < this.dim; row++)
+            {
+                for (int col = 0; col < this.dim; col++)
+                {
+                    e.Add(Tuple.Create(row, col));
+                }
+            }
+            OnBoardChanged(e);
 
         }
 
@@ -147,13 +156,13 @@ namespace chess.Model
         
 
 
-        protected override void addToCaptured(Pieces piece)
+        protected override void addToCaptured(GamePieces piece)
         {
             this.piecesCapd.Add(piece);
             OnCapturedChanged(EventArgs.Empty);
         }
 
-        public List<Pieces> PiecesCapd
+        public List<GamePieces> PiecesCapd
         {
             get
             {

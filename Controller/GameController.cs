@@ -14,15 +14,23 @@ using System.Diagnostics;
 
 namespace chess.Controller
 {
-    public enum GameControlState { Initial = 1, Game = 2, Load = 3, Settings = 4}
+    
 
     public class GameController : INotifyPropertyChanged, IGameController // remove the propertychanged event
     {
         
         private string input;
         private string message;
+
+        // all of the game models are stored in here, the View can access this
+        private IDisplayableModel[] models = new IDisplayableModel[2] { null, null };
+        // this way the game models can be used for display by the View and
+        // the game loops are free to use the models like they want.
+        // e.g. the chessposition contains more information than the tttposition
         private ChessPositionModel cpm;
-        private IGameModel model;
+        private TTTPositionModel tttpm;
+
+
         private Evaluator evaluator;
         private GameControlState state;
         private Thread t;
@@ -31,63 +39,64 @@ namespace chess.Controller
         {
             input = null;
             message = null;
-            cpm = null;
-            model = null;
+            models[(int)GameModels.Chess] = null;
+            models[(int)GameModels.TicTacToe] = null;
             evaluator = null;
             t = null;
             state = GameControlState.Initial;
         }
 
 
-        public void InitialiseChessObjects()
+        public void InitialiseAllObjects()
         {
-            cpm = new ChessPositionModel();
+            models[(int)GameModels.Chess] = new ChessPositionModel();
+            cpm = (ChessPositionModel)models[(int)GameModels.Chess];
+            models[(int)GameModels.TicTacToe] = new TTTPositionModel();
+            tttpm = (TTTPositionModel)models[(int)GameModels.TicTacToe];
+
             evaluator = new Evaluator();
             evaluator.preloadRayArray();
             evaluator.preloadRayArrayPawnCapture();
             System.Console.WriteLine("preload complete");
-        }
 
-        public void InitialiseTTTObjects()
-        {
-            model = new TTTModel();
+
         }
 
         public void testStuff()
         {
             // preloaded array
-            evaluator.getRays(Pieces.R, Tuple.Create(3, 6));
+            evaluator.getRays(GamePieces.BlackRook, Tuple.Create(3, 6));
         }
 
-        public void UnInitialiseChessObjects()
+        public void UninitialiseObjects()
         {
+            models[(int)GameModels.Chess] = null;
             cpm = null;
+            models[(int)GameModels.TicTacToe] = null;
+            tttpm = null;
             evaluator = null;
         }
-
-        public void UnInitialiseTTTObjects()
-        {
-            model = null;
-        }
+        
 
        
-        public void InitialSetupChess()
+        public void PrepareChessModel()
         {
 
-            cpm.populate();
+            cpm.Setup();
             state = GameControlState.Game;
             this.Message = "Game is setup";
             
         }
 
-        public void TerminateChess()
+        public void Terminate()
         {
             //terminate t, if its running
-            stopGameLoop();
+            StopGameLoop();
 
             input = null;
             message = null;
             cpm.Player = null;
+            tttpm.Player = null;
             state = GameControlState.Initial;
             this.Message = "Game is terminated";
         }
@@ -98,18 +107,8 @@ namespace chess.Controller
             this.Message = "Game is setup";
         }
 
-        public void TerminateTTT()
-        {
-            stopGameLoop();
-            input = null;
-            message = null;
-            model.Player = null;
-            state = GameControlState.Initial;
-            this.Message = "Game is terminated";
-        }
 
-
-        public void stopGameLoop()
+        public void StopGameLoop()
         {
             if (t != null)
             {
@@ -206,7 +205,7 @@ namespace chess.Controller
         }
 
 
-        public void StartTTTGameLoop()
+        public void StartGameLoop()
         {
             t = new Thread(TTTGameLoop);
             t.Start();
@@ -255,12 +254,9 @@ namespace chess.Controller
 
         
 
-        public ChessPositionModel ChessModel
+        public IDisplayableModel Model(GameModels model)
         {
-            get
-            {
-                return this.cpm;
-            }
+            return this.models[(int)model];
         }
 
 

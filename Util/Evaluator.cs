@@ -278,7 +278,7 @@ namespace chess.Util
             Tuple<int, int> posA = move.PosA;
             TileStruct pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
             char posAPlayer = ((int)pieceOnPosA.piece.Val < 6) ? 'w' : 'b';
-            if (pieceOnPosA.piece.Val == Pieces.pawnW || pieceOnPosA.piece.Val == Pieces.pawnB)
+            if (pieceOnPosA.piece.Val == GamePieces.WhitePawn || pieceOnPosA.piece.Val == GamePieces.BlackPawn)
             {
                 ;
                 CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA.piece);
@@ -300,7 +300,7 @@ namespace chess.Util
                     TileStruct pieceOnPassantPos = cpm.Board[passantPos.Item1, passantPos.Item2];
                     // if passant piece is a pawn
                     ;
-                    if (pieceOnPassantPos.piece.Val == Pieces.pawnW || pieceOnPassantPos.piece.Val == Pieces.pawnB)
+                    if (pieceOnPassantPos.piece.Val == GamePieces.WhitePawn || pieceOnPassantPos.piece.Val == GamePieces.BlackPawn)
                     {
                         // and its the other players piece
                         char pieceOnPassantPosOwner = ((int)pieceOnPassantPos.piece.Val < 6) ? 'w' : 'b';
@@ -350,7 +350,7 @@ namespace chess.Util
             TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> captureRays;
 
-            if (tileA.piece.Val == Pieces.pawnB || tileA.piece.Val == Pieces.pawnW)
+            if (tileA.piece.Val == GamePieces.BlackPawn || tileA.piece.Val == GamePieces.WhitePawn)
                 captureRays = getRaysPawnCapture(tileA.piece.Val, posA);
             else
                 captureRays = getRays(tileA.piece.Val, posA);
@@ -450,7 +450,7 @@ namespace chess.Util
                     if (!tile.IsEmpty())
                     {
                         if ((curPlayer.Owns(tile.piece)) && 
-                            (tile.piece.Val == Pieces.k || tile.piece.Val == Pieces.K))
+                            (tile.piece.Val == GamePieces.WhiteKing || tile.piece.Val == GamePieces.BlackKing))
                         {
                             curPlayersKingPos = Tuple.Create(row, col);
                             break;
@@ -507,7 +507,7 @@ namespace chess.Util
         /// <param name="piece"></param>
         /// <param name=""></param>
         /// <returns></returns>
-        public List<List<Tuple<int, int>>> getRays(Pieces piece, Tuple<int, int> location)
+        public List<List<Tuple<int, int>>> getRays(GamePieces piece, Tuple<int, int> location)
         {
             if (rayArray == null)
                 throw new Exception("ray array not instantiated");
@@ -524,12 +524,12 @@ namespace chess.Util
 
         }
 
-        public List<List<Tuple<int,int>>> getRaysPawnCapture(Pieces piece, Tuple<int, int> location)
+        public List<List<Tuple<int,int>>> getRaysPawnCapture(GamePieces piece, Tuple<int, int> location)
         {
             if (rayArrayPawnCapture == null)
                 throw new Exception("ray array (pawns) noy instantiated");
 
-            int pieceIndex = (piece == Pieces.pawnW) ? 0 : 1;
+            int pieceIndex = (piece == GamePieces.WhitePawn) ? 0 : 1;
             //System.Console.WriteLine($"> There are {rayArray[pieceIndex][location.Item1, location.Item2].Count} direction rays");
             //System.Console.WriteLine($"> for piece {piece} at location {location}");
             //foreach (List<Tuple<int, int>> ray in rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2])
@@ -555,7 +555,7 @@ namespace chess.Util
             for (int i = 0; i < rayArray.Length; i++)
             {
                 // foreach of the i piece types, create 64 tiles each containing a number of rays (n directions)
-                MovementStyle style = MovementStyles.getMovementStyle((Pieces)i);
+                MovementStyle style = MovementStyles.getMovementStyle((GamePieces)i);
                 rayArray[i] = new List<List<Tuple<int,int>>>[8, 8];
                 for (int j = 0; j < 8; j++) // row
                 {
@@ -603,8 +603,8 @@ namespace chess.Util
         {
             // 2 unique pawn pieces
             rayArrayPawnCapture = new List<List<Tuple<int, int>>>[2][,];
-            CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(Pieces.pawnW);
-            CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(Pieces.pawnB);
+            CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(GamePieces.WhitePawn);
+            CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(GamePieces.BlackPawn);
 
             rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[8, 8]; // white
             rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[8, 8]; // black

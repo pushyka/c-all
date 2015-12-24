@@ -6,15 +6,26 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
-    public enum Pieces
+    public enum GamePieces
     {
-        pawnW, r, n, b, queenW, k, pawnB, R, N, B, queenB, K, empty
+        WhitePawn,
+        WhiteRook,
+        WhiteKnight,
+        WhiteBishop,
+        WhiteQueen,
+        WhiteKing,
+        BlackPawn,
+        BlackRook,
+        BlackKnight,
+        BlackBishop,
+        BlackQueen,
+        BlackKing,
+        empty,
+        X,
+        O
     }
 
+    public enum GameControlState { Initial = 1, Game = 2, Load = 3, Settings = 4 }
 
-    // if a function is given a Pieces enum and a player argument, quickly determine if
-    // the piece is of player ...
-
-    // player = -1 (white), 1 (black)
-    // if palyer < 0 and piece < 0 OR player > 0 and piece > 0 : is of cur player
+    public enum GameModels { Chess, TicTacToe}
 }
