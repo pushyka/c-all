@@ -24,9 +24,13 @@ namespace chess.Controller
 
         // all of the game models are stored in here, the View can access this
         private IDisplayableModel[] models = new IDisplayableModel[2] { null, null };
+
         // this way the game models can be used for display by the View and
         // the game loops are free to use the models like they want.
         // e.g. the chessposition contains more information than the tttposition
+
+            // TODO maybe change to a dictionary
+
         private ChessPositionModel cpm;
         private TTTPositionModel tttpm;
 
@@ -55,8 +59,8 @@ namespace chess.Controller
             tttpm = (TTTPositionModel)models[(int)GameModels.TicTacToe];
 
             evaluator = new Evaluator();
-            evaluator.preloadRayArray();
-            evaluator.preloadRayArrayPawnCapture();
+            evaluator.GenerateRays();
+            evaluator.GeneratePawnRays();
             System.Console.WriteLine("preload complete");
 
 
@@ -65,7 +69,7 @@ namespace chess.Controller
         public void testStuff()
         {
             // preloaded array
-            evaluator.getRays(GamePieces.BlackRook, Tuple.Create(3, 6));
+            evaluator.GetPieceRay(GamePieces.BlackRook, Tuple.Create(3, 6));
         }
 
         public void UninitialiseObjects()
@@ -86,6 +90,15 @@ namespace chess.Controller
             state = GameControlState.Game;
             this.Message = "Game is setup";
             
+        }
+
+        public void PrepareTTTModel()
+        {
+
+            tttpm.Setup();
+            state = GameControlState.Game;
+            this.Message = "Game is setup";
+
         }
 
         public void Terminate()
@@ -205,7 +218,7 @@ namespace chess.Controller
         }
 
 
-        public void StartGameLoop()
+        public void StartTTTGameLoop()
         {
             t = new Thread(TTTGameLoop);
             t.Start();

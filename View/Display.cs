@@ -72,10 +72,11 @@ namespace chess.View
             this.gameController = gc;
             this.gameController.InitialiseAllObjects();
             // tripple buffer>
+            
+            
             InitializeComponent();
             InitializeComponent2();
-            InitGenericBoard();
-            // will need to create the ttt board too...
+            this.genericBoardBase = new TableLayoutPanel();
             
             
 
@@ -87,12 +88,12 @@ namespace chess.View
         /// <summary>
         /// Creates and hides a generic c type board
         /// </summary>
-        private void InitGenericBoard()
+        private void AssembleChessBoard()
         {
 
 
             // now the main container panel
-            this.genericBoardBase = new TableLayoutPanel();
+            
             this.genericBoardBase.RowCount = 8;
             this.genericBoardBase.ColumnCount = 8;
 
@@ -111,8 +112,37 @@ namespace chess.View
             // add it to the main display form
             this.Controls.Add(this.genericBoardBase);
             // hide ot fpr npw
-            //this.genericBoardBase.Visible = false;
-            this.genericBoardBase.Enabled = false;
+            this.genericBoardBase.Visible = true;
+            this.genericBoardBase.Enabled = true;
+        }
+
+        private void AssembleTTTBoard()
+        {
+
+
+            // now the main container panel
+
+            this.genericBoardBase.RowCount = 3;
+            this.genericBoardBase.ColumnCount = 3;
+
+            this.genericBoardBase.Location = new System.Drawing.Point(46, 83);
+            this.genericBoardBase.Name = "genericBoardBase";
+            //this.genericBoardBase.BackColor = Color.Transparent;
+            this.genericBoardBase.Size = new System.Drawing.Size(150, 150);
+            this.genericBoardBase.TabIndex = 4;
+            this.genericBoardBase.BorderStyle = BorderStyle.FixedSingle; // solution
+
+
+
+            // do tiles
+            this.genericBoardBase.BackColor = Color.Red;
+
+
+            // add it to the main display form
+            this.Controls.Add(this.genericBoardBase);
+            // hide ot fpr npw
+            this.genericBoardBase.Visible = true;
+            this.genericBoardBase.Enabled = true;
         }
 
         private void generateTilesForBase()
@@ -162,16 +192,16 @@ namespace chess.View
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void menuItem_addBoard_Click(object sender, EventArgs e)
+        private void menuItemChess_Click(object sender, EventArgs e)
         {
             // if dont disable this menu option, it can be clicked multiple times causing
             // for example these handlers to be registered multiple times , so ensure 
             // this menu item is not clickeed multiple times
-
+            AssembleChessBoard();
 
             // could change following to make an initial ref to the model rather than long lines ,,
 
-            
+
             // register event handlers to the chess model
             this.gameController.PropertyChanged += message_PropertyChanged; // message
             this.gameController.Model(GameModels.Chess).CapturedChanged += model_CapturedChanged;
@@ -190,10 +220,9 @@ namespace chess.View
 
 
 
-            this.menuItem_add_Board.Enabled = false;
+            this.menuItemNewGame.Enabled = false;
             this.loadGameToolStripMenuItem.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = true;
-            this.genericBoardBase.Enabled = true;
             this.message_box.Enabled = true;
             this.concedeButton.Visible = true;
 
@@ -201,6 +230,39 @@ namespace chess.View
 
             this.gameController.StartChessGameLoop();
 
+        }
+
+
+        private void menuItemTTT_Click(object sender, EventArgs e)
+        {
+            AssembleTTTBoard();
+
+            this.gameController.PropertyChanged += message_PropertyChanged; // message
+            this.gameController.Model(GameModels.TicTacToe).CapturedChanged += model_CapturedChanged;
+            this.gameController.Model(GameModels.TicTacToe).PlayerChanged += model_PlayerChanged;
+
+
+            //finally register the view to the model.BoardChanged event so it will update itself on future changes
+            this.gameController.Model(GameModels.TicTacToe).BoardChanged += model_BoardChanged;
+            // setup the game (populate)
+            this.gameController.PrepareTTTModel();
+
+
+            // update the view to match the model 
+            //todoREMOVE THIS AND MOVE BOardChanged Handler above REGISTERED BEFORE THE MODEL CODE
+            //this.updateView(this.gameController.Model(GameModels.Chess).Board);
+
+
+
+            this.menuItemNewGame.Enabled = false;
+            this.loadGameToolStripMenuItem.Enabled = false;
+            this.abandonGameToolStripMenuItem.Enabled = true;
+            this.message_box.Enabled = true;
+            this.concedeButton.Visible = true;
+
+
+
+            this.gameController.StartTTTGameLoop();
         }
 
 
@@ -217,9 +279,10 @@ namespace chess.View
             this.gameController.InitialiseAllObjects();
             // clear display
             resetView();
+            this.genericBoardBase.Visible = false;
             this.genericBoardBase.Enabled = false;
             this.concedeButton.Visible = false;
-            this.menuItem_add_Board.Enabled = true;
+            this.menuItemNewGame.Enabled = true;
             this.loadGameToolStripMenuItem.Enabled = true;
             this.abandonGameToolStripMenuItem.Enabled = false;
         }
@@ -603,7 +666,7 @@ namespace chess.View
 
         private void menuItem_loadGame_Click(object sender, EventArgs e)
         {
-            this.menuItem_add_Board.Enabled = false;
+            this.menuItemNewGame.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = false;
 
             DialogResult result = this.loadform.ShowDialog();
@@ -640,5 +703,7 @@ namespace chess.View
             this.gameController.InitialiseAllObjects();
             this.gameController.testStuff();
         }
+
+
     }
 }

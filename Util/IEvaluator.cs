@@ -38,6 +38,6 @@ namespace chess.Util
         /// <returns></returns>
         bool IsKingInCheck(ChessPosition cpm, ref List<Tuple<int, int>> attackerPositions);
 
-        void preloadRayArray();
+        void GenerateRays();
     }
 }

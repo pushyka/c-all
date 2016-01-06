@@ -26,7 +26,7 @@ namespace chess.Controller
         /// creates and starts the gameloop thread
         /// this is called following a setUp call
         /// </summary>
-        void StartGameLoop();
+        void StartTTTGameLoop();
 
         /// <summary>
         /// stops the gameloop by terminating the gameloop thread

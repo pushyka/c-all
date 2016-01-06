@@ -190,7 +190,7 @@ namespace chess.Util
             TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> movementRays;
             // get the rays for a piece of type=piece.Val and location=posA
-            movementRays = getRays(tileA.piece.Val, posA);
+            movementRays = GetPieceRay(tileA.piece.Val, posA);
             List<Tuple<int, int>> moveRayUsed = null;
             foreach (List<Tuple<int, int>> ray in movementRays)
             {
@@ -220,40 +220,7 @@ namespace chess.Util
         }
 
 
-        /* Potentially deprecated */
-        //private List<Tuple<int, int>> CoordsPieceOnACanMoveTo(Tuple<int, int> posA, MovementStyle style, ChessPosition cpm)
-        //{
-        //    List<Tuple<int, int>> coordsPieceACanMoveTo = new List<Tuple<int, int>>();
-        //    foreach (Tuple<int, int> direction in style.dirs)
-        //    {
-        //        int coordsNum = 1;
-        //        while (coordsNum <= style.maxIterations)
-        //        {
-        //            Tuple<int, int> newPos;
-        //            int newPosRank = posA.Item1 + (coordsNum * direction.Item1);
-        //            int newPosFile = posA.Item2 + (coordsNum * direction.Item2);
-        //            newPos = Tuple.Create(newPosRank, newPosFile);
-        //            // if the newPos is not on the board, dont add it to the list
-        //            // and break since movement along this direction cannot continue
-        //            if ((newPosRank < 0 || newPosRank > 7) ||
-        //                (newPosFile < 0 || newPosFile > 7))
-        //                break;
-        //            // if the newPos is occupied by a non e, then movement along this path is blocked
-        //            // so dont add it to the list and also break since movement cannot continue
-        //            if (!cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
-        //                break;
-        //            //otherwise its empty so add it to the coords and continue along the path
-        //            // no index error since already checked its not off the board
-        //            if (cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
-        //                coordsPieceACanMoveTo.Add(newPos);
 
-
-        //            coordsNum ++;
-        //        }
-        //    }
-
-        //    return coordsPieceACanMoveTo;
-        //}
 
 
         #region TODO REFACTOR ENPASSANT CODES
@@ -351,9 +318,9 @@ namespace chess.Util
             List<List<Tuple<int, int>>> captureRays;
 
             if (tileA.piece.Val == GamePieces.BlackPawn || tileA.piece.Val == GamePieces.WhitePawn)
-                captureRays = getRaysPawnCapture(tileA.piece.Val, posA);
+                captureRays = GetPawnRay(tileA.piece.Val, posA);
             else
-                captureRays = getRays(tileA.piece.Val, posA);
+                captureRays = GetPieceRay(tileA.piece.Val, posA);
 
             List<Tuple<int, int>> captureRayUsed = null;
             foreach (List<Tuple<int, int>> ray in captureRays)
@@ -384,53 +351,7 @@ namespace chess.Util
         }
 
 
-        /* Potentially deprecated */
-        //private List<Tuple<int, int>> getCoordsWithPiecesPieceACanCapture(Tuple<int, int> posA, CaptureStyle style, TileStruct[,] board)
-        //{
-        //    List<Tuple<int, int>> coordsPieceACanCapture = new List<Tuple<int, int>>();
-        //    char posAPlayer = ((int)board[posA.Item1, posA.Item2].piece.Val < 6) ? 'w' : 'b';
-        //    // foreach move direction form a list of any coords which have tiles can be captured (one per direction at most)
-        //    foreach (Tuple<int, int> attackDirection in style.dirs)
-        //    {
-        //        int coordsNum = 1;
-        //        while (coordsNum <= style.maxIterations)
-        //        {
-        //            //generate the new coordinate by adding 1 unit of direction to the initial posA
-        //            Tuple<int, int> newPos;
-        //            int newPosRank = posA.Item1 + (coordsNum * attackDirection.Item1);
-        //            int newPosFile = posA.Item2 + (coordsNum * attackDirection.Item2);
-        //            newPos = Tuple.Create(newPosRank, newPosFile);
-        //            // if the newPos is not on the board, dont add it to the list
-        //            // and break since movement along this direction cannot continue
-        //            if ((newPosRank < 0 || newPosRank > 7) ||
-        //                (newPosFile < 0 || newPosFile > 7))
-        //                break;
-        //            // if reach a piece and the piece is not empty
-        //            if (!board[newPos.Item1, newPos.Item2].IsEmpty())
-        //            {
-        //                //and the piece is of opponent
-        //                char owner = ((int)board[newPos.Item1, newPos.Item2].piece.Val < 6) ? 'w' : 'b';
-        //                if (owner != posAPlayer)
-        //                {
-        //                    coordsPieceACanCapture.Add(newPos);
-        //                    // add it to the list
-        //                    break;
-        //                }
 
-        //                // else its own piece
-        //                else
-        //                    break;
-        //            }
-        //            // otherwise its empty so the attack direction is not blocked etc
-        //            coordsNum++;
-        //        }
-        //    }
-
-
-
-
-        //    return coordsPieceACanCapture;
-        //}
 
 
         /* This function is passed a copy of the chess game. It uses the information contained in this object
@@ -507,7 +428,7 @@ namespace chess.Util
         /// <param name="piece"></param>
         /// <param name=""></param>
         /// <returns></returns>
-        public List<List<Tuple<int, int>>> getRays(GamePieces piece, Tuple<int, int> location)
+        public List<List<Tuple<int, int>>> GetPieceRay(GamePieces piece, Tuple<int, int> location)
         {
             if (rayArray == null)
                 throw new Exception("ray array not instantiated");
@@ -524,7 +445,7 @@ namespace chess.Util
 
         }
 
-        public List<List<Tuple<int,int>>> getRaysPawnCapture(GamePieces piece, Tuple<int, int> location)
+        public List<List<Tuple<int,int>>> GetPawnRay(GamePieces piece, Tuple<int, int> location)
         {
             if (rayArrayPawnCapture == null)
                 throw new Exception("ray array (pawns) noy instantiated");
@@ -539,7 +460,7 @@ namespace chess.Util
             return rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2];
         }
 
-        public void preloadRayArray()
+        public void GenerateRays()
         {
             
             //rayArray = new List<List<Tuple<int, int>>>[12][,];
@@ -599,7 +520,7 @@ namespace chess.Util
         
         }
 
-        public void preloadRayArrayPawnCapture()
+        public void GeneratePawnRays()
         {
             // 2 unique pawn pieces
             rayArrayPawnCapture = new List<List<Tuple<int, int>>>[2][,];
@@ -651,5 +572,107 @@ namespace chess.Util
             }
 
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /* Potentially deprecated */
+        //private List<Tuple<int, int>> CoordsPieceOnACanMoveTo(Tuple<int, int> posA, MovementStyle style, ChessPosition cpm)
+        //{
+        //    List<Tuple<int, int>> coordsPieceACanMoveTo = new List<Tuple<int, int>>();
+        //    foreach (Tuple<int, int> direction in style.dirs)
+        //    {
+        //        int coordsNum = 1;
+        //        while (coordsNum <= style.maxIterations)
+        //        {
+        //            Tuple<int, int> newPos;
+        //            int newPosRank = posA.Item1 + (coordsNum * direction.Item1);
+        //            int newPosFile = posA.Item2 + (coordsNum * direction.Item2);
+        //            newPos = Tuple.Create(newPosRank, newPosFile);
+        //            // if the newPos is not on the board, dont add it to the list
+        //            // and break since movement along this direction cannot continue
+        //            if ((newPosRank < 0 || newPosRank > 7) ||
+        //                (newPosFile < 0 || newPosFile > 7))
+        //                break;
+        //            // if the newPos is occupied by a non e, then movement along this path is blocked
+        //            // so dont add it to the list and also break since movement cannot continue
+        //            if (!cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
+        //                break;
+        //            //otherwise its empty so add it to the coords and continue along the path
+        //            // no index error since already checked its not off the board
+        //            if (cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
+        //                coordsPieceACanMoveTo.Add(newPos);
+
+
+        //            coordsNum ++;
+        //        }
+        //    }
+
+        //    return coordsPieceACanMoveTo;
+        //}
+
+
+        /* Potentially deprecated */
+        //private List<Tuple<int, int>> getCoordsWithPiecesPieceACanCapture(Tuple<int, int> posA, CaptureStyle style, TileStruct[,] board)
+        //{
+        //    List<Tuple<int, int>> coordsPieceACanCapture = new List<Tuple<int, int>>();
+        //    char posAPlayer = ((int)board[posA.Item1, posA.Item2].piece.Val < 6) ? 'w' : 'b';
+        //    // foreach move direction form a list of any coords which have tiles can be captured (one per direction at most)
+        //    foreach (Tuple<int, int> attackDirection in style.dirs)
+        //    {
+        //        int coordsNum = 1;
+        //        while (coordsNum <= style.maxIterations)
+        //        {
+        //            //generate the new coordinate by adding 1 unit of direction to the initial posA
+        //            Tuple<int, int> newPos;
+        //            int newPosRank = posA.Item1 + (coordsNum * attackDirection.Item1);
+        //            int newPosFile = posA.Item2 + (coordsNum * attackDirection.Item2);
+        //            newPos = Tuple.Create(newPosRank, newPosFile);
+        //            // if the newPos is not on the board, dont add it to the list
+        //            // and break since movement along this direction cannot continue
+        //            if ((newPosRank < 0 || newPosRank > 7) ||
+        //                (newPosFile < 0 || newPosFile > 7))
+        //                break;
+        //            // if reach a piece and the piece is not empty
+        //            if (!board[newPos.Item1, newPos.Item2].IsEmpty())
+        //            {
+        //                //and the piece is of opponent
+        //                char owner = ((int)board[newPos.Item1, newPos.Item2].piece.Val < 6) ? 'w' : 'b';
+        //                if (owner != posAPlayer)
+        //                {
+        //                    coordsPieceACanCapture.Add(newPos);
+        //                    // add it to the list
+        //                    break;
+        //                }
+
+        //                // else its own piece
+        //                else
+        //                    break;
+        //            }
+        //            // otherwise its empty so the attack direction is not blocked etc
+        //            coordsNum++;
+        //        }
+        //    }
+
+
+
+
+        //    return coordsPieceACanCapture;
+        //}
+
     }
 }

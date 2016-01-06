@@ -41,14 +41,16 @@
             this.whitePiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
             this.placeholder = new System.Windows.Forms.Panel();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuItem_add_Board = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItemNewGame = new System.Windows.Forms.ToolStripMenuItem();
+            this.chessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tTTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.abandonGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.black_turn_panel = new System.Windows.Forms.Panel();
             this.white_turn_panel = new System.Windows.Forms.Panel();
-            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -143,7 +145,7 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuItem_add_Board,
+            this.menuItemNewGame,
             this.loadGameToolStripMenuItem,
             this.abandonGameToolStripMenuItem,
             this.closeToolStripMenuItem,
@@ -152,12 +154,28 @@
             this.toolStripMenuItem1.Size = new System.Drawing.Size(37, 20);
             this.toolStripMenuItem1.Text = "File";
             // 
-            // menuItem_add_Board
+            // menuItemNewGame
             // 
-            this.menuItem_add_Board.Name = "menuItem_add_Board";
-            this.menuItem_add_Board.Size = new System.Drawing.Size(156, 22);
-            this.menuItem_add_Board.Text = "New game";
-            this.menuItem_add_Board.Click += new System.EventHandler(this.menuItem_addBoard_Click);
+            this.menuItemNewGame.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.chessToolStripMenuItem,
+            this.tTTToolStripMenuItem});
+            this.menuItemNewGame.Name = "menuItemNewGame";
+            this.menuItemNewGame.Size = new System.Drawing.Size(156, 22);
+            this.menuItemNewGame.Text = "New game";
+            // 
+            // chessToolStripMenuItem
+            // 
+            this.chessToolStripMenuItem.Name = "chessToolStripMenuItem";
+            this.chessToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.chessToolStripMenuItem.Text = "Chess";
+            this.chessToolStripMenuItem.Click += new System.EventHandler(this.menuItemChess_Click);
+            // 
+            // tTTToolStripMenuItem
+            // 
+            this.tTTToolStripMenuItem.Name = "tTTToolStripMenuItem";
+            this.tTTToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.tTTToolStripMenuItem.Text = "TTT";
+            this.tTTToolStripMenuItem.Click += new System.EventHandler(this.menuItemTTT_Click);
             // 
             // loadGameToolStripMenuItem
             // 
@@ -180,6 +198,13 @@
             this.closeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.menuItem_close_Click);
+            // 
+            // testToolStripMenuItem
+            // 
+            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
+            this.testToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.testToolStripMenuItem.Text = "test";
+            this.testToolStripMenuItem.Click += new System.EventHandler(this.menuItem_test_Click);
             // 
             // menuStrip1
             // 
@@ -210,13 +235,6 @@
             this.white_turn_panel.Size = new System.Drawing.Size(13, 14);
             this.white_turn_panel.TabIndex = 9;
             this.white_turn_panel.Visible = false;
-            // 
-            // testToolStripMenuItem
-            // 
-            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.testToolStripMenuItem.Text = "test";
-            this.testToolStripMenuItem.Click += new System.EventHandler(this.menuItem_test_Click);
             // 
             // Display
             // 
@@ -249,7 +267,7 @@
         private System.Windows.Forms.TableLayoutPanel blackPiecesCaptured;
         private System.Windows.Forms.TableLayoutPanel whitePiecesCaptured;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem menuItem_add_Board;
+        private System.Windows.Forms.ToolStripMenuItem menuItemNewGame;
         private System.Windows.Forms.ToolStripMenuItem loadGameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem abandonGameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
@@ -257,5 +275,7 @@
         private System.Windows.Forms.Panel black_turn_panel;
         private System.Windows.Forms.Panel white_turn_panel;
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem chessToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tTTToolStripMenuItem;
     }
 }
