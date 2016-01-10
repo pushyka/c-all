@@ -10,14 +10,20 @@ namespace chess.Model
     {
         private string playerValue;
         
+        public Player()
+        {
+            this.playerValue = null;
+        } 
+
         public Player(string player)
         {
             this.playerValue = player;
-        } 
+        }
 
         public void change()
         {
-            this.playerValue = (playerValue == "white") ? "black" : "white";
+            if (playerValue != null)
+                this.playerValue = (playerValue == "white") ? "black" : "white";
         }
 
 
@@ -42,16 +48,15 @@ namespace chess.Model
             return result;
         }
 
-        public void set(string player)
-        {
-            this.playerValue = player;
-        }
-
         public string CurPlayer
         {
             get
             {
                 return this.playerValue;
+            }
+            set
+            {
+                this.playerValue = value;
             }
         }
     }

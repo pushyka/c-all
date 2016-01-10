@@ -9,41 +9,52 @@ namespace chess.Controller
 {
     interface IGameController
     {
-        /// <summary>
-        /// Creates the model and evaluator instances
-        /// sets the model to the initial populated game state
-        /// sets the initial player
-        /// </summary>
-        void PrepareChessModel();
 
         /// <summary>
-        /// nulls the model and evaluator
-        /// terminates the gameloop thread
+        /// Instantiates the game objects, models and utilities.
+        /// </summary>
+        /// <param name="model"></param>
+        void InitialiseModel(GameModels model);
+
+
+        /// <summary>
+        /// Removes the game objects, models and utilities.
+        /// </summary>
+        /// <param name="model"></param>
+        void UnInitialiseModel(GameModels model);
+
+
+        /// <summary>
+        /// Sets the initial parameters of the game model
+        /// like the initial population of pieces and the 
+        /// starting player.
+        /// </summary>
+        void PrepareModel();
+
+
+        /// <summary>
+        /// Once everything is prepared, starts the loop thread for the game.
+        /// </summary>
+        void StartGameLoop(GameModels model);
+
+
+        /// <summary>
+        /// Stops the runnig game loop thread.
+        /// </summary>
+        void StopGameLoop();
+    
+        /// <summary>
+        /// Stops the running game loop thread and nullifies the
+        /// initial parameters (unpreparemodel)
         /// </summary>
         void Terminate();
 
-        /// <summary>
-        /// creates and starts the gameloop thread
-        /// this is called following a setUp call
-        /// </summary>
-        void StartTTTGameLoop();
 
-        /// <summary>
-        /// stops the gameloop by terminating the gameloop thread
-        /// if it is running. mainly called on an 'abandon' or 'close' app command
-        /// eg to ensure the thread is stopped before closing the application
-        /// </summary>
-        void StopGameLoop();
+        // The view binds to the {model exposed by the controller}
+        IDisplayableModel Model { get; }
 
-        // The view etc can access the model via the controller
-        IDisplayableModel Model(GameModels model);
-        // message is mostly set by the controller but sometimes the
-        // view might wish to update it with something
         string Message { get; set; }
-        // input is mostly set by the view
-        string Input { get; set; }
 
-        
-        
+        string Input { get; set; }
     }
 }

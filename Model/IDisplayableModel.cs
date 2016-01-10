@@ -19,7 +19,9 @@ namespace chess.Model
 
         //void applyMove(FormedMove move, string moveType);
 
-        //void Setup();
+        void Setup();
+
+        void SetPlayer();
 
         Player Player { get; set; }
 

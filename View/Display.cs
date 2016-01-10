@@ -25,6 +25,7 @@ namespace chess.View
         private LoadForm loadform;
         private string USRMOVE = "";
         private List<Control> tintRef = null;
+        private GameModels selectedGameModel;
 
         // dictionaries for quick conversion from coordinates to file/rank
         private Dictionary<int, char> colToFile = new Dictionary<int, char>
@@ -70,13 +71,12 @@ namespace chess.View
         public Display(GameController gc)
         {
             this.gameController = gc;
-            this.gameController.InitialiseAllObjects();
             // tripple buffer>
             
             
             InitializeComponent();
             InitializeComponent2();
-            this.genericBoardBase = new TableLayoutPanel();
+            
             
             
 
@@ -90,10 +90,10 @@ namespace chess.View
         /// </summary>
         private void AssembleChessBoard()
         {
-
+            this.genericBoardBase = new TableLayoutPanel();
 
             // now the main container panel
-            
+
             this.genericBoardBase.RowCount = 8;
             this.genericBoardBase.ColumnCount = 8;
 
@@ -118,7 +118,7 @@ namespace chess.View
 
         private void AssembleTTTBoard()
         {
-
+            this.genericBoardBase = new TableLayoutPanel();
 
             // now the main container panel
 
@@ -128,7 +128,7 @@ namespace chess.View
             this.genericBoardBase.Location = new System.Drawing.Point(46, 83);
             this.genericBoardBase.Name = "genericBoardBase";
             //this.genericBoardBase.BackColor = Color.Transparent;
-            this.genericBoardBase.Size = new System.Drawing.Size(150, 150);
+            this.genericBoardBase.Size = new System.Drawing.Size(400, 400);
             this.genericBoardBase.TabIndex = 4;
             this.genericBoardBase.BorderStyle = BorderStyle.FixedSingle; // solution
 
@@ -194,29 +194,23 @@ namespace chess.View
         /// <param name="e"></param>
         private void menuItemChess_Click(object sender, EventArgs e)
         {
-            // if dont disable this menu option, it can be clicked multiple times causing
-            // for example these handlers to be registered multiple times , so ensure 
-            // this menu item is not clickeed multiple times
+            this.selectedGameModel = GameModels.Chess;
+
+            // Model
+            this.gameController.InitialiseModel(this.selectedGameModel);
+
+            // View
             AssembleChessBoard();
-
-            // could change following to make an initial ref to the model rather than long lines ,,
-
-
-            // register event handlers to the chess model
-            this.gameController.PropertyChanged += message_PropertyChanged; // message
-            this.gameController.Model(GameModels.Chess).CapturedChanged += model_CapturedChanged;
-            this.gameController.Model(GameModels.Chess).PlayerChanged += model_PlayerChanged;
-
-
-            //finally register the view to the model.BoardChanged event so it will update itself on future changes
-            this.gameController.Model(GameModels.Chess).BoardChanged += model_BoardChanged;
-            // setup the game (populate)
-            this.gameController.PrepareChessModel();
             
+            // register event handlers to the chess model
+            this.gameController.PropertyChanged += message_PropertyChanged;
+            this.gameController.Model.CapturedChanged += ChessBoardCaptureChanged;
+            this.gameController.Model.PlayerChanged += ChessBoardPlayerChanged;
+            this.gameController.Model.BoardChanged += ChessBoardChanged;
 
-            // update the view to match the model 
-            //todoREMOVE THIS AND MOVE BOardChanged Handler above REGISTERED BEFORE THE MODEL CODE
-            //this.updateView(this.gameController.Model(GameModels.Chess).Board);
+            // This comes after the handlers are registered so that
+            // the boardchanged handler may update the view.
+            this.gameController.PrepareModel();
 
 
 
@@ -226,32 +220,31 @@ namespace chess.View
             this.message_box.Enabled = true;
             this.concedeButton.Visible = true;
 
-
-
-            this.gameController.StartChessGameLoop();
+            this.gameController.StartGameLoop(this.selectedGameModel);
 
         }
 
 
         private void menuItemTTT_Click(object sender, EventArgs e)
         {
+            this.selectedGameModel = GameModels.TicTacToe;
+
+            // Model
+            this.gameController.InitialiseModel(this.selectedGameModel);
+
+            // View
             AssembleTTTBoard();
 
-            this.gameController.PropertyChanged += message_PropertyChanged; // message
-            this.gameController.Model(GameModels.TicTacToe).CapturedChanged += model_CapturedChanged;
-            this.gameController.Model(GameModels.TicTacToe).PlayerChanged += model_PlayerChanged;
+            // register event handlers to the ttt model
+            // WONT NECESARILY USE ALL OF THESE / MABE SPECIFIC ONES FOR TTT
+            this.gameController.PropertyChanged += message_PropertyChanged; // can keep this one
+            //this.gameController.Model.CapturedChanged += ChessBoardCaptureChanged; // wont need to register anything for this ttt
+            this.gameController.Model.PlayerChanged += ChessBoardPlayerChanged; // could make this more generic
+            this.gameController.Model.BoardChanged += ChessBoardChanged; // needs its own, since wont be using chesspieces
 
-
-            //finally register the view to the model.BoardChanged event so it will update itself on future changes
-            this.gameController.Model(GameModels.TicTacToe).BoardChanged += model_BoardChanged;
-            // setup the game (populate)
-            this.gameController.PrepareTTTModel();
-
-
-            // update the view to match the model 
-            //todoREMOVE THIS AND MOVE BOardChanged Handler above REGISTERED BEFORE THE MODEL CODE
-            //this.updateView(this.gameController.Model(GameModels.Chess).Board);
-
+            // This comes after the handlers are registered so that
+            // the boardchanged handler may update the view.
+            this.gameController.PrepareModel();
 
 
             this.menuItemNewGame.Enabled = false;
@@ -260,9 +253,7 @@ namespace chess.View
             this.message_box.Enabled = true;
             this.concedeButton.Visible = true;
 
-
-
-            this.gameController.StartTTTGameLoop();
+            this.gameController.StartGameLoop(this.selectedGameModel);
         }
 
 
@@ -271,16 +262,16 @@ namespace chess.View
             // stop the game loop thread
             this.gameController.Terminate();
             // deregister handlers from the model
-            this.gameController.Model(GameModels.Chess).BoardChanged -= model_BoardChanged;
+            this.gameController.Model.BoardChanged -= ChessBoardChanged;
             this.gameController.PropertyChanged -= message_PropertyChanged;
-            this.gameController.Model(GameModels.Chess).CapturedChanged -= model_CapturedChanged;
-            this.gameController.Model(GameModels.Chess).PlayerChanged -= model_PlayerChanged;
-            // reinitialise the objects
-            this.gameController.InitialiseAllObjects();
+            this.gameController.Model.CapturedChanged -= ChessBoardCaptureChanged;
+            this.gameController.Model.PlayerChanged -= ChessBoardPlayerChanged;
+            // uninitialise the models
+            this.gameController.UnInitialiseModel(this.selectedGameModel);
             // clear display
             resetView();
-            this.genericBoardBase.Visible = false;
-            this.genericBoardBase.Enabled = false;
+            //this.genericBoardBase.Visible = false;
+            //this.genericBoardBase.Enabled = false;
             this.concedeButton.Visible = false;
             this.menuItemNewGame.Enabled = true;
             this.loadGameToolStripMenuItem.Enabled = true;
@@ -289,15 +280,10 @@ namespace chess.View
 
         private void resetView()
         {
-            // clear the view tiles
-            for (int row = 0; row < 8; row++)
-            {
-                for (int col = 0; col < 8; col++)
-                {
-                    Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(col, row);
-                    gTile.Controls.Clear();
-                }
-            }
+            // clear the view tiles and remove it from the view
+            this.genericBoardBase.Controls.Clear();
+            this.Controls.Remove(genericBoardBase);
+            this.genericBoardBase = null;
 
 
             this.blackPiecesCaptured.Controls.Clear();
@@ -305,6 +291,9 @@ namespace chess.View
 
             // clear message box
             this.message_box.Items.Clear();
+
+            this.white_turn_panel.Visible = false;
+            this.black_turn_panel.Visible = false;
         }
 
 
@@ -351,6 +340,20 @@ namespace chess.View
         /// <param name="e"></param>
         private void OnTileClick(object sender, EventArgs e)
         {
+
+            switch(selectedGameModel)
+            {
+                case GameModels.Chess:
+                    processChessClicks(sender, e);
+                    break;
+                case GameModels.TicTacToe:
+                    processTTTClicks(sender, e);
+                    break;
+            }
+        }
+
+        private void processChessClicks(object sender, EventArgs e)
+        {
             string tileClicked = "";
 
             if (sender is Panel)
@@ -377,7 +380,7 @@ namespace chess.View
                     {
                         throw new Exception();
                     }
-                    
+
 
                 }
                 else
@@ -404,12 +407,7 @@ namespace chess.View
             }
             
 
-            
 
-            
-
-            
-            
 
             if (USRMOVE == "")
             {
@@ -425,6 +423,11 @@ namespace chess.View
                 Thread.Sleep(100);
                 removeTint();
             }
+        }
+
+        private void processTTTClicks(object sender, EventArgs e)
+        {
+            // todo
         }
 
 
@@ -475,15 +478,15 @@ namespace chess.View
 
 
 
-        delegate void model_BoardChangedCallback(object sender, BoardChangedEventArgs e);
+        delegate void ChessBoardChangedCallback(object sender, BoardChangedEventArgs e);
 
-        private void model_BoardChanged(object sender, BoardChangedEventArgs e)
+        private void ChessBoardChanged(object sender, BoardChangedEventArgs e)
         {
             // code calling this method from non Form disp thread, so need to invoke into
             // the thread which is responsible for running the disp (eg the genericboardbase's thread)
             if (this.genericBoardBase.InvokeRequired)
             {
-                model_BoardChangedCallback d = new model_BoardChangedCallback(model_BoardChanged);
+                ChessBoardChangedCallback d = new ChessBoardChangedCallback(ChessBoardChanged);
                 this.genericBoardBase.Invoke(d, new object[] { sender, e });
             }
             else
@@ -498,9 +501,9 @@ namespace chess.View
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
                     GamePieces mPiece;
-                    if (!this.gameController.Model(GameModels.Chess).Board[pos.Item1, pos.Item2].IsEmpty())
+                    if (!this.gameController.Model.Board[pos.Item1, pos.Item2].IsEmpty())
                     {
-                        mPiece = this.gameController.Model(GameModels.Chess).Board[pos.Item1, pos.Item2].piece.Val;
+                        mPiece = this.gameController.Model.Board[pos.Item1, pos.Item2].piece.Val;
                     }
                     else
                     {
@@ -582,15 +585,15 @@ namespace chess.View
         }
 
 
-        delegate void model_CapturedChangedCallback(object sender, EventArgs e);
+        delegate void ChessBoardCaptureChangedCallback(object sender, EventArgs e);
 
-        private void model_CapturedChanged(object sender, EventArgs e)
+        private void ChessBoardCaptureChanged(object sender, EventArgs e)
         {
             //System.Console.WriteLine("I have registered a capture");
             // todo cross thread etc
             if (this.genericBoardBase.InvokeRequired)
             {
-                model_CapturedChangedCallback d = new model_CapturedChangedCallback(model_CapturedChanged);
+                ChessBoardCaptureChangedCallback d = new ChessBoardCaptureChangedCallback(ChessBoardCaptureChanged);
                 this.genericBoardBase.Invoke(d, new object[] { sender, e });
             }
             else
@@ -601,7 +604,7 @@ namespace chess.View
                 try
                 {
                     // get the last item
-                    GamePieces capturedPiece = gameController.Model(GameModels.Chess).PiecesCapd[gameController.Model(GameModels.Chess).PiecesCapd.Count - 1];
+                    GamePieces capturedPiece = gameController.Model.PiecesCapd[gameController.Model.PiecesCapd.Count - 1];
                     ;
                     // uses version of the function which doesnt add click handler
                     PictureBox gCapturedPiece = getGuiPiece2(capturedPiece);
@@ -627,20 +630,20 @@ namespace chess.View
         }
 
 
-        delegate void model_PlayerChangedCallback(object sender, EventArgs e);
+        delegate void ChessBoardPlayerChangedCallback(object sender, EventArgs e);
 
-        private void model_PlayerChanged(object sender, EventArgs e)
+        private void ChessBoardPlayerChanged(object sender, EventArgs e)
         {
             if (this.genericBoardBase.InvokeRequired)
             {
-                model_PlayerChangedCallback d = new model_PlayerChangedCallback(model_PlayerChanged);
+                ChessBoardPlayerChangedCallback d = new ChessBoardPlayerChangedCallback(ChessBoardPlayerChanged);
                 this.genericBoardBase.Invoke(d, new object[] { sender, e });
             }
             else
             {
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
-                string curPlayer = this.gameController.Model(GameModels.Chess).Player.CurPlayer;
+                string curPlayer = this.gameController.Model.Player.CurPlayer;
                 this.white_turn_panel.Visible = false;
                 this.black_turn_panel.Visible = false;
 
@@ -682,9 +685,7 @@ namespace chess.View
 
         private void menuItem_close_Click(object sender, EventArgs e)
         {
-            // make sure to terminate the gameloop thread if its running
             gameController.StopGameLoop();
-            // now end the main thread
             this.Close();
         }
 
@@ -692,17 +693,13 @@ namespace chess.View
         {
             base.OnFormClosing(e);
 
-            if (e.CloseReason == CloseReason.WindowsShutDown) return;
-
-            // else user is closing also need to stop this loop if its running
+            if (e.CloseReason == CloseReason.WindowsShutDown)
+                return;
+            // else user is closing so stop the game loop if it is running
             gameController.StopGameLoop();
         }
 
-        private void menuItem_test_Click(object sender, EventArgs e)
-        {
-            this.gameController.InitialiseAllObjects();
-            this.gameController.testStuff();
-        }
+
 
 
     }

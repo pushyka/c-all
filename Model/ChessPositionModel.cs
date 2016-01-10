@@ -42,7 +42,7 @@ namespace chess.Model
             this.piecesCapd = new List<GamePieces>();
             this.castle = new Dictionary<char, bool>();
             this.halfmoveClock = 0;
-            this.player = new Player("white");
+            this.player = new Player();
 
         }
 
@@ -111,6 +111,8 @@ namespace chess.Model
                 }
             }
             OnBoardChanged(e);
+
+
 
         }
 
@@ -197,12 +199,18 @@ namespace chess.Model
             {
                 return this.player;
             }
-            set
-            {
-                // this is the override
-                this.player.change();
-                OnPlayerChanged(EventArgs.Empty);
-            }
+        }
+
+        public void SetPlayer()
+        {
+            this.player.CurPlayer = "white";
+            OnPlayerChanged(EventArgs.Empty);
+        }
+
+        public void ChangePlayer()
+        {
+            this.player.change();
+            OnPlayerChanged(EventArgs.Empty);
         }
 
 

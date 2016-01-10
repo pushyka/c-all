@@ -25,7 +25,7 @@ namespace chess.Model
         O
     }
 
-    public enum GameControlState { Initial = 1, Game = 2, Load = 3, Settings = 4 }
+    public enum GameControlState { PreInitial = 1, Initial, Ready, GameInProgress, Load, Settings }
 
     public enum GameModels { Chess, TicTacToe}
 }

@@ -21,47 +21,39 @@ namespace chess.Controller
         
         private string input;
         private string message;
-
-        // all of the game models are stored in here, the View can access this
-        private IDisplayableModel[] models = new IDisplayableModel[2] { null, null };
-
-        // this way the game models can be used for display by the View and
-        // the game loops are free to use the models like they want.
-        // e.g. the chessposition contains more information than the tttposition
-
-            // TODO maybe change to a dictionary
-
-        private ChessPositionModel cpm;
-        private TTTPositionModel tttpm;
-
-
-        private Evaluator evaluator;
         private GameControlState state;
+
+        private IDisplayableModel gameModel;
+        private Evaluator evaluator;
         private Thread t;
 
         public GameController()
         {
             input = null;
             message = null;
-            models[(int)GameModels.Chess] = null;
-            models[(int)GameModels.TicTacToe] = null;
+            gameModel = null;
             evaluator = null;
             t = null;
-            state = GameControlState.Initial;
+            state = GameControlState.PreInitial;
+           
         }
 
 
-        public void InitialiseAllObjects()
+        public void InitialiseModel(GameModels model)
         {
-            models[(int)GameModels.Chess] = new ChessPositionModel();
-            cpm = (ChessPositionModel)models[(int)GameModels.Chess];
-            models[(int)GameModels.TicTacToe] = new TTTPositionModel();
-            tttpm = (TTTPositionModel)models[(int)GameModels.TicTacToe];
-
-            evaluator = new Evaluator();
-            evaluator.GenerateRays();
-            evaluator.GeneratePawnRays();
-            System.Console.WriteLine("preload complete");
+            switch(model)
+            {
+                case GameModels.Chess:
+                    gameModel = new ChessPositionModel();
+                    evaluator = new Evaluator();
+                    evaluator.GenerateRays();
+                    evaluator.GeneratePawnRays();
+                    break;
+                case GameModels.TicTacToe:
+                    gameModel = new TTTPositionModel();
+                    break;
+            }
+            state = GameControlState.Initial;
 
 
         }
@@ -72,33 +64,21 @@ namespace chess.Controller
             evaluator.GetPieceRay(GamePieces.BlackRook, Tuple.Create(3, 6));
         }
 
-        public void UninitialiseObjects()
+        public void UnInitialiseModel(GameModels model)
         {
-            models[(int)GameModels.Chess] = null;
-            cpm = null;
-            models[(int)GameModels.TicTacToe] = null;
-            tttpm = null;
+            gameModel = null;
             evaluator = null;
+            state = GameControlState.PreInitial;
         }
         
-
        
-        public void PrepareChessModel()
+        public void PrepareModel()
         {
-
-            cpm.Setup();
-            state = GameControlState.Game;
+            gameModel.Setup();
+            gameModel.SetPlayer();
+            state = GameControlState.Ready;
             this.Message = "Game is setup";
             
-        }
-
-        public void PrepareTTTModel()
-        {
-
-            tttpm.Setup();
-            state = GameControlState.Game;
-            this.Message = "Game is setup";
-
         }
 
         public void Terminate()
@@ -108,16 +88,9 @@ namespace chess.Controller
 
             input = null;
             message = null;
-            cpm.Player = null;
-            tttpm.Player = null;
+            gameModel.Player = null;
             state = GameControlState.Initial;
             this.Message = "Game is terminated";
-        }
-
-        public void InitialSetupTTT()
-        {
-            state = GameControlState.Game;
-            this.Message = "Game is setup";
         }
 
 
@@ -131,21 +104,34 @@ namespace chess.Controller
         }
 
 
-        public void StartChessGameLoop()
+        public void StartGameLoop(GameModels model)
         {
-            t = new Thread(ChessGameLoop);
-            t.Start();
-            this.Message = "Game has started";
+            switch(model)
+            {
+                case GameModels.Chess:
+                    t = new Thread(ChessGameLoop);
+                    break;
+                case GameModels.TicTacToe:
+                    t = new Thread(TTTGameLoop);
+                    break;
+            }
+            if (state == GameControlState.Ready)
+                t.Start();
+                state = GameControlState.GameInProgress;
+                this.Message = "Game has started";
         }
 
         private void ChessGameLoop()
         {
+            // get the explicit type of model since evaluator only works with
+            // specifically the chess position model types
+            ChessPositionModel cpm = (ChessPositionModel)this.gameModel;
             string moveType;
             FormedMove move;
             List<Tuple<int, int>> kingCheckedBy = new List<Tuple<int, int>>();
 
             // this bool will be set false when the game ends
-            while (state == GameControlState.Game)
+            while (state == GameControlState.GameInProgress)
             {
                 // start of new turn, clear variables
                 move = null;
@@ -187,12 +173,12 @@ namespace chess.Controller
                             ;
                             cpm.applyMove(move, moveType);
 
-                            
+
                             // change display message here rather than whos turn
                             //System.Console.WriteLine("have applied move of type {0}", moveType);
 
                             // change the player
-                            cpm.Player.change();
+                            cpm.ChangePlayer();
                             // its the start of the player's turn so if he had any pawns that could have been captured
                             // en passant during hte oponents turn, they will now be unable to be captured en passant
                             //System.Console.WriteLine(" CLEARING PASSANTS");
@@ -218,17 +204,12 @@ namespace chess.Controller
         }
 
 
-        public void StartTTTGameLoop()
-        {
-            t = new Thread(TTTGameLoop);
-            t.Start();
-            this.Message = "Game has started";
-        }
-
         private void TTTGameLoop()
         {
             
-            while (state == GameControlState.Game)
+            TTTPositionModel tttpm = (TTTPositionModel)this.gameModel;
+
+            while (state == GameControlState.GameInProgress)
             {
                 
                 
@@ -261,15 +242,21 @@ namespace chess.Controller
 
         private void conceded()
         {
-            this.Message = "Player " + cpm.Player.CurPlayer + " has conceded!";
-            cpm.Player = null;
+            this.Message = "Player " + this.gameModel.Player.CurPlayer + " has conceded!";
+            this.gameModel.Player = null;
         }
 
         
-
-        public IDisplayableModel Model(GameModels model)
+        /// <summary>
+        /// Returns a reference to the current game model.
+        /// </summary>
+        /// <returns></returns>
+        public IDisplayableModel Model
         {
-            return this.models[(int)model];
+            get
+            {
+                return this.gameModel;
+            }
         }
 
 

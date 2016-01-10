@@ -31,6 +31,11 @@ namespace chess.Model
             //
         }
 
+        public void SetPlayer()
+        {
+            //
+        }
+
 
 
 
@@ -65,6 +70,8 @@ namespace chess.Model
                 // add the event
             }
         }
+
+
 
         public TileStruct[,] Board
         {

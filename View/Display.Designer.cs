@@ -47,7 +47,6 @@
             this.loadGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.abandonGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.black_turn_panel = new System.Windows.Forms.Panel();
             this.white_turn_panel = new System.Windows.Forms.Panel();
@@ -148,8 +147,7 @@
             this.menuItemNewGame,
             this.loadGameToolStripMenuItem,
             this.abandonGameToolStripMenuItem,
-            this.closeToolStripMenuItem,
-            this.testToolStripMenuItem});
+            this.closeToolStripMenuItem});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(37, 20);
             this.toolStripMenuItem1.Text = "File";
@@ -198,13 +196,6 @@
             this.closeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.menuItem_close_Click);
-            // 
-            // testToolStripMenuItem
-            // 
-            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.testToolStripMenuItem.Text = "test";
-            this.testToolStripMenuItem.Click += new System.EventHandler(this.menuItem_test_Click);
             // 
             // menuStrip1
             // 
@@ -274,7 +265,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.Panel black_turn_panel;
         private System.Windows.Forms.Panel white_turn_panel;
-        private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem chessToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tTTToolStripMenuItem;
     }

@@ -267,6 +267,7 @@ namespace chess.Util
                     TileStruct pieceOnPassantPos = cpm.Board[passantPos.Item1, passantPos.Item2];
                     // if passant piece is a pawn
                     ;
+                    // check if this is a rule, can ALSO capture any other piece with enpassant
                     if (pieceOnPassantPos.piece.Val == GamePieces.WhitePawn || pieceOnPassantPos.piece.Val == GamePieces.BlackPawn)
                     {
                         // and its the other players piece
