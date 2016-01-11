@@ -89,6 +89,23 @@ namespace chess.Model
             OnBoardChanged(e);
         }
 
+
+
+
+        /// <summary>
+        /// Checks the board for the existence of a winning position for either player.
+        /// If a winning position is found it returns true and puts the winner in the winner
+        /// variable passed by reference.
+        /// </summary>
+        public bool IsWinningPosition(ref string winner)
+        {
+            bool isWin = false;
+            // rows
+            
+            return isWin;
+        }
+
+
         public Player Player
         {
             get

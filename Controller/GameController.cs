@@ -209,9 +209,14 @@ namespace chess.Controller
             
             TTTPositionModel tttpm = (TTTPositionModel)this.gameModel;
             FormedMove move;
+            string winner = null;
 
             while (state == GameControlState.GameInProgress)
             {
+                // check if a winner has been found 
+                // isWinner = tttpm.IsWinningPosition(ref winner); // checks it for both players
+                // if (isWinner)
+                //      break;
 
                 move = null;
                 // check if display has provided a move
@@ -230,6 +235,8 @@ namespace chess.Controller
             }
 
             this.Message = "The game has ended, loop thread detached";
+            // if (winner != null)
+            //      etc
         }
 
 
