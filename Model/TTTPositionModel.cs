@@ -28,12 +28,32 @@ namespace chess.Model
 
         public void Setup()
         {
-            //
+            for (int row = 0; row < this.dim; row ++)
+            {
+                for (int col = 0; col < this.dim; col ++)
+                {
+                    this.board[row, col] = new TileStruct();
+                }
+            }
         }
 
         public void SetPlayer()
         {
             //
+        }
+
+        public void ChangePlayer()
+        {
+            this.player.change();
+            OnPlayerChanged(EventArgs.Empty);
+        }
+
+        protected virtual void OnPlayerChanged(EventArgs e)
+        {
+            if (PlayerChanged != null)
+            {
+                PlayerChanged(this, e);
+            }
         }
 
 
@@ -43,19 +63,30 @@ namespace chess.Model
            Add a piece of the current player to the location in the move.*/
         public void applyMove(FormedMove move, string moveType)
         {
-            var location = move.PosA;
-            var pieceOfPlayer = new Piece(GamePieces.empty); // fix
-            updateTileWithPiece(location, pieceOfPlayer);
+            Tuple<int, int> location = move.PosA;
+            Piece playerPiece;
+            if (this.player.CurPlayer == "white")
+                playerPiece = new Piece(GamePieces.O);
+            else
+                playerPiece = new Piece(GamePieces.X);
+            ;
+            updateTileWithPiece(location, playerPiece);
         }
 
 
 
         private void updateTileWithPiece(Tuple<int, int> location, Piece newPiece)
         {
+            ;
             int row = location.Item1;
             int col = location.Item2;
+            ;
             board[row, col].piece = newPiece;
-            // add the event 
+            // finally fire the BoardChanged event!
+            // EventArgs could be the tile coordinates which have changed
+            BoardChangedEventArgs e = new BoardChangedEventArgs();
+            e.Add(location);
+            OnBoardChanged(e);
         }
 
         public Player Player
@@ -88,6 +119,23 @@ namespace chess.Model
                 return null;
             }
         }
+
+
+
+        
+
+
+
+        // this method is called by some code (when the code changes the board) and raises the event 
+        protected virtual void OnBoardChanged(BoardChangedEventArgs e)
+        {
+            // eg makes sure the Event has a delegate attached
+            if (BoardChanged != null)
+            {
+                BoardChanged(this, e);
+            }
+        }
+
 
     }
 }

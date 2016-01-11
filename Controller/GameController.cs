@@ -208,31 +208,25 @@ namespace chess.Controller
         {
             
             TTTPositionModel tttpm = (TTTPositionModel)this.gameModel;
+            FormedMove move;
 
             while (state == GameControlState.GameInProgress)
             {
-                
-                
+
+                move = null;
                 // check if display has provided a move
                 if (input != null)
                 {
-                    if (input == "concede")
-                    {
-                        // c.Player has conceded
-                        conceded();
-                        input = null;
-                        break;
-                    }
-                    else
-                        System.Console.WriteLine("The input was not valid");
-
+                    // Do Stuff..
+                    System.Console.WriteLine("process the input");
+                    move = new FormedMove(input);
+                    tttpm.applyMove(move, null);
+                    tttpm.ChangePlayer();
+                    this.Message = "Player " + tttpm.Player.CurPlayer + "'s turasdsadasdsdan";
                     input = null;
                 }
-                else
-                {
-                    // Do Stuff..
-                }
                 Thread.Sleep(1000);
+
             }
 
             this.Message = "The game has ended, loop thread detached";

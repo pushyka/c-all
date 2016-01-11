@@ -23,6 +23,35 @@ namespace chess.Model
             this.isValid = false;
         }
 
+        /// <summary>
+        /// Constructor for creating a move object which contains a 
+        /// single position in posA
+        /// </summary>
+        /// <param name="mvSpecifier"></param>
+        public FormedMove(string mvSpecifier)
+        {
+            // "colrow"
+
+            System.Console.WriteLine(mvSpecifier+ " issssssss");
+            if (mvSpecifier.Length == 2)
+            {
+                int col = (int)Char.GetNumericValue(mvSpecifier[0]);
+                int row = (int)Char.GetNumericValue(mvSpecifier[1]);
+                posA = Tuple.Create<int, int>(row, col);
+                isValid = true;
+            }
+        }
+
+        /// <summary>
+        /// Constructor for creating a move object when the specifiers are given.
+        /// TODO ~ change chess to use this version rather than the build-as-it-goes version
+        /// </summary>
+        /// <param name="mvSpecifier"></param>
+        public FormedMove(string mvSpecifier, string mvSpecifier2)
+        {
+            isValid = true;
+        }
+
 
         /// <summary>
         /// Takes a tuple t (representing a position on the board)

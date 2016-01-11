@@ -128,14 +128,28 @@ namespace chess.View
             this.genericBoardBase.Location = new System.Drawing.Point(46, 83);
             this.genericBoardBase.Name = "genericBoardBase";
             //this.genericBoardBase.BackColor = Color.Transparent;
-            this.genericBoardBase.Size = new System.Drawing.Size(400, 400);
+            this.genericBoardBase.Size = new System.Drawing.Size(243, 243); // 6x3 pixels pixels for the spacing, 3x50 for each square
             this.genericBoardBase.TabIndex = 4;
-            this.genericBoardBase.BorderStyle = BorderStyle.FixedSingle; // solution
+            //this.genericBoardBase.BorderStyle = BorderStyle.FixedSingle; // solution
 
 
-
+            //this.genericBoardBase.BackColor = Color.Black;
             // do tiles
-            this.genericBoardBase.BackColor = Color.Red;
+            for (int row = 0; row < 3; row++)
+            {
+                for (int col = 0; col < 3; col++)
+                {
+                    Panel tile = new Panel();
+                    tile.Size = new System.Drawing.Size(75, 75);
+                    System.Console.WriteLine(tile.Margin);
+                    tile.BorderStyle = BorderStyle.FixedSingle;
+                    tile.BackColor = Color.White;
+                    tile.Click += OnTileClick;
+
+                    //tile.MouseEnter += Tile_MouseEnter; // maybe too messy for now
+                    this.genericBoardBase.Controls.Add(tile);
+                }
+            }
 
 
             // add it to the main display form
@@ -165,7 +179,7 @@ namespace chess.View
                         tile.BackColor = Color.Peru;
                     }
                     tile.Click += OnTileClick;
-                    tile.MouseEnter += Tile_MouseEnter; // maybe too messy for now
+                    //tile.MouseEnter += Tile_MouseEnter; // maybe too messy for now
                     this.genericBoardBase.Controls.Add(tile);
                 }
                 
@@ -204,6 +218,7 @@ namespace chess.View
             
             // register event handlers to the chess model
             this.gameController.PropertyChanged += message_PropertyChanged;
+            // chess specific handlers
             this.gameController.Model.CapturedChanged += ChessBoardCaptureChanged;
             this.gameController.Model.PlayerChanged += ChessBoardPlayerChanged;
             this.gameController.Model.BoardChanged += ChessBoardChanged;
@@ -238,9 +253,8 @@ namespace chess.View
             // register event handlers to the ttt model
             // WONT NECESARILY USE ALL OF THESE / MABE SPECIFIC ONES FOR TTT
             this.gameController.PropertyChanged += message_PropertyChanged; // can keep this one
-            //this.gameController.Model.CapturedChanged += ChessBoardCaptureChanged; // wont need to register anything for this ttt
-            this.gameController.Model.PlayerChanged += ChessBoardPlayerChanged; // could make this more generic
-            this.gameController.Model.BoardChanged += ChessBoardChanged; // needs its own, since wont be using chesspieces
+            this.gameController.Model.PlayerChanged += TTTBoardPlayerChanged; // could make this more generic
+            this.gameController.Model.BoardChanged += TTTBoardChanged; // needs its own, since wont be using chesspieces
 
             // This comes after the handlers are registered so that
             // the boardchanged handler may update the view.
@@ -251,7 +265,7 @@ namespace chess.View
             this.loadGameToolStripMenuItem.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = true;
             this.message_box.Enabled = true;
-            this.concedeButton.Visible = true;
+            //this.concedeButton.Visible = true;
 
             this.gameController.StartGameLoop(this.selectedGameModel);
         }
@@ -259,17 +273,17 @@ namespace chess.View
 
         private void abandonGameToolStripMenuItem_Click(object sender, EventArgs e)
         {    
+            // ADD A SWITCH STATEMENT IN HERE FOR DIFFERENT MODELS -> HANDLERS, VIEW ELEMENTS ARE DIFFERENT ETC
+
             // stop the game loop thread
             this.gameController.Terminate();
             // deregister handlers from the model
-            this.gameController.Model.BoardChanged -= ChessBoardChanged;
-            this.gameController.PropertyChanged -= message_PropertyChanged;
-            this.gameController.Model.CapturedChanged -= ChessBoardCaptureChanged;
-            this.gameController.Model.PlayerChanged -= ChessBoardPlayerChanged;
+            deregisterHandlers(this.selectedGameModel);
+
             // uninitialise the models
             this.gameController.UnInitialiseModel(this.selectedGameModel);
             // clear display
-            resetView();
+            resetView(this.selectedGameModel);
             //this.genericBoardBase.Visible = false;
             //this.genericBoardBase.Enabled = false;
             this.concedeButton.Visible = false;
@@ -278,22 +292,50 @@ namespace chess.View
             this.abandonGameToolStripMenuItem.Enabled = false;
         }
 
-        private void resetView()
+
+        private void deregisterHandlers(GameModels model)
+        {
+            switch(model)
+            {
+                case GameModels.Chess:
+                    this.gameController.Model.BoardChanged -= ChessBoardChanged;
+                    this.gameController.PropertyChanged -= message_PropertyChanged;
+                    this.gameController.Model.CapturedChanged -= ChessBoardCaptureChanged;
+                    this.gameController.Model.PlayerChanged -= ChessBoardPlayerChanged;
+                    break;
+                case GameModels.TicTacToe:
+                    this.gameController.PropertyChanged -= message_PropertyChanged;
+                    this.gameController.Model.PlayerChanged -= TTTBoardPlayerChanged;
+                    this.gameController.Model.BoardChanged -= TTTBoardChanged;
+                    break;
+            }
+
+        }
+
+        private void resetView(GameModels model)
         {
             // clear the view tiles and remove it from the view
             this.genericBoardBase.Controls.Clear();
             this.Controls.Remove(genericBoardBase);
             this.genericBoardBase = null;
 
+            switch(model)
+            {
+                case GameModels.Chess:
+                    this.blackPiecesCaptured.Controls.Clear();
+                    this.whitePiecesCaptured.Controls.Clear();
+                    this.white_turn_panel.Visible = false;
+                    this.black_turn_panel.Visible = false;
+                    break;
+                case GameModels.TicTacToe:
+                    break;
+            }
 
-            this.blackPiecesCaptured.Controls.Clear();
-            this.whitePiecesCaptured.Controls.Clear();
 
             // clear message box
             this.message_box.Items.Clear();
 
-            this.white_turn_panel.Visible = false;
-            this.black_turn_panel.Visible = false;
+
         }
 
 
@@ -427,7 +469,25 @@ namespace chess.View
 
         private void processTTTClicks(object sender, EventArgs e)
         {
-            // todo
+            System.Console.WriteLine("a ttt click");
+            string tileClicked = "";
+
+            if (sender is Panel)
+            {
+                Panel tile = (Panel)sender;
+                TableLayoutPanelCellPosition pos = this.genericBoardBase.GetPositionFromControl(tile);
+
+                System.Console.WriteLine("I am the view and I have registered a click: {0}", pos);
+                tileClicked += pos.Column.ToString() +pos.Row.ToString();
+            }
+            if (USRMOVE == "")
+            {
+                USRMOVE += tileClicked;
+                this.gameController.Input = USRMOVE;
+                USRMOVE = "";
+            }
+               
+            
         }
 
 
@@ -699,6 +759,91 @@ namespace chess.View
             gameController.StopGameLoop();
         }
 
+
+
+        delegate void TTTBoardChangedCallback(object sender, BoardChangedEventArgs e);
+
+        private void TTTBoardChanged(object sender, BoardChangedEventArgs e)
+        {
+            // code calling this method from non Form disp thread, so need to invoke into
+            // the thread which is responsible for running the disp (eg the genericboardbase's thread)
+            if (this.genericBoardBase.InvokeRequired)
+            {
+                TTTBoardChangedCallback d = new TTTBoardChangedCallback(TTTBoardChanged);
+                this.genericBoardBase.Invoke(d, new object[] { sender, e });
+            }
+            else
+            {
+                System.Console.WriteLine("NOW UPDATE THE VIEW ACCORDING TO THE BOARD WHICH HAS JUST BEEN CHANGED");
+
+                //// only update the pos which have changed
+                //List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
+                //System.Console.WriteLine($"BoardChanged raised with {e.PositionsChanged.Count} locations");
+                //foreach (Tuple<int, int> pos in positionsChanged)
+                //{
+
+                //    // corresponding gui position
+                //    Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
+                //    GamePieces mPiece;
+                //    if (!this.gameController.Model.Board[pos.Item1, pos.Item2].IsEmpty())
+                //    {
+                //        mPiece = this.gameController.Model.Board[pos.Item1, pos.Item2].piece.Val;
+                //    }
+                //    else
+                //    {
+                //        // give it the empty value
+                //        mPiece = GamePieces.empty;
+                //    }
+
+                //    // remove all existing items on the tile (picture boxes if any)
+                //    foreach (Control pb in gTile.Controls.OfType<PictureBox>())
+                //    {
+                //        gTile.Controls.Remove(pb);
+                //    }
+
+                //    // if mPiece was changed to e, then this is satisfactorily cleared the tile
+
+                //    // else mPiece is a piece which needs to be added to the now empty tile
+                //    if (gamePieces.ContainsKey(mPiece))
+                //    {
+                //        PictureBox gPiece = getGuiPiece(mPiece);
+                //        gTile.Controls.Add(gPiece);
+                //    }
+                //    else if (mPiece == GamePieces.empty)
+                //    {
+                //        // then the clearing is already done
+                //    }
+                //    else
+                //    {
+                //        //System.Console.WriteLine("model piece is some unexpected value");
+                //    }
+
+
+                //}
+            }
+
+
+        }
+
+
+        delegate void TTTBoardPlayerChangedCallback(object sender, EventArgs e);
+
+        private void TTTBoardPlayerChanged(object sender, EventArgs e)
+        {
+            if (this.genericBoardBase.InvokeRequired)
+            {
+                TTTBoardPlayerChangedCallback d = new TTTBoardPlayerChangedCallback(TTTBoardPlayerChanged);
+                this.genericBoardBase.Invoke(d, new object[] { sender, e });
+            }
+            else
+            {
+                // update captured display current player turn indicator squares to the model.player value
+                // which has recently been changed
+                string curPlayer = this.gameController.Model.Player.CurPlayer;
+                this.gameController.Message = $"{curPlayer}'s turn";
+
+            }
+        }
 
 
 
