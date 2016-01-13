@@ -120,6 +120,18 @@
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>185, 32</value>
   </metadata>
+  <data name="customeOutlineLabel2.Text" xml:space="preserve">
+    <value>Use the File menu to start or load a game
+
+View the openings book under the Tools menu
+
+Gareth's Chess features all of the standard chess functionality: en passant capture, 
+complete pawn promotion and castling.
+The program will soon feature the ability to play against the computer intelligence. 
+When loading a saved game, you have the option to load it ready for continued play or 
+to see the replay of the game up to that point, move by move.
+</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>25</value>
   </metadata>

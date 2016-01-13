@@ -96,6 +96,9 @@
     <Compile Include="Util\MovementStyle.cs" />
     <Compile Include="Util\MovementStyles.cs" />
     <Compile Include="Util\utility.cs" />
+    <Compile Include="View\CustomeOutlineLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="View\Display.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -173,6 +176,24 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\wood-chess-pieces-board-box-combo-2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\game-piece-ex.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\game-piece-oh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\wood-textures-high-quality-13.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\wood_006.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ZoomImagevintage-wood-flooring-rovere-tile1359107839.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

@@ -23,7 +23,7 @@ namespace chess.Model
         public void change()
         {
             if (playerValue != null)
-                this.playerValue = (playerValue == "white") ? "black" : "white";
+                this.playerValue = (playerValue == "white") ? "black" : (playerValue == "black") ? "white" : (playerValue == "X") ? "O" : "X";
         }
 
 

@@ -66,23 +66,19 @@ namespace chess.View
             {GamePieces.WhiteKnight, chess.Properties.Resources.Chess_nlt60},
             {GamePieces.WhiteRook, chess.Properties.Resources.Chess_rlt60},
             {GamePieces.WhitePawn, chess.Properties.Resources.Chess_plt60},
+            {GamePieces.O, chess.Properties.Resources.game_piece_oh},
+            {GamePieces.X, chess.Properties.Resources.game_piece_ex}
         };
 
         public Display(GameController gc)
         {
             this.gameController = gc;
             // tripple buffer>
-            
-            
+
             InitializeComponent();
-            InitializeComponent2();
-            
-            
-            
+            InitializeOtherComponents();
 
             tintRef = new List<Control>(); //reset?
-
-
         }
 
         /// <summary>
@@ -125,10 +121,10 @@ namespace chess.View
             this.genericBoardBase.RowCount = 3;
             this.genericBoardBase.ColumnCount = 3;
 
-            this.genericBoardBase.Location = new System.Drawing.Point(46, 83);
+            this.genericBoardBase.Location = new System.Drawing.Point(126, 163);
             this.genericBoardBase.Name = "genericBoardBase";
-            //this.genericBoardBase.BackColor = Color.Transparent;
-            this.genericBoardBase.Size = new System.Drawing.Size(243, 243); // 6x3 pixels pixels for the spacing, 3x50 for each square
+            this.genericBoardBase.BackColor = Color.Black;
+            this.genericBoardBase.Size = new System.Drawing.Size(245, 245); // 6x3 pixels pixels for the spacing, 3x50 for each square
             this.genericBoardBase.TabIndex = 4;
             //this.genericBoardBase.BorderStyle = BorderStyle.FixedSingle; // solution
 
@@ -141,9 +137,21 @@ namespace chess.View
                 {
                     Panel tile = new Panel();
                     tile.Size = new System.Drawing.Size(75, 75);
-                    System.Console.WriteLine(tile.Margin);
-                    tile.BorderStyle = BorderStyle.FixedSingle;
-                    tile.BackColor = Color.White;
+                    // remove the margin spacing from the outer edges
+                    int top = 5;
+                    int bot = 5;
+                    int rgt = 5;
+                    int lft = 5;
+                    if (row == 0)
+                        top = 0;
+                    if (row == 2)
+                        bot = 0;
+                    if (col == 0)
+                        lft = 0;
+                    if (col == 2)
+                        rgt = 0;
+                    tile.Margin = new Padding(lft, top, rgt, bot);
+                    tile.BackColor = Color.OldLace;
                     tile.Click += OnTileClick;
 
                     //tile.MouseEnter += Tile_MouseEnter; // maybe too messy for now
@@ -189,7 +197,7 @@ namespace chess.View
 
         }
 
-        private void InitializeComponent2()
+        private void InitializeOtherComponents()
         {
             this.concedeButton.FlatStyle = FlatStyle.Flat;
             loadform = new LoadForm();
@@ -208,6 +216,10 @@ namespace chess.View
         /// <param name="e"></param>
         private void menuItemChess_Click(object sender, EventArgs e)
         {
+            // if a game was already in progress, clear it first
+            if (this.gameController.State == GameControlState.GameInProgress)
+                abandonGameToolStripMenuItem_Click(null, null);
+
             this.selectedGameModel = GameModels.Chess;
 
             // Model
@@ -228,11 +240,12 @@ namespace chess.View
             this.gameController.PrepareModel();
 
 
-
-            this.menuItemNewGame.Enabled = false;
+            this.infoPanel.Visible = false;
+            this.menuItemNewGame.Enabled = true;
             this.loadGameToolStripMenuItem.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = true;
             this.message_box.Enabled = true;
+            this.message_box.Visible = true;
             this.concedeButton.Visible = true;
 
             this.gameController.StartGameLoop(this.selectedGameModel);
@@ -242,6 +255,10 @@ namespace chess.View
 
         private void menuItemTTT_Click(object sender, EventArgs e)
         {
+            // if a game was already in progress, clear it first
+            if (this.gameController.State == GameControlState.GameInProgress)
+                abandonGameToolStripMenuItem_Click(null, null);
+
             this.selectedGameModel = GameModels.TicTacToe;
 
             // Model
@@ -260,11 +277,12 @@ namespace chess.View
             // the boardchanged handler may update the view.
             this.gameController.PrepareModel();
 
-
-            this.menuItemNewGame.Enabled = false;
+            this.infoPanel.Visible = false;
+            this.menuItemNewGame.Enabled = true;
             this.loadGameToolStripMenuItem.Enabled = false;
             this.abandonGameToolStripMenuItem.Enabled = true;
             this.message_box.Enabled = true;
+            this.message_box.Visible = true;
             //this.concedeButton.Visible = true;
 
             this.gameController.StartGameLoop(this.selectedGameModel);
@@ -284,12 +302,19 @@ namespace chess.View
             this.gameController.UnInitialiseModel(this.selectedGameModel);
             // clear display
             resetView(this.selectedGameModel);
-            //this.genericBoardBase.Visible = false;
-            //this.genericBoardBase.Enabled = false;
+           
+            // if sender is null this has been called between a game switch eg (chess-> ttt)
+            // so save time by not doing these steps (prevents flicker of infoPanel too)
+            if (sender != null)
+            {
+                
+                this.message_box.Visible = false;
+                this.menuItemNewGame.Enabled = true;
+                this.loadGameToolStripMenuItem.Enabled = true;
+                this.abandonGameToolStripMenuItem.Enabled = false;
+                this.infoPanel.Visible = true;
+            }
             this.concedeButton.Visible = false;
-            this.menuItemNewGame.Enabled = true;
-            this.loadGameToolStripMenuItem.Enabled = true;
-            this.abandonGameToolStripMenuItem.Enabled = false;
         }
 
 
@@ -632,10 +657,22 @@ namespace chess.View
                 message_PropertyChangedCallback d = new message_PropertyChangedCallback(message_PropertyChanged);
                 this.genericBoardBase.Invoke(d, new object[] { sender, e });
             }
-            // else we are in the thread which created the control
+            //else we are in the thread which created the control
+            //else
+            //{
+            //    this.message_box.BeginUpdate();
+            //    this.message_box.Items.Add(this.gameController.Message);
+            //    // set most recently added as the last one
+            //    this.message_box.TopIndex = this.message_box.Items.Count - 1;
+            //    this.message_box.EndUpdate();
+            //}
+
+            // this version only has one item in the message box at a time
+            // maybe make it to display 2 items
             else
             {
                 this.message_box.BeginUpdate();
+                this.message_box.Items.Clear();
                 this.message_box.Items.Add(this.gameController.Message);
                 // set most recently added as the last one
                 this.message_box.TopIndex = this.message_box.Items.Count - 1;
@@ -776,10 +813,26 @@ namespace chess.View
             {
                 System.Console.WriteLine("NOW UPDATE THE VIEW ACCORDING TO THE BOARD WHICH HAS JUST BEEN CHANGED");
 
-                //// only update the pos which have changed
-                //List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
-                //System.Console.WriteLine($"BoardChanged raised with {e.PositionsChanged.Count} locations");
-                //foreach (Tuple<int, int> pos in positionsChanged)
+                // for ttt there is only ever one position changed at a time
+                List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
+                foreach (Tuple<int, int> pos in positionsChanged)
+                {
+                    GamePieces mPiece;
+                    // corresponding gui position
+                    // all my code treats coords in the row,col order but this function uses col,row order
+                    Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
+                    if (!this.gameController.Model.Board[pos.Item1, pos.Item2].IsEmpty())
+                        mPiece = this.gameController.Model.Board[pos.Item1, pos.Item2].piece.Val;
+                    else
+                        mPiece = GamePieces.empty;
+                    if (gamePieces.ContainsKey(mPiece))
+                    {
+                        // getguipiece2 is the version which doesnt add a click handler on to the piece
+                        // since in ttt we dont need to worry about player clicking the piece
+                        PictureBox gPiece = getGuiPiece2(mPiece);
+                        gTile.Controls.Add(gPiece);
+                    }
+                }
                 //{
 
                 //    // corresponding gui position
@@ -840,8 +893,6 @@ namespace chess.View
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
                 string curPlayer = this.gameController.Model.Player.CurPlayer;
-                this.gameController.Message = $"{curPlayer}'s turn";
-
             }
         }
 

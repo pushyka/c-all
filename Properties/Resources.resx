@@ -154,4 +154,22 @@
   <data name="Chess_rlt60" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Chess_rlt60.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="game_piece_ex" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\game-piece-ex.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="game_piece_oh" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\game-piece-oh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="wood_006" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wood_006.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="wood_chess_pieces_board_box_combo_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wood-chess-pieces-board-box-combo-2.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="wood_textures_high_quality_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wood-textures-high-quality-13.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ZoomImagevintage_wood_flooring_rovere_tile1359107839" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ZoomImagevintage-wood-flooring-rovere-tile1359107839.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

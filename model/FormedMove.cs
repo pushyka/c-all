@@ -37,6 +37,7 @@ namespace chess.Model
             {
                 int col = (int)Char.GetNumericValue(mvSpecifier[0]);
                 int row = (int)Char.GetNumericValue(mvSpecifier[1]);
+                System.Console.WriteLine($"col is {col} row is {row}");
                 posA = Tuple.Create<int, int>(row, col);
                 isValid = true;
             }

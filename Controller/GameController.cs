@@ -77,7 +77,7 @@ namespace chess.Controller
             gameModel.Setup();
             gameModel.SetPlayer();
             state = GameControlState.Ready;
-            this.Message = "Game is setup";
+            //this.Message = "Game is setup";
             
         }
 
@@ -118,7 +118,7 @@ namespace chess.Controller
             if (state == GameControlState.Ready)
                 t.Start();
                 state = GameControlState.GameInProgress;
-                this.Message = "Game has started";
+                //this.Message = "Game has started";
         }
 
         private void ChessGameLoop()
@@ -128,11 +128,13 @@ namespace chess.Controller
             ChessPositionModel cpm = (ChessPositionModel)this.gameModel;
             string moveType;
             FormedMove move;
+            string winner = null;
             List<Tuple<int, int>> kingCheckedBy = new List<Tuple<int, int>>();
 
             // this bool will be set false when the game ends
-            while (state == GameControlState.GameInProgress)
+            while (true)
             {
+                
                 // start of new turn, clear variables
                 move = null;
                 moveType = null;
@@ -144,7 +146,7 @@ namespace chess.Controller
                 // , else IsGame = false
                 // if not in check and no legal move : stalemate
                 // if in check and no legal move to remove attack : checkmate
-
+                
                 if (evaluator.IsKingInCheck(cpm, ref kingCheckedBy))
                     this.Message = $"Player {cpm.Player.CurPlayer}'s king is in check";
 
@@ -158,7 +160,10 @@ namespace chess.Controller
                     if (input == "concede")
                     {
                         // c.Player has conceded
-                        conceded();
+                        this.Message = "Player " + cpm.Player.CurPlayer + " has conceded!";
+                        cpm.Player.change();
+                        winner = cpm.Player.CurPlayer;
+                        cpm.Player = null;
                         input = null;
                         break;
                     }
@@ -170,7 +175,6 @@ namespace chess.Controller
                         if (evaluator.ValidateMove(move, cpm, ref moveType, ref kingCheckedBy))
                         {
                             //this.Message = "move passed validation";
-                            ;
                             cpm.applyMove(move, moveType);
 
 
@@ -183,24 +187,25 @@ namespace chess.Controller
                             // en passant during hte oponents turn, they will now be unable to be captured en passant
                             //System.Console.WriteLine(" CLEARING PASSANTS");
                             cpm.clearEnPassantPawns(cpm.Player);
-                            this.Message = "Player " + cpm.Player.CurPlayer + "'s turn";
-                            this.Message = "passant sq if any is " + cpm.EnPassantSq;
+                            //this.Message = $"Player {cpm.Player.CurPlayer}'s turn";
+                            //this.Message = $"passant sq if any is{cpm.EnPassantSq}";
 
 
                         }
                         else
-                            System.Console.WriteLine("The move was not valid");
-                        // anything in kingcheckedby?
+                            this.Message = "The move was not valid";
                     }
                     else
-                        System.Console.WriteLine("The input was not valid");
+                        this.Message = "The input was not valid";
 
                     input = null;
                 }
                 //Thread.Sleep(1000);
             }
-
-            this.Message = "The game has ended, loop thread detached";
+            if (winner != null)
+                this.Message = $"Player {winner} has won the game!";
+            else
+                this.Message = "The game has ended, loop thread detached";
         }
 
 
@@ -210,42 +215,47 @@ namespace chess.Controller
             TTTPositionModel tttpm = (TTTPositionModel)this.gameModel;
             FormedMove move;
             string winner = null;
+            bool isMaxTurns = false;
 
-            while (state == GameControlState.GameInProgress)
+            while (true)
             {
-                // check if a winner has been found 
-                // isWinner = tttpm.IsWinningPosition(ref winner); // checks it for both players
-                // if (isWinner)
-                //      break;
+                // check if a winner has been found or reached max turns
+                if (tttpm.IsWinningPosition(ref winner) || tttpm.IsMaxTurns(ref isMaxTurns))
+                {
+                    break;
+                }
 
+                this.Message = $"Player {tttpm.Player.CurPlayer}, make your move";
                 move = null;
                 // check if display has provided a move
                 if (input != null)
                 {
                     // Do Stuff..
-                    System.Console.WriteLine("process the input");
                     move = new FormedMove(input);
-                    tttpm.applyMove(move, null);
-                    tttpm.ChangePlayer();
-                    this.Message = "Player " + tttpm.Player.CurPlayer + "'s turasdsadasdsdan";
+                    if (tttpm.validateMove(move))
+                    {
+                        tttpm.applyMove(move, null);
+                        tttpm.ChangePlayer();
+                    }
+                    else
+                        this.Message = "The move was not valid";
                     input = null;
+
+
                 }
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
 
             }
+            // at this point game has ended
+            // why..
 
-            this.Message = "The game has ended, loop thread detached";
-            // if (winner != null)
-            //      etc
+            if (winner != null)
+                this.Message = $"Player {winner} has won the game!"; // make bold ?
+            else if (isMaxTurns)
+                this.Message = "Draw, no more moves can be made";
+
         }
 
-
-
-        private void conceded()
-        {
-            this.Message = "Player " + this.gameModel.Player.CurPlayer + " has conceded!";
-            this.gameModel.Player = null;
-        }
 
         
         /// <summary>
@@ -303,6 +313,14 @@ namespace chess.Controller
                     this.input = value;
                 else
                     System.Console.WriteLine("A previous input hsant been cleared yet (currently being processed) so this Set has failed");
+            }
+        }
+
+        public GameControlState State
+        {
+            get
+            {
+                return this.state;
             }
         }
 

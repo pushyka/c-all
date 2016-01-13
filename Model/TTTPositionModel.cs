@@ -12,6 +12,7 @@ namespace chess.Model
         private TileStruct[,] board;
         private Player player;
         private int rowToWin;
+        private int turns;
 
         public event EventHandler<BoardChangedEventArgs> BoardChanged;
         public event EventHandler CapturedChanged;
@@ -21,8 +22,9 @@ namespace chess.Model
         {
             this.dim = 3;
             this.board = new TileStruct[dim, dim];
-            this.player = new Player("white"); //fix player class
+            this.player = new Player("X"); //fix player class
             this.rowToWin = dim;
+            this.turns = 0;
         
         }
 
@@ -32,7 +34,7 @@ namespace chess.Model
             {
                 for (int col = 0; col < this.dim; col ++)
                 {
-                    this.board[row, col] = new TileStruct();
+                    this.board[row, col] = new TileStruct(new Piece(GamePieces.empty));
                 }
             }
         }
@@ -42,20 +44,20 @@ namespace chess.Model
             //
         }
 
-        public void ChangePlayer()
-        {
-            this.player.change();
-            OnPlayerChanged(EventArgs.Empty);
-        }
 
-        protected virtual void OnPlayerChanged(EventArgs e)
+        /// <summary>
+        /// Given a move object, check that the move would be valid against the current
+        /// ttt model. All moves would be valid so long as they dont specify a a tile
+        /// which has already been clicked. eg so long as they are empty.
+        /// This uses the GamePieces.empty version of empty
+        /// </summary>
+        /// <param name="move"></param>
+        /// <returns></returns>
+        public bool validateMove(FormedMove move)
         {
-            if (PlayerChanged != null)
-            {
-                PlayerChanged(this, e);
-            }
+            Tuple<int, int> location = move.PosA;
+            return this.board[location.Item1, location.Item2].piece.Val == GamePieces.empty;
         }
-
 
 
 
@@ -65,12 +67,13 @@ namespace chess.Model
         {
             Tuple<int, int> location = move.PosA;
             Piece playerPiece;
-            if (this.player.CurPlayer == "white")
+            if (this.player.CurPlayer == "O")
                 playerPiece = new Piece(GamePieces.O);
             else
                 playerPiece = new Piece(GamePieces.X);
             ;
             updateTileWithPiece(location, playerPiece);
+            turns += 1;
         }
 
 
@@ -95,12 +98,49 @@ namespace chess.Model
         /// <summary>
         /// Checks the board for the existence of a winning position for either player.
         /// If a winning position is found it returns true and puts the winner in the winner
-        /// variable passed by reference.
+        /// variable passed by reference. 
+        /// 
         /// </summary>
         public bool IsWinningPosition(ref string winner)
         {
             bool isWin = false;
-            // rows
+            GamePieces[] players = new GamePieces[] { GamePieces.X, GamePieces.O };
+            foreach (GamePieces player in players)
+            {
+                // check verticals
+                if ((board[0, 0].piece.Val == player && board[1, 0].piece.Val == player && board[2, 0].piece.Val == player) ||
+                    (board[0, 1].piece.Val == player && board[1, 1].piece.Val == player && board[2, 1].piece.Val == player) ||
+                    (board[0, 2].piece.Val == player && board[1, 2].piece.Val == player && board[2, 2].piece.Val == player))
+                {
+                    winner = player.ToString();
+                    isWin = true;
+                    break;
+                }
+
+                // check horizontals
+
+                if ((board[0, 0].piece.Val == player && board[0, 1].piece.Val == player && board[0, 2].piece.Val == player) ||
+                    (board[1, 0].piece.Val == player && board[1, 1].piece.Val == player && board[1, 2].piece.Val == player) ||
+                    (board[2, 0].piece.Val == player && board[2, 1].piece.Val == player && board[2, 2].piece.Val == player))
+                {
+                    winner = player.ToString();
+                    isWin = true;
+                    break;
+                }
+
+                // check diagonals
+
+                if ((board[0, 0].piece.Val == player && board[1, 1].piece.Val == player && board[2, 2].piece.Val == player) ||
+                    (board[2, 0].piece.Val == player && board[1, 1].piece.Val == player && board[0, 2].piece.Val == player))
+                {
+                    winner = player.ToString();
+                    isWin = true;
+                    break;
+                }
+
+
+
+            }
             
             return isWin;
         }
@@ -136,9 +176,27 @@ namespace chess.Model
                 return null;
             }
         }
+        public bool IsMaxTurns(ref bool isMaxTurns)
+        {
+            isMaxTurns = this.turns == (this.dim * this.dim);
+            return isMaxTurns;
+        }
 
 
 
+        public void ChangePlayer()
+        {
+            this.player.change();
+            OnPlayerChanged(EventArgs.Empty);
+        }
+
+        protected virtual void OnPlayerChanged(EventArgs e)
+        {
+            if (PlayerChanged != null)
+            {
+                PlayerChanged(this, e);
+            }
+        }
         
 
 
