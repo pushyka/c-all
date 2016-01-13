@@ -268,6 +268,7 @@ namespace chess.Util
                     // if passant piece is a pawn
                     ;
                     // check if this is a rule, can ALSO capture any other piece with enpassant
+                    // add a NotEmpty check
                     if (pieceOnPassantPos.piece.Val == GamePieces.WhitePawn || pieceOnPassantPos.piece.Val == GamePieces.BlackPawn)
                     {
                         // and its the other players piece
