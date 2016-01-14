@@ -63,35 +63,35 @@ namespace chess.Util
                 -(further movement checks)
         Finally it must check, if the move were to be applied, that it does not leave the 
         current player's king in check.*/
-        public bool ValidateMove(FormedMove move, ChessPosition cpm, ref string moveType, ref List<Tuple<int, int>> kingCheckedBy)
+        public bool ValidateMove(FormedMove move, ChessPosition cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
         {
             bool outcome = false;
             TileStruct tileA = new TileStruct();
             TileStruct tileB = new TileStruct();
 
-            if (MovePositionsDistinct(move))
+            if (IsMovePositionsDistinct(move))
             {
                 if (IsMoveAPieceCurPlayer(move, cpm, ref tileA))
                 {
                     if (IsMoveBPieceCurPlayer(move, cpm, ref tileB))
                     {
                         outcome = false;
-                        moveType = "castle";
+                        moveType = EChessMoveTypes.Castle;
                     }
                     else if (IsMoveBPieceOtherPlayer(move, cpm, ref tileB))
                     {
-                        outcome = IsCaptureLegal(move, cpm);                            //        <--  done (todo: pawns, horses)
-                        moveType = "capture";
+                        outcome = IsCaptureLegal(move, cpm);
+                        moveType = EChessMoveTypes.Capture;
                     }
                     else if (IsMoveBEmpty(move, cpm, ref tileB))
                     {
-                        if (outcome = IsPieceMovementLegal(move, cpm))                      //          <-- done
+                        if (outcome = IsPieceMovementLegal(move, cpm))
                         {
-                            moveType = "movement";
+                            moveType = EChessMoveTypes.Movement;
                         }
-                        else if (outcome = IsEnPassantCaptureLegal(move, cpm))                       //          <-- todo
+                        else if (outcome = IsEnPassantCaptureLegal(move, cpm))
                         {
-                            moveType = "enpassantcapture";
+                            moveType = EChessMoveTypes.EpMovement;
                         }
                     }
                     else
@@ -119,7 +119,7 @@ namespace chess.Util
 
         /* Take a move object and return true if the A and B
         positions are distinct from each other. */
-        private bool MovePositionsDistinct(FormedMove move)
+        private bool IsMovePositionsDistinct(FormedMove move)
         {
             Tuple<int, int> posA = move.PosA;
             Tuple<int, int> posB = move.PosB;
@@ -235,7 +235,7 @@ namespace chess.Util
             List<List<Tuple<int, int>>> epMovementRays;
             // get attack ray for the pawn on tileA
             // these are the movement rays in the case of EP
-            epMovementRays = GetPawnRay(tileA.piece.Val, posA);
+            epMovementRays = GetPieceRayPawnCapture(tileA.piece.Val, posA);
             List<Tuple<int, int>> moveRayUsed = null;
             foreach(List<Tuple<int, int>> ray in epMovementRays)
             {
@@ -293,8 +293,8 @@ namespace chess.Util
             TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> captureRays;
 
-            if (tileA.piece.Val == GamePieces.BlackPawn || tileA.piece.Val == GamePieces.WhitePawn)
-                captureRays = GetPawnRay(tileA.piece.Val, posA);
+            if (tileA.piece.Val == EGamePieces.BlackPawn || tileA.piece.Val == EGamePieces.WhitePawn)
+                captureRays = GetPieceRayPawnCapture(tileA.piece.Val, posA);
             else
                 captureRays = GetPieceRay(tileA.piece.Val, posA);
 
@@ -327,9 +327,6 @@ namespace chess.Util
         }
 
 
-
-
-
         /* This function is passed a copy of the chess game. It uses the information contained in this object
         to determine whether or not the Current player's king is being threatened by check from the other player
         returning true if so. If it is being checked by the opposing player a list of the one / two coords containing the 
@@ -347,7 +344,7 @@ namespace chess.Util
                     if (!tile.IsEmpty())
                     {
                         if ((curPlayer.Owns(tile.piece)) && 
-                            (tile.piece.Val == GamePieces.WhiteKing || tile.piece.Val == GamePieces.BlackKing))
+                            (tile.piece.Val == EGamePieces.WhiteKing || tile.piece.Val == EGamePieces.BlackKing))
                         {
                             curPlayersKingPos = Tuple.Create(row, col);
                             break;
@@ -372,101 +369,56 @@ namespace chess.Util
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// Takes a piece and a y,x board location and returns one List containing
-        /// a List for each valid direction of movement containing a sequence of board locations that
-        /// the piece could potentially move to.
-        /// 
-        /// e.g. piece=r, location=(3,6)
-        /// </summary>
-        /// <param name="piece"></param>
-        /// <param name=""></param>
-        /// <returns></returns>
-        public List<List<Tuple<int, int>>> GetPieceRay(GamePieces piece, Tuple<int, int> location)
+        /* Takes a piece and a y,x board location and returns one List containing a List for each valid 
+        direction of movement. Each of these lists contains a sequence of board locations that the piece 
+        could potentially move to (from that starting location) */
+        public List<List<Tuple<int, int>>> GetPieceRay(EGamePieces piece, Tuple<int, int> location)
         {
             if (rayArray == null)
                 throw new Exception("ray array not instantiated");
-            ;
-            //System.Console.WriteLine($"> There are {rayArray[(int)piece][location.Item1, location.Item2].Count} direction rays");
-            //System.Console.WriteLine($"> for piece {piece} at location {location}");
-            //foreach (List<Tuple<int, int>> ray in rayArray[(int)piece][location.Item1, location.Item2])
-            //{
-            //    System.Console.WriteLine($"> counts: {ray.Count}");
-            //}
-            
             return rayArray[(int)piece][location.Item1, location.Item2];
-
-
         }
 
-        public List<List<Tuple<int,int>>> GetPawnRay(GamePieces piece, Tuple<int, int> location)
+
+        /* Same as GetPieceRay but takes a pawn piece and returns the diagonal attack rays rather than the vertical
+        pawn movement ray.*/
+        public List<List<Tuple<int,int>>> GetPieceRayPawnCapture(EGamePieces piece, Tuple<int, int> location)
         {
             if (rayArrayPawnCapture == null)
                 throw new Exception("ray array (pawns) noy instantiated");
-
-            int pieceIndex = (piece == GamePieces.WhitePawn) ? 0 : 1;
-            //System.Console.WriteLine($"> There are {rayArray[pieceIndex][location.Item1, location.Item2].Count} direction rays");
-            //System.Console.WriteLine($"> for piece {piece} at location {location}");
-            //foreach (List<Tuple<int, int>> ray in rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2])
-            //{
-            //    System.Console.WriteLine($"> counts: {ray.Count}");
-            //}
+            int pieceIndex = (piece == EGamePieces.WhitePawn) ? 0 : 1;
             return rayArrayPawnCapture[pieceIndex][location.Item1, location.Item2];
         }
 
+
+
+        /* Generates the rays for use by the GetPieceRay procedure. This method is called at the start of
+        the program to eliminate the time cost of computing these rays on a as-i-need-it while the game
+        is running.*/
         public void GenerateRays()
         {
-            
-            //rayArray = new List<List<Tuple<int, int>>>[12][,];
-            // init 12 element array
             rayArray = new List<List<Tuple<int,int>>>[UNIQUE_PIECE_NUM][,];
             // 12 pieces
             //      8 rows per piece
-            //              8 columns per row       //
-            //                      1 List
+            //              8 columns per row
+            //                      1 List of
             //                              n Lists
             //                                  n Tuple<int, int>
 
             for (int i = 0; i < rayArray.Length; i++)
             {
                 // foreach of the i piece types, create 64 tiles each containing a number of rays (n directions)
-                MovementStyle style = MovementStyles.getMovementStyle((GamePieces)i);
+                MovementStyle style = MovementStyles.getMovementStyle((EGamePieces)i);
                 rayArray[i] = new List<List<Tuple<int,int>>>[8, 8];
                 for (int j = 0; j < 8; j++) // row
                 {
                     for (int k = 0; k < 8; k++) // col
                     {
-                        // now create the list and add the results of piece i at pos j,k
                         List<List<Tuple<int, int>>> rays = new List<List<Tuple<int, int>>>();
-                        // get the set of rays of the given piece and location
-
                         foreach (Tuple<int, int> dir in style.dirs)
                         {
                             List<Tuple<int, int>> ray = new List<Tuple<int, int>>();
                             int coordsNum = 1;
-
                             while (coordsNum <= style.maxIterations)
                             {
                                 //generate the new coordinate by adding 1 unit of direction to the initial posA
@@ -479,29 +431,27 @@ namespace chess.Util
                                 if ((newPosRank < 0 || newPosRank > 7) ||
                                     (newPosFile < 0 || newPosFile > 7))
                                     break;
-                                ;
                                 ray.Add(newPos);
-
                                 coordsNum++;
                             }
                             rays.Add(ray);
                         }
                         rayArray[i][j, k] = rays;
-
                     }
-
                 }
-
             }
-        
         }
 
+
+        /* Generates the rays for use by the GetPieceRayPawnCapture procedure. This method is called at the start of
+        the program to eliminate the time cost of computing these rays on a as-i-need-it while the game
+        is running.*/
         public void GeneratePawnRays()
         {
             // 2 unique pawn pieces
             rayArrayPawnCapture = new List<List<Tuple<int, int>>>[2][,];
-            CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(GamePieces.WhitePawn);
-            CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(GamePieces.BlackPawn);
+            CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(EGamePieces.WhitePawn);
+            CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(EGamePieces.BlackPawn);
 
             rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[8, 8]; // white
             rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[8, 8]; // black
@@ -543,112 +493,8 @@ namespace chess.Util
 
                     rayArrayPawnCapture[0][j, k] = whiteRays;
                     rayArrayPawnCapture[1][j, k] = blackRays;
-
                 }
             }
-
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /* Potentially deprecated */
-        //private List<Tuple<int, int>> CoordsPieceOnACanMoveTo(Tuple<int, int> posA, MovementStyle style, ChessPosition cpm)
-        //{
-        //    List<Tuple<int, int>> coordsPieceACanMoveTo = new List<Tuple<int, int>>();
-        //    foreach (Tuple<int, int> direction in style.dirs)
-        //    {
-        //        int coordsNum = 1;
-        //        while (coordsNum <= style.maxIterations)
-        //        {
-        //            Tuple<int, int> newPos;
-        //            int newPosRank = posA.Item1 + (coordsNum * direction.Item1);
-        //            int newPosFile = posA.Item2 + (coordsNum * direction.Item2);
-        //            newPos = Tuple.Create(newPosRank, newPosFile);
-        //            // if the newPos is not on the board, dont add it to the list
-        //            // and break since movement along this direction cannot continue
-        //            if ((newPosRank < 0 || newPosRank > 7) ||
-        //                (newPosFile < 0 || newPosFile > 7))
-        //                break;
-        //            // if the newPos is occupied by a non e, then movement along this path is blocked
-        //            // so dont add it to the list and also break since movement cannot continue
-        //            if (!cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
-        //                break;
-        //            //otherwise its empty so add it to the coords and continue along the path
-        //            // no index error since already checked its not off the board
-        //            if (cpm.Board[newPos.Item1, newPos.Item2].IsEmpty())
-        //                coordsPieceACanMoveTo.Add(newPos);
-
-
-        //            coordsNum ++;
-        //        }
-        //    }
-
-        //    return coordsPieceACanMoveTo;
-        //}
-
-
-        /* Potentially deprecated */
-        //private List<Tuple<int, int>> getCoordsWithPiecesPieceACanCapture(Tuple<int, int> posA, CaptureStyle style, TileStruct[,] board)
-        //{
-        //    List<Tuple<int, int>> coordsPieceACanCapture = new List<Tuple<int, int>>();
-        //    char posAPlayer = ((int)board[posA.Item1, posA.Item2].piece.Val < 6) ? 'w' : 'b';
-        //    // foreach move direction form a list of any coords which have tiles can be captured (one per direction at most)
-        //    foreach (Tuple<int, int> attackDirection in style.dirs)
-        //    {
-        //        int coordsNum = 1;
-        //        while (coordsNum <= style.maxIterations)
-        //        {
-        //            //generate the new coordinate by adding 1 unit of direction to the initial posA
-        //            Tuple<int, int> newPos;
-        //            int newPosRank = posA.Item1 + (coordsNum * attackDirection.Item1);
-        //            int newPosFile = posA.Item2 + (coordsNum * attackDirection.Item2);
-        //            newPos = Tuple.Create(newPosRank, newPosFile);
-        //            // if the newPos is not on the board, dont add it to the list
-        //            // and break since movement along this direction cannot continue
-        //            if ((newPosRank < 0 || newPosRank > 7) ||
-        //                (newPosFile < 0 || newPosFile > 7))
-        //                break;
-        //            // if reach a piece and the piece is not empty
-        //            if (!board[newPos.Item1, newPos.Item2].IsEmpty())
-        //            {
-        //                //and the piece is of opponent
-        //                char owner = ((int)board[newPos.Item1, newPos.Item2].piece.Val < 6) ? 'w' : 'b';
-        //                if (owner != posAPlayer)
-        //                {
-        //                    coordsPieceACanCapture.Add(newPos);
-        //                    // add it to the list
-        //                    break;
-        //                }
-
-        //                // else its own piece
-        //                else
-        //                    break;
-        //            }
-        //            // otherwise its empty so the attack direction is not blocked etc
-        //            coordsNum++;
-        //        }
-        //    }
-
-
-
-
-        //    return coordsPieceACanCapture;
-        //}
-
     }
 }

@@ -28,7 +28,7 @@ namespace chess.Model
         /// <summary>
         /// Returns a list containing the pieces captured so far.
         /// </summary>
-        List<GamePieces> PiecesCapd { get; }
+        List<EGamePieces> PiecesCapd { get; }
 
         Player Player { get; set; }
 

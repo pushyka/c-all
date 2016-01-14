@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
-    public enum GamePieces
+    public enum EGamePieces
     {
         WhitePawn,
         WhiteRook,
@@ -24,8 +24,4 @@ namespace chess.Model
         X,
         O
     }
-
-    public enum GameControlState { PreInitial = 1, Initial, Ready, GameInProgress, GameEnded, Load, Settings }
-
-    public enum GameModels { Chess, TicTacToe}
 }

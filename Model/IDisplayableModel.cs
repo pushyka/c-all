@@ -27,6 +27,6 @@ namespace chess.Model
 
         TileStruct[,] Board { get; }
 
-        List<GamePieces> PiecesCapd { get; }
+        List<EGamePieces> PiecesCapd { get; }
     }
 }

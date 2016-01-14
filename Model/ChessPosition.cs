@@ -14,7 +14,7 @@ namespace chess.Model
         protected Dictionary<char, bool> castle;
         protected Tuple<int, int> enPassantSq;
         protected int halfmoveClock;
-        protected List<GamePieces> piecesCapd;//x2 
+        protected List<EGamePieces> piecesCapd;//x2 
 
         // used when creating a chess position model
         protected ChessPosition() { } 
@@ -26,7 +26,7 @@ namespace chess.Model
                              Dictionary<char, bool> castle,
                              Tuple<int, int> enPassantSq,
                              int halfmoveClock,
-                             List<GamePieces> piecesCapd)
+                             List<EGamePieces> piecesCapd)
         {
             this.dim = dim;
             this.board = board;
@@ -42,26 +42,23 @@ namespace chess.Model
         
 
 
-        /// <summary>
-        /// The Entry point for move application, this method
-        /// selects the appropriate type of move to make based on moveType
-        /// </summary>
-        /// <param name="move"></param>
-        /// <param name="moveType"></param>
-        public void applyMove(FormedMove move, string moveType)
+        
+        /* The Entry point for move application, this method
+        selects the appropriate type of move to make based on moveType*/
+        public void applyMove(FormedMove move, EChessMoveTypes moveType)
         {
             switch (moveType)
             {
-                case "castle":
+                case EChessMoveTypes.Castle:
                     applyCastle(move);
                     break;
-                case "capture":
+                case EChessMoveTypes.Capture:
                     applyCapture(move);
                     break;
-                case "movement":
+                case EChessMoveTypes.Movement:
                     applyMovement(move);
                     break;
-                case "enpassantcapture":
+                case EChessMoveTypes.EpMovement:
                     applyEnPassantCapture(move);
                     break;
                 default:
@@ -87,7 +84,7 @@ namespace chess.Model
             TileStruct toSqTl = getTile(toSqPos);
 
             //  if moving piece is a pawn and its its first move
-            if ((frSqTl.piece.Val == GamePieces.WhitePawn || frSqTl.piece.Val == GamePieces.BlackPawn) &&
+            if ((frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn) &&
                 (!frSqTl.piece.MovedOnce))
             {
                 //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
@@ -99,13 +96,13 @@ namespace chess.Model
                 frSqTl.piece.MovedOnce = true;
             }
             // if moving piece is a pawn check if its promoted
-            if (frSqTl.piece.Val == GamePieces.WhitePawn || frSqTl.piece.Val == GamePieces.BlackPawn)
+            if (frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn)
                 if (checkPromotion(frSqTl, toSqPos))
                 {
                     // then prompt player for piece to change pawn to
                     // atm just do queen
                     // update it to the new selection
-                    GamePieces q = ((frSqTl.piece.Val == GamePieces.WhitePawn)) ? GamePieces.WhiteQueen : GamePieces.BlackQueen;
+                    EGamePieces q = ((frSqTl.piece.Val == EGamePieces.WhitePawn)) ? EGamePieces.WhiteQueen : EGamePieces.BlackQueen;
                     // fix later
                     frSqTl = new TileStruct(new Piece(q));
                 }
@@ -134,13 +131,13 @@ namespace chess.Model
             TileStruct frSqTl = getTile(frSqPos);
 
             // if moving piece is a pawn check if its promoted
-            if (frSqTl.piece.Val == GamePieces.WhitePawn || frSqTl.piece.Val == GamePieces.BlackPawn)
+            if (frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn)
                 if (checkPromotion(frSqTl, toSqPos))
                 {
                     // then prompt player for piece to change pawn to
                     // atm just do queen
                     // update it to the new selection
-                    GamePieces q = ((int)frSqTl.piece.Val < 6) ? GamePieces.WhiteQueen : GamePieces.BlackQueen;
+                    EGamePieces q = ((int)frSqTl.piece.Val < 6) ? EGamePieces.WhiteQueen : EGamePieces.BlackQueen;
                     frSqTl = new TileStruct(new Piece(q));
                 }
             // move the piece to the to square (copy)
@@ -173,10 +170,10 @@ namespace chess.Model
             int passantSquareLocFile = toSquareLoc.Item2;
             passantSquareLoc = Tuple.Create(passantSquareLocRank, passantSquareLocFile);
             TileStruct passantSquareVal = getTile(passantSquareLoc);
+
             updateTileWithPiece(passantSquareLoc, null);
             // add the passant square to the captured list
-            addToCaptured(passantSquareVal.piece.Val);
-            //System.Console.WriteLine("en passant move registered");
+            addToCaptured(passantSquareVal.piece.Val); // this shouldnt be after the set of the val on loc to null...
 
         }
 
@@ -197,8 +194,8 @@ namespace chess.Model
         private bool checkPromotion(TileStruct frSqTl, Tuple<int, int> toSqPos)
         {
             bool isP = false;
-            if ((frSqTl.piece.Val == GamePieces.WhitePawn && toSqPos.Item1 == 0) ||
-                (frSqTl.piece.Val == GamePieces.BlackPawn && toSqPos.Item1 == dim - 1))
+            if ((frSqTl.piece.Val == EGamePieces.WhitePawn && toSqPos.Item1 == 0) ||
+                (frSqTl.piece.Val == EGamePieces.BlackPawn && toSqPos.Item1 == dim - 1))
             {
                 isP = true;
                 System.Console.WriteLine("PROMOTION TOOK PLACE");
@@ -256,7 +253,7 @@ namespace chess.Model
         /// same reasoning as above function
         /// </summary>
         /// <param name="piece"></param>
-        protected virtual void addToCaptured(GamePieces piece)
+        protected virtual void addToCaptured(EGamePieces piece)
         {
             this.piecesCapd.Add(piece);
         }
@@ -286,7 +283,7 @@ namespace chess.Model
                     if (!board[j,k].IsEmpty())
                     {
                         Piece piece = board[j, k].piece;
-                        GamePieces val = piece.Val;
+                        EGamePieces val = piece.Val;
                         bool mv = piece.MovedOnce;
                         Piece pieceCopy = new Piece(val);
                         pieceCopy.MovedOnce = mv;
@@ -309,7 +306,7 @@ namespace chess.Model
             // halfmove clock
             int halfmoveClockCopy = halfmoveClock;
             //capdsofar
-            List<GamePieces> piecesCapdCopy = new List<GamePieces>(piecesCapd);
+            List<EGamePieces> piecesCapdCopy = new List<EGamePieces>(piecesCapd);
             ChessPosition cpos = new ChessPosition(dimCopy,
                                               boardCopy,
                                               playerCopy,

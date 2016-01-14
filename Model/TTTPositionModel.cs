@@ -34,7 +34,7 @@ namespace chess.Model
             {
                 for (int col = 0; col < this.dim; col ++)
                 {
-                    this.board[row, col] = new TileStruct(new Piece(GamePieces.empty));
+                    this.board[row, col] = new TileStruct(new Piece(EGamePieces.empty));
                 }
             }
         }
@@ -56,7 +56,7 @@ namespace chess.Model
         public bool validateMove(FormedMove move)
         {
             Tuple<int, int> location = move.PosA;
-            return this.board[location.Item1, location.Item2].piece.Val == GamePieces.empty;
+            return this.board[location.Item1, location.Item2].piece.Val == EGamePieces.empty;
         }
 
 
@@ -68,9 +68,9 @@ namespace chess.Model
             Tuple<int, int> location = move.PosA;
             Piece playerPiece;
             if (this.player.CurPlayer == "O")
-                playerPiece = new Piece(GamePieces.O);
+                playerPiece = new Piece(EGamePieces.O);
             else
-                playerPiece = new Piece(GamePieces.X);
+                playerPiece = new Piece(EGamePieces.X);
             ;
             updateTileWithPiece(location, playerPiece);
             turns += 1;
@@ -104,8 +104,8 @@ namespace chess.Model
         public bool IsWinningPosition(ref string winner)
         {
             bool isWin = false;
-            GamePieces[] players = new GamePieces[] { GamePieces.X, GamePieces.O };
-            foreach (GamePieces player in players)
+            EGamePieces[] players = new EGamePieces[] { EGamePieces.X, EGamePieces.O };
+            foreach (EGamePieces player in players)
             {
                 // check verticals
                 if ((board[0, 0].piece.Val == player && board[1, 0].piece.Val == player && board[2, 0].piece.Val == player) ||
@@ -169,7 +169,7 @@ namespace chess.Model
             }
         }
 
-        public List<GamePieces> PiecesCapd
+        public List<EGamePieces> PiecesCapd
         {
             get
             {

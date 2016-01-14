@@ -14,14 +14,14 @@ namespace chess.Controller
         /// Instantiates the game objects, models and utilities.
         /// </summary>
         /// <param name="model"></param>
-        void InitialiseModel(GameModels model);
+        void InitialiseModel(EGameModels model);
 
 
         /// <summary>
         /// Removes the game objects, models and utilities.
         /// </summary>
         /// <param name="model"></param>
-        void UnInitialiseModel(GameModels model);
+        void UnInitialiseModel(EGameModels model);
 
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace chess.Controller
         /// <summary>
         /// Once everything is prepared, starts the loop thread for the game.
         /// </summary>
-        void StartGameLoop(GameModels model);
+        void StartGameLoop(EGameModels model);
 
 
         /// <summary>

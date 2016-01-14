@@ -21,7 +21,7 @@ namespace chess.Controller
         
         private string input;
         private string message;
-        private GameControlState state;
+        private EGameControlState state;
 
         private IDisplayableModel gameModel;
         private Evaluator evaluator;
@@ -34,26 +34,26 @@ namespace chess.Controller
             gameModel = null;
             evaluator = null;
             t = null;
-            state = GameControlState.PreInitial;
+            state = EGameControlState.PreInitial;
            
         }
 
 
-        public void InitialiseModel(GameModels model)
+        public void InitialiseModel(EGameModels model)
         {
             switch(model)
             {
-                case GameModels.Chess:
+                case EGameModels.Chess:
                     gameModel = new ChessPositionModel();
                     evaluator = new Evaluator();
                     evaluator.GenerateRays();
                     evaluator.GeneratePawnRays();
                     break;
-                case GameModels.TicTacToe:
+                case EGameModels.TicTacToe:
                     gameModel = new TTTPositionModel();
                     break;
             }
-            state = GameControlState.Initial;
+            state = EGameControlState.Initial;
 
 
         }
@@ -61,14 +61,14 @@ namespace chess.Controller
         public void testStuff()
         {
             // preloaded array
-            evaluator.GetPieceRay(GamePieces.BlackRook, Tuple.Create(3, 6));
+            evaluator.GetPieceRay(EGamePieces.BlackRook, Tuple.Create(3, 6));
         }
 
-        public void UnInitialiseModel(GameModels model)
+        public void UnInitialiseModel(EGameModels model)
         {
             gameModel = null;
             evaluator = null;
-            state = GameControlState.PreInitial;
+            state = EGameControlState.PreInitial;
         }
         
        
@@ -76,7 +76,7 @@ namespace chess.Controller
         {
             gameModel.Setup();
             gameModel.SetPlayer();
-            state = GameControlState.Ready;
+            state = EGameControlState.Ready;
             //this.Message = "Game is setup";
             
         }
@@ -89,7 +89,7 @@ namespace chess.Controller
             input = null;
             message = null;
             gameModel.Player = null;
-            state = GameControlState.Initial;
+            state = EGameControlState.Initial;
             this.Message = "Game is terminated";
         }
 
@@ -104,20 +104,20 @@ namespace chess.Controller
         }
 
 
-        public void StartGameLoop(GameModels model)
+        public void StartGameLoop(EGameModels model)
         {
             switch(model)
             {
-                case GameModels.Chess:
+                case EGameModels.Chess:
                     t = new Thread(ChessGameLoop);
                     break;
-                case GameModels.TicTacToe:
+                case EGameModels.TicTacToe:
                     t = new Thread(TTTGameLoop);
                     break;
             }
-            if (state == GameControlState.Ready)
+            if (state == EGameControlState.Ready)
                 t.Start();
-                state = GameControlState.GameInProgress;
+                state = EGameControlState.GameInProgress;
                 //this.Message = "Game has started";
         }
 
@@ -126,7 +126,7 @@ namespace chess.Controller
             // get the explicit type of model since evaluator only works with
             // specifically the chess position model types
             ChessPositionModel cpm = (ChessPositionModel)this.gameModel;
-            string moveType;
+            EChessMoveTypes moveType;
             FormedMove move;
             string winner = null;
             List<Tuple<int, int>> kingCheckedBy = new List<Tuple<int, int>>();
@@ -137,7 +137,7 @@ namespace chess.Controller
                 
                 // start of new turn, clear variables
                 move = null;
-                moveType = null;
+                moveType = EChessMoveTypes.None;
                 kingCheckedBy.Clear();
 
 
@@ -316,7 +316,7 @@ namespace chess.Controller
             }
         }
 
-        public GameControlState State
+        public EGameControlState State
         {
             get
             {

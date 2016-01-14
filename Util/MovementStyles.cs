@@ -28,13 +28,13 @@ namespace chess.Util
         }
 
         // the preloadray array doesnt have piece objects
-        public static MovementStyle getMovementStyle(GamePieces piece)
+        public static MovementStyle getMovementStyle(EGamePieces piece)
         {
             return new MovementStyle(new Piece(piece));
         }
 
         // the preloadray array doesnt have piece objects
-        public static CaptureStyle getCaptureStyle(GamePieces piece)
+        public static CaptureStyle getCaptureStyle(EGamePieces piece)
         {
             return new CaptureStyle(new Piece(piece));
         }

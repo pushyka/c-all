@@ -25,7 +25,7 @@ namespace chess.View
         private LoadForm loadform;
         private string USRMOVE = "";
         private List<Control> tintRef = null;
-        private GameModels selectedGameModel;
+        private EGameModels selectedGameModel;
 
         // dictionaries for quick conversion from coordinates to file/rank
         private Dictionary<int, char> colToFile = new Dictionary<int, char>
@@ -51,23 +51,23 @@ namespace chess.View
             {7, 1}
         };
 
-        private Dictionary<GamePieces, Image> gamePieces = new Dictionary<GamePieces, Image>
+        private Dictionary<EGamePieces, Image> gamePieces = new Dictionary<EGamePieces, Image>
         {
             
-            {GamePieces.BlackKing, chess.Properties.Resources.Chess_kdt60},
-            {GamePieces.BlackQueen, chess.Properties.Resources.Chess_qdt60},
-            {GamePieces.BlackBishop, chess.Properties.Resources.Chess_bdt60},
-            {GamePieces.BlackKnight, chess.Properties.Resources.Chess_ndt60},
-            {GamePieces.BlackRook, chess.Properties.Resources.Chess_rdt60},
-            {GamePieces.BlackPawn, chess.Properties.Resources.Chess_pdt60},
-            {GamePieces.WhiteKing, chess.Properties.Resources.Chess_klt60},
-            {GamePieces.WhiteQueen, chess.Properties.Resources.Chess_qlt60},
-            {GamePieces.WhiteBishop, chess.Properties.Resources.Chess_blt60},
-            {GamePieces.WhiteKnight, chess.Properties.Resources.Chess_nlt60},
-            {GamePieces.WhiteRook, chess.Properties.Resources.Chess_rlt60},
-            {GamePieces.WhitePawn, chess.Properties.Resources.Chess_plt60},
-            {GamePieces.O, chess.Properties.Resources.game_piece_oh},
-            {GamePieces.X, chess.Properties.Resources.game_piece_ex}
+            {EGamePieces.BlackKing, chess.Properties.Resources.Chess_kdt60},
+            {EGamePieces.BlackQueen, chess.Properties.Resources.Chess_qdt60},
+            {EGamePieces.BlackBishop, chess.Properties.Resources.Chess_bdt60},
+            {EGamePieces.BlackKnight, chess.Properties.Resources.Chess_ndt60},
+            {EGamePieces.BlackRook, chess.Properties.Resources.Chess_rdt60},
+            {EGamePieces.BlackPawn, chess.Properties.Resources.Chess_pdt60},
+            {EGamePieces.WhiteKing, chess.Properties.Resources.Chess_klt60},
+            {EGamePieces.WhiteQueen, chess.Properties.Resources.Chess_qlt60},
+            {EGamePieces.WhiteBishop, chess.Properties.Resources.Chess_blt60},
+            {EGamePieces.WhiteKnight, chess.Properties.Resources.Chess_nlt60},
+            {EGamePieces.WhiteRook, chess.Properties.Resources.Chess_rlt60},
+            {EGamePieces.WhitePawn, chess.Properties.Resources.Chess_plt60},
+            {EGamePieces.O, chess.Properties.Resources.game_piece_oh},
+            {EGamePieces.X, chess.Properties.Resources.game_piece_ex}
         };
 
         public Display(GameController gc)
@@ -217,10 +217,10 @@ namespace chess.View
         private void menuItemChess_Click(object sender, EventArgs e)
         {
             // if a game was already in progress, clear it first
-            if (this.gameController.State == GameControlState.GameInProgress)
+            if (this.gameController.State == EGameControlState.GameInProgress)
                 abandonGameToolStripMenuItem_Click(null, null);
 
-            this.selectedGameModel = GameModels.Chess;
+            this.selectedGameModel = EGameModels.Chess;
 
             // Model
             this.gameController.InitialiseModel(this.selectedGameModel);
@@ -256,10 +256,10 @@ namespace chess.View
         private void menuItemTTT_Click(object sender, EventArgs e)
         {
             // if a game was already in progress, clear it first
-            if (this.gameController.State == GameControlState.GameInProgress)
+            if (this.gameController.State == EGameControlState.GameInProgress)
                 abandonGameToolStripMenuItem_Click(null, null);
 
-            this.selectedGameModel = GameModels.TicTacToe;
+            this.selectedGameModel = EGameModels.TicTacToe;
 
             // Model
             this.gameController.InitialiseModel(this.selectedGameModel);
@@ -318,17 +318,17 @@ namespace chess.View
         }
 
 
-        private void deregisterHandlers(GameModels model)
+        private void deregisterHandlers(EGameModels model)
         {
             switch(model)
             {
-                case GameModels.Chess:
+                case EGameModels.Chess:
                     this.gameController.Model.BoardChanged -= ChessBoardChanged;
                     this.gameController.PropertyChanged -= message_PropertyChanged;
                     this.gameController.Model.CapturedChanged -= ChessBoardCaptureChanged;
                     this.gameController.Model.PlayerChanged -= ChessBoardPlayerChanged;
                     break;
-                case GameModels.TicTacToe:
+                case EGameModels.TicTacToe:
                     this.gameController.PropertyChanged -= message_PropertyChanged;
                     this.gameController.Model.PlayerChanged -= TTTBoardPlayerChanged;
                     this.gameController.Model.BoardChanged -= TTTBoardChanged;
@@ -337,7 +337,7 @@ namespace chess.View
 
         }
 
-        private void resetView(GameModels model)
+        private void resetView(EGameModels model)
         {
             // clear the view tiles and remove it from the view
             this.genericBoardBase.Controls.Clear();
@@ -346,13 +346,13 @@ namespace chess.View
 
             switch(model)
             {
-                case GameModels.Chess:
+                case EGameModels.Chess:
                     this.blackPiecesCaptured.Controls.Clear();
                     this.whitePiecesCaptured.Controls.Clear();
                     this.white_turn_panel.Visible = false;
                     this.black_turn_panel.Visible = false;
                     break;
-                case GameModels.TicTacToe:
+                case EGameModels.TicTacToe:
                     break;
             }
 
@@ -366,7 +366,7 @@ namespace chess.View
 
 
 
-        private PictureBox getGuiPiece(GamePieces mPiece)
+        private PictureBox getGuiPiece(EGamePieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";
@@ -378,7 +378,7 @@ namespace chess.View
             return pb;
         }
 
-        private PictureBox getGuiPiece2(GamePieces mPiece)
+        private PictureBox getGuiPiece2(EGamePieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";
@@ -410,10 +410,10 @@ namespace chess.View
 
             switch(selectedGameModel)
             {
-                case GameModels.Chess:
+                case EGameModels.Chess:
                     processChessClicks(sender, e);
                     break;
-                case GameModels.TicTacToe:
+                case EGameModels.TicTacToe:
                     processTTTClicks(sender, e);
                     break;
             }
@@ -585,7 +585,7 @@ namespace chess.View
 
                     // corresponding gui position
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
-                    GamePieces mPiece;
+                    EGamePieces mPiece;
                     if (!this.gameController.Model.Board[pos.Item1, pos.Item2].IsEmpty())
                     {
                         mPiece = this.gameController.Model.Board[pos.Item1, pos.Item2].piece.Val;
@@ -593,7 +593,7 @@ namespace chess.View
                     else
                     {
                         // give it the empty value
-                        mPiece = GamePieces.empty;
+                        mPiece = EGamePieces.empty;
                     }
 
                     // remove all existing items on the tile (picture boxes if any)
@@ -610,7 +610,7 @@ namespace chess.View
                         PictureBox gPiece = getGuiPiece(mPiece);
                         gTile.Controls.Add(gPiece);
                     }
-                    else if (mPiece == GamePieces.empty)
+                    else if (mPiece == EGamePieces.empty)
                     {
                         // then the clearing is already done
                     }
@@ -701,7 +701,7 @@ namespace chess.View
                 try
                 {
                     // get the last item
-                    GamePieces capturedPiece = gameController.Model.PiecesCapd[gameController.Model.PiecesCapd.Count - 1];
+                    EGamePieces capturedPiece = gameController.Model.PiecesCapd[gameController.Model.PiecesCapd.Count - 1];
                     ;
                     // uses version of the function which doesnt add click handler
                     PictureBox gCapturedPiece = getGuiPiece2(capturedPiece);
@@ -817,14 +817,14 @@ namespace chess.View
                 List<Tuple<int, int>> positionsChanged = e.PositionsChanged;
                 foreach (Tuple<int, int> pos in positionsChanged)
                 {
-                    GamePieces mPiece;
+                    EGamePieces mPiece;
                     // corresponding gui position
                     // all my code treats coords in the row,col order but this function uses col,row order
                     Panel gTile = (Panel)this.genericBoardBase.GetControlFromPosition(pos.Item2, pos.Item1);
                     if (!this.gameController.Model.Board[pos.Item1, pos.Item2].IsEmpty())
                         mPiece = this.gameController.Model.Board[pos.Item1, pos.Item2].piece.Val;
                     else
-                        mPiece = GamePieces.empty;
+                        mPiece = EGamePieces.empty;
                     if (gamePieces.ContainsKey(mPiece))
                     {
                         // getguipiece2 is the version which doesnt add a click handler on to the piece
