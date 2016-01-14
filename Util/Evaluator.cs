@@ -178,6 +178,7 @@ namespace chess.Util
             return tileB.IsEmpty();
         }
 
+
         /* Takes a move which so far meets the requirements for a Movement type
         move on the chess board. This function checks that one of the moving piece's 
         rays covers this move object (The piece itself can move in this direction/way)
@@ -220,79 +221,52 @@ namespace chess.Util
         }
 
 
-
-
-
-        #region TODO REFACTOR ENPASSANT CODES
-
+        /* Takes a move which so far meets the requirements for an EnPassant type
+        move on the chess board. This function checks that one of the moving pawn's 
+        diagonal rays covers this move object (The piece itself can move in this direction/way)
+        and that the corresponding enpassant capture tile for this movement contains
+        an enemy pawn piece to capture.*/
         private bool IsEnPassantCaptureLegal(FormedMove move, ChessPosition cpm)
         {
-
-            List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = getCoordsPieceALegallyMoveEnPassantToPosB(move, cpm);
-            return coordsPieceACanMoveEnPassantTo.Contains(move.PosB);
-
-        }
-
-        private List<Tuple<int, int>> getCoordsPieceALegallyMoveEnPassantToPosB(FormedMove move, ChessPosition cpm)
-        {
-            
-            // THE EN PASSANT CAPTURE IS A ->MOVE<- WITH A SECONDARY CAPTURE SIDE EFFECT
-            // check the positions adjacent to the posA:
-            // IF they -contain an enemy pawn
-            //         -the enemy pawn is.canBeCapturedEnPassant (this also implies the capturing pawn is in correct position)
-            // THEN add the diagonal coord to coordspieceacancapture
-            List<Tuple<int, int>> coordsPieceACanMoveEnPassantTo = new List<Tuple<int, int>>();
+            bool isLegalEnPassantCapture = true;
             Tuple<int, int> posA = move.PosA;
-            TileStruct pieceOnPosA = cpm.Board[posA.Item1, posA.Item2];
-            char posAPlayer = ((int)pieceOnPosA.piece.Val < 6) ? 'w' : 'b';
-            if (pieceOnPosA.piece.Val == GamePieces.WhitePawn || pieceOnPosA.piece.Val == GamePieces.BlackPawn)
+            Tuple<int, int> posB = move.PosB;
+            TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
+            List<List<Tuple<int, int>>> epMovementRays;
+            // get attack ray for the pawn on tileA
+            // these are the movement rays in the case of EP
+            epMovementRays = GetPawnRay(tileA.piece.Val, posA);
+            List<Tuple<int, int>> moveRayUsed = null;
+            foreach(List<Tuple<int, int>> ray in epMovementRays)
             {
-                ;
-                CaptureStyle style = MovementStyles.getCaptureStyle(pieceOnPosA.piece);
-                foreach (Tuple<int, int> attackDirection in style.dirs)
+                if (ray.Contains(posB))
                 {
-                    Tuple<int, int> attackPos;
-                    int attackPosRank = posA.Item1 + attackDirection.Item1;
-                    int attackPosFile = posA.Item2 + attackDirection.Item2;
-                    attackPos = Tuple.Create(attackPosRank, attackPosFile);
-
-                    Tuple<int, int> passantPos;
-                    int passantPosRank = posA.Item1; // adjacent
-                    int passantPosFile = attackPosFile;
-                    passantPos = Tuple.Create(passantPosRank, passantPosFile);
-                    if ((passantPosRank < 0 || passantPosRank > 7) ||
-                        (passantPosFile < 0 || passantPosFile > 7))
-                        break;
-                    ; // correct here
-                    TileStruct pieceOnPassantPos = cpm.Board[passantPos.Item1, passantPos.Item2];
-                    // if passant piece is a pawn
-                    ;
-                    // check if this is a rule, can ALSO capture any other piece with enpassant
-                    // add a NotEmpty check
-                    if (pieceOnPassantPos.piece.Val == GamePieces.WhitePawn || pieceOnPassantPos.piece.Val == GamePieces.BlackPawn)
-                    {
-                        // and its the other players piece
-                        char pieceOnPassantPosOwner = ((int)pieceOnPassantPos.piece.Val < 6) ? 'w' : 'b';
-                        if (pieceOnPassantPosOwner != posAPlayer)
-                        {
-                            // and it can be captured enpassant
-
-                            if (passantPos.Equals(cpm.EnPassantSq))
-                            {
-                                // then add the attackPos to the list of valid capture to positions
-                                coordsPieceACanMoveEnPassantTo.Add(attackPos);
-                            }
-
-                        }
-                    }
+                    moveRayUsed = ray;
+                    break;
                 }
             }
-            // in the apply move function as a capture, and the piece is  pawn and there IS NOTHING in the posB, then this means it was
-            // an en passant capture.
-            return coordsPieceACanMoveEnPassantTo;
-        }
+            // so at this point:
+            // have posA and posB and it is a valid enpassant-type
+            // movement (diagonal to empty square)
 
-        #endregion
+            if (moveRayUsed != null)
+            {
+                // continue checking ep position
+                int epX = posB.Item2;
+                int epY = posA.Item1;
+                Tuple<int, int> posEP = Tuple.Create(epY, epX);
+                // if this computed ep square between posA and posB does not 
+                // match the currently valid EnPassantSq, then this is not
+                // a valid EP capture
+                if (!posEP.Equals(cpm.EnPassantSq))
+                    isLegalEnPassantCapture = false;
+
+            }
+            else
+                isLegalEnPassantCapture = false;
+
+            return isLegalEnPassantCapture;
+        }
 
 
         /* Takes a move which so far meets the requirements for a Capture type

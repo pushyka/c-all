@@ -266,7 +266,7 @@
             this.customeOutlineLabel2.Name = "customeOutlineLabel2";
             this.customeOutlineLabel2.OutlineColour = System.Drawing.Color.Black;
             this.customeOutlineLabel2.OutlineColourWidth = 2F;
-            this.customeOutlineLabel2.Size = new System.Drawing.Size(840, 176);
+            this.customeOutlineLabel2.Size = new System.Drawing.Size(840, 224);
             this.customeOutlineLabel2.TabIndex = 1;
             this.customeOutlineLabel2.Text = resources.GetString("customeOutlineLabel2.Text");
             // 
