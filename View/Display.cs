@@ -51,7 +51,7 @@ namespace chess.View
             {7, 1}
         };
 
-        private Dictionary<EGamePieces, Image> gamePieces = new Dictionary<EGamePieces, Image>
+        private static Dictionary<EGamePieces, Image> gamePieces = new Dictionary<EGamePieces, Image>
         {
             
             {EGamePieces.BlackKing, chess.Properties.Resources.Chess_kdt60},
@@ -378,7 +378,9 @@ namespace chess.View
             return pb;
         }
 
-        private PictureBox getGuiPiece2(EGamePieces mPiece)
+
+        /* This function used also for creating the promotion selection dialogue */
+        public static PictureBox getGuiPiece2(EGamePieces mPiece)
         {
             PictureBox pb = new PictureBox();
             pb.Name = "pb";

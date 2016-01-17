@@ -69,12 +69,10 @@ namespace chess.Model
             // fire the event (board changed)
         }
 
-        /// <summary>
-        /// Applies a formed move to the current state of the board.
-        /// The formed move has already been validated so this function 
-        /// simply performs the MOVE operation on the game board. 
-        /// </summary>
-        /// <param name="input"></param>
+        /* Apply a movement type move to the board. This move has already been validated by
+        the evaluator and found to be legal. If the moving piece is a pawn, need to update the
+        movedOnce value, determine if it can be captured enPassant next turn and determine if it
+        requires promotion.*/
         private void applyMovement(FormedMove move)
         {
             Tuple<int, int> frSqPos = move.PosA;
@@ -83,30 +81,39 @@ namespace chess.Model
             TileStruct frSqTl = getTile(frSqPos);
             TileStruct toSqTl = getTile(toSqPos);
 
+            Piece mvPiece = frSqTl.piece;
+
+            #region MOVE PAWN STUFF TO END
             //  if moving piece is a pawn and its its first move
-            if ((frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn) &&
-                (!frSqTl.piece.MovedOnce))
+            if (mvPiece.Val == EGamePieces.WhitePawn ||
+                mvPiece.Val == EGamePieces.BlackPawn)
             {
-                //if it moved 2 tiles (abs difference between fromsqloc.y and tsqloc.y)
-                if (Math.Abs((frSqPos.Item1 - toSqPos.Item1)) == 2)
+                // if it has moved two squares on its first move it can be captured en passant
+                if (!mvPiece.MovedOnce && mvTwoTiles(frSqPos, toSqPos))
                 {
                     this.enPassantSq = toSqPos;
                 }
-                // the pawn has been moved atleast once so
-                frSqTl.piece.MovedOnce = true;
-            }
-            // if moving piece is a pawn check if its promoted
-            if (frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn)
-                if (checkPromotion(frSqTl, toSqPos))
+                mvPiece.MovedOnce = true;
+                // if it has reached the opposite side rank it can be promoted
+                if (toSqIsHighRank(toSqPos))
                 {
-                    // then prompt player for piece to change pawn to
-                    // atm just do queen
-                    // update it to the new selection
-                    EGamePieces q = ((frSqTl.piece.Val == EGamePieces.WhitePawn)) ? EGamePieces.WhiteQueen : EGamePieces.BlackQueen;
-                    // fix later
-                    frSqTl = new TileStruct(new Piece(q));
-                }
+                    Piece selectedUpgrPiece;
+                    EGamePieces selectedUpgrVal;
 
+                    View.PromotionSelection promotionSelection = new View.PromotionSelection(mvPiece);
+                    if (promotionSelection.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        selectedUpgrVal = promotionSelection.SelectedPiece;
+                        promotionSelection.Dispose();
+                        selectedUpgrPiece = new Piece(selectedUpgrVal);
+                        frSqTl = new TileStruct(selectedUpgrPiece);
+                        
+                    }
+
+                }
+            }
+
+            #endregion
 
             // move the piece to the to square (copy)
             updateTileWithPiece(toSqPos, frSqTl.piece);
@@ -132,7 +139,7 @@ namespace chess.Model
 
             // if moving piece is a pawn check if its promoted
             if (frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn)
-                if (checkPromotion(frSqTl, toSqPos))
+                if (toSqIsHighRank(toSqPos))
                 {
                     // then prompt player for piece to change pawn to
                     // atm just do queen
@@ -191,20 +198,22 @@ namespace chess.Model
             // todo
         }
 
-        private bool checkPromotion(TileStruct frSqTl, Tuple<int, int> toSqPos)
+
+        /* A pawn is moving to toSqPos. This has already been established
+        Don't need to check the colour of the pawn since by the rules of the game
+        a black pawn can only move to dim-1 and a white pawn can only move to 0 ranks.
+        (only moves forwards) so IF a pawn is mvoing on to toSqPos, only then is the function called,
+        and can assume the color of the pawn is correct. */
+        private bool toSqIsHighRank(Tuple<int, int> toSqPos)
         {
-            bool isP = false;
-            if ((frSqTl.piece.Val == EGamePieces.WhitePawn && toSqPos.Item1 == 0) ||
-                (frSqTl.piece.Val == EGamePieces.BlackPawn && toSqPos.Item1 == dim - 1))
-            {
-                isP = true;
-                System.Console.WriteLine("PROMOTION TOOK PLACE");
-            }
-                
-
-
-            return isP;
+            return ((toSqPos.Item1 == 0) || (toSqPos.Item1 == dim - 1));
         }
+
+        private bool mvTwoTiles(Tuple<int, int> frSqPos, Tuple<int, int> toSqPos)
+        {
+            return Math.Abs(frSqPos.Item1 - toSqPos.Item1) == 2;
+        }
+            
 
 
         public void clearEnPassantPawns(Player player)

@@ -176,7 +176,7 @@ namespace chess.Controller
                         {
                             //this.Message = "move passed validation";
                             cpm.applyMove(move, moveType);
-
+                            // check if any pawns on oposite rank -> promotion
 
                             // change display message here rather than whos turn
                             //System.Console.WriteLine("have applied move of type {0}", moveType);

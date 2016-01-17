@@ -12,6 +12,7 @@ namespace chess.Util
     public class Evaluator : IEvaluator
     {
         const int UNIQUE_PIECE_NUM = 12;
+        // think about dim / 8
         public List<List<Tuple<int, int>>>[][,] rayArray;
         public List<List<Tuple<int, int>>>[][,] rayArrayPawnCapture;
 
