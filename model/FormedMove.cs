@@ -15,12 +15,14 @@ namespace chess.Model
         private Tuple<int, int> posA;
         private Tuple<int, int> posB;
         private bool isValid;
+        private EGamePieces promotionSelection;
         
         public FormedMove()
         {
             this.posA = null;
             this.posB = null;
             this.isValid = false;
+            this.promotionSelection = EGamePieces.empty;
         }
 
         /// <summary>
@@ -30,14 +32,10 @@ namespace chess.Model
         /// <param name="mvSpecifier"></param>
         public FormedMove(string mvSpecifier)
         {
-            // "colrow"
-
-            System.Console.WriteLine(mvSpecifier+ " issssssss");
             if (mvSpecifier.Length == 2)
             {
                 int col = (int)Char.GetNumericValue(mvSpecifier[0]);
                 int row = (int)Char.GetNumericValue(mvSpecifier[1]);
-                System.Console.WriteLine($"col is {col} row is {row}");
                 posA = Tuple.Create<int, int>(row, col);
                 isValid = true;
             }
@@ -110,6 +108,18 @@ namespace chess.Model
             get
             {
                 return this.posB;
+            }
+        }
+
+        public EGamePieces PromotionSelection
+        {
+            get
+            {
+                return this.promotionSelection;
+            }
+            set
+            {
+                this.promotionSelection = value;
             }
         }
     }

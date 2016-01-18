@@ -23,6 +23,10 @@ namespace chess.Model
             {
                 return this.val;
             }
+            set
+            {
+                this.val = value;
+            }
         }
 
         public bool MovedOnce

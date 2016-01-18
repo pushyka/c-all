@@ -82,8 +82,7 @@ namespace chess.Model
             TileStruct toSqTl = getTile(toSqPos);
 
             Piece mvPiece = frSqTl.piece;
-
-            #region MOVE PAWN STUFF TO END
+            
             //  if moving piece is a pawn and its its first move
             if (mvPiece.Val == EGamePieces.WhitePawn ||
                 mvPiece.Val == EGamePieces.BlackPawn)
@@ -94,29 +93,15 @@ namespace chess.Model
                     this.enPassantSq = toSqPos;
                 }
                 mvPiece.MovedOnce = true;
-                // if it has reached the opposite side rank it can be promoted
-                if (toSqIsHighRank(toSqPos))
+                // if there is a value in move.promotionselection this means the moving piece should be updated
+                if (move.PromotionSelection != EGamePieces.empty)
                 {
-                    Piece selectedUpgrPiece;
-                    EGamePieces selectedUpgrVal;
-
-                    View.PromotionSelection promotionSelection = new View.PromotionSelection(mvPiece);
-                    if (promotionSelection.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        selectedUpgrVal = promotionSelection.SelectedPiece;
-                        promotionSelection.Dispose();
-                        selectedUpgrPiece = new Piece(selectedUpgrVal);
-                        frSqTl = new TileStruct(selectedUpgrPiece);
-                        
-                    }
-
+                    mvPiece.Val = move.PromotionSelection;
                 }
             }
 
-            #endregion
-
             // move the piece to the to square (copy)
-            updateTileWithPiece(toSqPos, frSqTl.piece);
+            updateTileWithPiece(toSqPos, mvPiece);
             // empty the from square
             updateTileWithPiece(frSqPos, null);
         }
@@ -137,23 +122,28 @@ namespace chess.Model
             TileStruct toSqTl = getTile(toSqPos);
             TileStruct frSqTl = getTile(frSqPos);
 
-            // if moving piece is a pawn check if its promoted
-            if (frSqTl.piece.Val == EGamePieces.WhitePawn || frSqTl.piece.Val == EGamePieces.BlackPawn)
-                if (toSqIsHighRank(toSqPos))
+            Piece mvPiece = frSqTl.piece;
+
+            //  if moving piece is a pawn
+            if (mvPiece.Val == EGamePieces.WhitePawn ||
+                mvPiece.Val == EGamePieces.BlackPawn)
+            {
+                // if there is a value in move.promotionselection this means the moving piece should be updated
+                if (move.PromotionSelection != EGamePieces.empty)
                 {
-                    // then prompt player for piece to change pawn to
-                    // atm just do queen
-                    // update it to the new selection
-                    EGamePieces q = ((int)frSqTl.piece.Val < 6) ? EGamePieces.WhiteQueen : EGamePieces.BlackQueen;
-                    frSqTl = new TileStruct(new Piece(q));
+                    mvPiece.Val = move.PromotionSelection;
                 }
-            // move the piece to the to square (copy)
-            updateTileWithPiece(toSqPos, frSqTl.piece);
-            // empty the from square
-            updateTileWithPiece(frSqPos, null);
+            }
 
             // add the captured to the list
             addToCaptured(toSqTl.piece.Val);
+
+            // move the piece to the to square (copy)
+            updateTileWithPiece(toSqPos, mvPiece);
+            // empty the from square
+            updateTileWithPiece(frSqPos, null);
+
+
         }
 
         private void applyEnPassantCapture(FormedMove move)
@@ -204,10 +194,7 @@ namespace chess.Model
         a black pawn can only move to dim-1 and a white pawn can only move to 0 ranks.
         (only moves forwards) so IF a pawn is mvoing on to toSqPos, only then is the function called,
         and can assume the color of the pawn is correct. */
-        private bool toSqIsHighRank(Tuple<int, int> toSqPos)
-        {
-            return ((toSqPos.Item1 == 0) || (toSqPos.Item1 == dim - 1));
-        }
+
 
         private bool mvTwoTiles(Tuple<int, int> frSqPos, Tuple<int, int> toSqPos)
         {

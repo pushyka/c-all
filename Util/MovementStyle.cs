@@ -150,14 +150,8 @@ namespace chess.Util
         // TUPLES SHOULD BE Y,X format since ROW,COL
         public virtual void createBlackPawnMovement(Piece piece)
         {
-            // y / row direction for advancement is positive
-            
-
             this.dirs.Add(Tuple.Create(+1, 0));
-            if (!piece.MovedOnce)
-                this.maxIterations = 2;
-            else
-                this.maxIterations = 1;
+            this.maxIterations = 2;
 
             this.type = "pawn";
         }
@@ -167,10 +161,7 @@ namespace chess.Util
         {
             // y / row direction for advancement is negative
             this.dirs.Add(Tuple.Create(-1, 0));
-            if (!piece.MovedOnce)
-                this.maxIterations = 2;
-            else
-                this.maxIterations = 1;
+            this.maxIterations = 2;
 
             this.type = "pawn";
         }

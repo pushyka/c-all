@@ -11,8 +11,10 @@ namespace chess.Util
 {
     public class Evaluator : IEvaluator
     {
+        // think about add these to contructor etc
         const int UNIQUE_PIECE_NUM = 12;
-        // think about dim / 8
+        const int DIM = 8;
+
         public List<List<Tuple<int, int>>>[][,] rayArray;
         public List<List<Tuple<int, int>>>[][,] rayArrayPawnCapture;
 
@@ -74,16 +76,19 @@ namespace chess.Util
             {
                 if (IsMoveAPieceCurPlayer(move, cpm, ref tileA))
                 {
+                    // check if its a castling
                     if (IsMoveBPieceCurPlayer(move, cpm, ref tileB))
                     {
-                        outcome = false;
+                        outcome = false; // IsLegalCastle?
                         moveType = EChessMoveTypes.Castle;
                     }
+                    // check if its a capture
                     else if (IsMoveBPieceOtherPlayer(move, cpm, ref tileB))
                     {
                         outcome = IsCaptureLegal(move, cpm);
                         moveType = EChessMoveTypes.Capture;
                     }
+                    // check if its a movement
                     else if (IsMoveBEmpty(move, cpm, ref tileB))
                     {
                         if (outcome = IsPieceMovementLegal(move, cpm))
@@ -95,24 +100,23 @@ namespace chess.Util
                             moveType = EChessMoveTypes.EpMovement;
                         }
                     }
-                    else
-                    {
-                        System.Console.WriteLine("Tile A did not contain a player piece");
-                    }
                 }
             }
-            else
-            {
-                System.Console.WriteLine("Tile A and B were not distinct");
-            }
+            // if its a valid move so far, check if there is a pawn promotion,
+            // then apply the move to a copy of the chess position and
+            // finally check it passes a check test
             if (outcome)
             {
+                // if there is a pawn promotion the player is prompted for the promotion piece and it is added to the move object
+                MoveIncludesPawnPromotion(ref move, cpm);
+
                 // a copy of the chess position is made so that the move may
                 // be applied in order for the king-check to be checked without
                 // causing the chess position to update the display
-                ChessPosition cpmCopy = cpm.getEvaluateableChessPosition();
-                cpmCopy.applyMove(move, moveType);
-                outcome = IsKingInCheck(cpmCopy, ref kingCheckedBy);
+                ChessPosition cpCopy = cpm.getEvaluateableChessPosition();
+                cpCopy.applyMove(move, moveType);
+                // after this application of the move
+                outcome = IsKingInCheck(cpCopy, ref kingCheckedBy);
             }
             return outcome;
         }
@@ -192,15 +196,36 @@ namespace chess.Util
             TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> movementRays;
             // get the rays for a piece of type=piece.Val and location=posA
+           
             movementRays = GetPieceRay(tileA.piece.Val, posA);
+            ;
             List<Tuple<int, int>> moveRayUsed = null;
             foreach (List<Tuple<int, int>> ray in movementRays)
             {
-                if (ray.Contains(posB))
+                // for pawns the rays are comprise TWO forward positions (from first move)
+                // so if the pawn has already .MovedOnce don not consider the second position in the ray
+                // as the pawn can no longer legally move to that position
+                if ((tileA.piece.Val == EGamePieces.WhitePawn || tileA.piece.Val == EGamePieces.BlackPawn) &&
+                    (tileA.piece.MovedOnce))
                 {
-                    moveRayUsed = ray;
-                    break;
-                } 
+                    ;
+                    if (ray[0].Equals(posB))
+                    {
+                        ;
+                        moveRayUsed = ray;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (ray.Contains(posB))
+                    {
+                        moveRayUsed = ray;
+                        break;
+                    }
+                }
+
+
             }
             if (moveRayUsed != null)
                 // check there are no intermediate Pieces blocking the movement
@@ -328,6 +353,40 @@ namespace chess.Util
         }
 
 
+        /* This function receives a move object and the chess game and checks if the move also
+        includes a pawn promotion, if it does it prompts the player for the selection piece, and
+        adds it to the FormedMove. If it does not it ends silently
+        TODO: could change it back to return bool, ref the selection piece then add it to move in the calling code ~~style issue*/
+        private void MoveIncludesPawnPromotion(ref FormedMove move, ChessPosition cpm)
+        {
+            
+            Piece mvPiece = cpm.Board[move.PosA.Item1, move.PosA.Item2].piece;
+            Tuple<int, int> posB = move.PosB;
+            // if moving piece is a pawn and posB isHighRank
+            if ((mvPiece.Val == EGamePieces.WhitePawn || mvPiece.Val == EGamePieces.BlackPawn) &&
+                (IsHighRank(posB)))
+            {
+                // prompt player for a promotion piece and add it to the move object
+                EGamePieces promotionPiece;
+                View.PromotionSelection promotionSelection = new View.PromotionSelection(mvPiece);
+                if (promotionSelection.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    promotionPiece = promotionSelection.SelectedPiece;
+                    promotionSelection.Dispose();
+                    move.PromotionSelection = promotionPiece;
+                }
+            }
+        }
+
+
+        /* Checks if a position is a high rank on the board
+        Used by MoveIncludesPawnPromotion ^ */
+        private bool IsHighRank(Tuple<int, int> toSqPos)
+        {
+            return ((toSqPos.Item1 == 0) || (toSqPos.Item1 == DIM - 1));
+        }
+
+
         /* This function is passed a copy of the chess game. It uses the information contained in this object
         to determine whether or not the Current player's king is being threatened by check from the other player
         returning true if so. If it is being checked by the opposing player a list of the one / two coords containing the 
@@ -410,10 +469,10 @@ namespace chess.Util
             {
                 // foreach of the i piece types, create 64 tiles each containing a number of rays (n directions)
                 MovementStyle style = MovementStyles.getMovementStyle((EGamePieces)i);
-                rayArray[i] = new List<List<Tuple<int,int>>>[8, 8];
-                for (int j = 0; j < 8; j++) // row
+                rayArray[i] = new List<List<Tuple<int,int>>>[DIM, DIM];
+                for (int j = 0; j < DIM; j++) // row
                 {
-                    for (int k = 0; k < 8; k++) // col
+                    for (int k = 0; k < DIM; k++) // col
                     {
                         List<List<Tuple<int, int>>> rays = new List<List<Tuple<int, int>>>();
                         foreach (Tuple<int, int> dir in style.dirs)
@@ -454,12 +513,12 @@ namespace chess.Util
             CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(EGamePieces.WhitePawn);
             CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(EGamePieces.BlackPawn);
 
-            rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[8, 8]; // white
-            rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[8, 8]; // black
+            rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[DIM, DIM]; // white
+            rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[DIM, DIM]; // black
 
-            for (int j = 0; j < 8; j ++)
+            for (int j = 0; j < DIM; j ++)
             {
-                for (int k = 0; k < 8; k ++)
+                for (int k = 0; k < DIM; k ++)
                 {
                     List<List<Tuple<int, int>>> whiteRays = new List<List<Tuple<int, int>>>();
                     List<List<Tuple<int, int>>> blackRays = new List<List<Tuple<int, int>>>();
