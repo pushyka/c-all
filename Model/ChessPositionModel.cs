@@ -8,55 +8,40 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
-
-
-
     public delegate void BoardChanged(object sender, BoardChangedEventArgs e);
 
+
+    /* This is a specialised type of ChessPosition. This is the single chess position which is the 'good copy'
+    which the view is 'bound' to. This represents the chess Model. When this object is changed, the view is notified by the
+    Events and is updated to match. The other ChessPosition type does not have events bound to it and is used for testing of moves 
+    and position generation. Multiple ChessPosition objects will be made. One ChessPositionModel object will be made. */
     public class ChessPositionModel : ChessPosition, IDisplayableModel
     {
-
-        // using multi-dimensional array since rows of equal lengths
-        // string or char
-        // 
-        //private Square[,] board; // the core element, this is the cloned piece
-        
-        //private int dim;
         public event EventHandler<BoardChangedEventArgs> BoardChanged;
         public event EventHandler CapturedChanged;
         public event EventHandler PlayerChanged;
 
-        //private char player;
-        public bool IsGame { get; set; }
+        public List<EGamePieces> PiecesCapd { get; }
 
-
-
-        // model constructor
+        /* Create instance of the cpm.
+        TODO: Add Singleton static check. */
         public ChessPositionModel()
         {
-            
             this.dim = 8;
-            this.board = new TileStruct[dim, dim]; // 8x8 surrounded by 2-width of invalid assigned squares (prevents outofbounds issues)
-                                             // hence 2,2 becomes the top left origin
-                                             // initial=te the capture list
+            this.board = new TileStruct[dim, dim];
             this.piecesCapd = new List<EGamePieces>();
             this.castle = new Dictionary<char, bool>();
             this.halfmoveClock = 0;
-            this.player = new Player();
-
         }
 
 
-
+        /* Perform the initial setup of the pieces on the board according to normal chess positioning.
+        Then fire the boardchanged event with all of the positions. So after this model setup, the 
+        View will do a big update to show the setup board in the display. */
         public void Setup()
         {
-
-
-
-
-
-            // black row 2
-            this.board[0, 0] = new TileStruct(new Piece(EGamePieces.BlackRook)); // top left origin
+            // rank 0 (black)
+            this.board[0, 0] = new TileStruct(new Piece(EGamePieces.BlackRook));
             this.board[0, 1] = new TileStruct(new Piece(EGamePieces.BlackKnight));
             this.board[0, 2] = new TileStruct(new Piece(EGamePieces.BlackBishop));
             this.board[0, 3] = new TileStruct(new Piece(EGamePieces.BlackQueen));
@@ -66,31 +51,20 @@ namespace chess.Model
             this.board[0, 7] = new TileStruct(new Piece(EGamePieces.BlackRook));
 
 
-            // black row 3 (pawns)
+            // rank 1 (black)
             for (int col = 0; col < dim; col++)
-            {
-                this.board[1, col] = new TileStruct(new Piece(EGamePieces.BlackPawn)); ; // pawns have 2 additional properties {movedOnce=false : used to allow +1/+2 advance for FIRST move}
-                                                        //                                    {canBeCapEnPassant=false : set=true if pawn advances +2, function 
-                                                        //to set=false for every pawn of oposite player at the end of current players turn.
-                                                        //seems naive, implement last anyway
-            }
+                this.board[1, col] = new TileStruct(new Piece(EGamePieces.BlackPawn));
 
-            // empty rows 
+            // empty ranks
             for (int row = 2; row < 6; row++)
-            {
                 for (int col = 0; col < dim; col++)
-                {
                     this.board[row, col] = new TileStruct();
-                }
-            }
 
-            // white row 8 (pawns)
+            // rank 6 (white)
             for (int col = 0; col < dim; col++)
-            {
-                this.board[6, col] = new TileStruct(new Piece(EGamePieces.WhitePawn)); ; // as above
-            }
+                this.board[6, col] = new TileStruct(new Piece(EGamePieces.WhitePawn));
 
-            // white row 9
+            // rank 7 (white)
             this.board[7, 0] = new TileStruct(new Piece(EGamePieces.WhiteRook));
             this.board[7, 1] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
             this.board[7, 2] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
@@ -98,52 +72,24 @@ namespace chess.Model
             this.board[7, 4] = new TileStruct(new Piece(EGamePieces.WhiteKing));
             this.board[7, 5] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
             this.board[7, 6] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
-            this.board[7, 7] = new TileStruct(new Piece(EGamePieces.WhiteRook)); // 9,9 the bottomright (rather than 7,7) due to the 2x off board buffer
+            this.board[7, 7] = new TileStruct(new Piece(EGamePieces.WhiteRook));
 
-            // fire the board changed event marked as ALL locations
+            // fire the board changed event with all locations as argument
             BoardChangedEventArgs e = new BoardChangedEventArgs();
-            // add all of the positions of the board to the changedevent
             for (int row = 0; row < this.dim; row++)
-            {
                 for (int col = 0; col < this.dim; col++)
-                {
                     e.Add(Tuple.Create(row, col));
-                }
-            }
             OnBoardChanged(e);
-
-
-
         }
+        
 
-        public void display()
-        {
-            for (int row = 0; row < dim; row++)
-            {
-                for (int col = 0; col < dim; col++)
-                {
-                    System.Console.Write("{0,-2} ", this.board[row, col].piece); // each entry allotted 2 chars, with 1 char space
-                }
-                System.Console.WriteLine(); // each row on a new line
-            }
-        }
-
-
-        /// <summary>
-        /// The base update operation on the model data. A given movetype will result in a call to this method for
-        /// each tile which is being changed for that move. The boardchanged event can be fired here.
-        /// this overrides the version which doesnt call update events
-        /// cant be private since overriden and dont wish to be public so virtual
-        /// </summary>
-        /// <param name="toTile"></param>
-        /// <param name="fromTile"></param>
+       /* Same as the ChessPosition implementation but this also fires the 
+       BoardChanged event since this is the singleton ChessPositionModel which is bound to the View. */
         protected override void updateTileWithPiece(Tuple<int,int> location, Piece newPiece)
         {
             int row = location.Item1;
             int col = location.Item2;
-
             this.board[row, col].piece = newPiece;
-
             // finally fire the BoardChanged event!
             // EventArgs could be the tile coordinates which have changed
             BoardChangedEventArgs e = new BoardChangedEventArgs();
@@ -152,37 +98,33 @@ namespace chess.Model
         }
 
 
-
-
-
-        
-
-
+        /* Same as the ChessPosition implementation but this also fires the 
+        CapturedChanged event so the View can update accordingly */
         protected override void addToCaptured(EGamePieces piece)
         {
             this.piecesCapd.Add(piece);
             OnCapturedChanged(EventArgs.Empty);
         }
 
-        public List<EGamePieces> PiecesCapd
+
+        /* ChessPosition represents a snapshot of a chess position so player will not need to change
+        in each of those objects. In the CPM the player will change throughout the course of the 
+        game and needs to have an event registered to let the View know. */
+        public void ChangePlayer()
         {
-            get
-            {
-                return this.piecesCapd;
-            }
+            this.Player.change();
+            OnPlayerChanged(EventArgs.Empty);
         }
 
 
-
-        // this method is called by some code (when the code changes the board) and raises the event 
         protected virtual void OnBoardChanged(BoardChangedEventArgs e)
         {
-            // eg makes sure the Event has a delegate attached
             if (BoardChanged != null)
             {
                 BoardChanged(this, e);
             }
         }
+
 
         protected virtual void OnCapturedChanged(EventArgs e)
         {
@@ -191,28 +133,6 @@ namespace chess.Model
                 CapturedChanged(this, e);
             }
         }
-
-
-        public override Player Player
-        {
-            get
-            {
-                return this.player;
-            }
-        }
-
-        public void SetPlayer()
-        {
-            this.player.CurPlayer = "white";
-            OnPlayerChanged(EventArgs.Empty);
-        }
-
-        public void ChangePlayer()
-        {
-            this.player.change();
-            OnPlayerChanged(EventArgs.Empty);
-        }
-
 
 
         protected virtual void OnPlayerChanged(EventArgs e)
@@ -224,7 +144,5 @@ namespace chess.Model
         }
 
 
-
     }
-
 }

@@ -29,7 +29,7 @@ namespace chess.Controller
         /// like the initial population of pieces and the 
         /// starting player.
         /// </summary>
-        void PrepareModel();
+        void PrepareModel(EGameModels model);
 
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace chess.Controller
         /// Stops the running game loop thread and nullifies the
         /// initial parameters (unpreparemodel)
         /// </summary>
-        void Terminate();
+        void Terminate(EGameModels model);
 
 
         // The view binds to the {model exposed by the controller}

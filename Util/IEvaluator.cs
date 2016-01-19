@@ -25,7 +25,7 @@ namespace chess.Util
         /// <param name="cur_turn"></param>
         /// <param name="moveType"></param>
         /// <returns></returns>
-        bool ValidateMove(FormedMove move, ChessPosition cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy);
+        bool IsValidMove(FormedMove move, ChessPosition cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy);
 
         /// <summary>
         /// given a board context and a current player, return true / false if the players king is

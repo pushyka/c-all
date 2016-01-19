@@ -15,182 +15,197 @@ using System.Diagnostics;
 namespace chess.Controller
 {
     
-
-    public class GameController : INotifyPropertyChanged, IGameController // remove the propertychanged event
+    /* The GameController class is responsible for receiving gameInput from the display / players,
+    setting up models and utilities used by the game and running the games' main loops. */
+    public class GameController : INotifyPropertyChanged, IGameController
     {
-        
-        private string input;
-        private string message;
-        private EGameControlState state;
+        // PropertyChanged event is for the .Message
+        private string infoMessage;
+        private string gameInput;
+        private EGameControlState gameState;
 
-        private IDisplayableModel gameModel;
+        // display is bound to this object reference
+        private IDisplayableModel displayableGameModel;
+
+        // game loops use these objects for specialised functionality
+        // like passing cpm to eval (which a tttpm cant be passed to)
+        private ChessPositionModel chessModel; 
+        private TTTPositionModel tttModel;
+
         private Evaluator evaluator;
-        private Thread t;
+        private Thread gLoopThread;
+
 
         public GameController()
         {
-            input = null;
-            message = null;
-            gameModel = null;
+            gameInput = null;
+            infoMessage = null;
+            displayableGameModel = null;
             evaluator = null;
-            t = null;
-            state = EGameControlState.PreInitial;
-           
+            gLoopThread = null;
+            gameState = EGameControlState.PreInitial;
         }
 
 
+        /* Receives a value indicating a game model and sets up the model as
+        'displayableModel' (to which the view is bound) and also
+        '*Model' (which is used in the game loop etc). This method also
+        sets up any dependant utilities. */
         public void InitialiseModel(EGameModels model)
         {
             switch(model)
             {
                 case EGameModels.Chess:
-                    gameModel = new ChessPositionModel();
+                    displayableGameModel = new ChessPositionModel();
+                    chessModel = (ChessPositionModel)displayableGameModel;
                     evaluator = new Evaluator();
                     evaluator.GenerateRays();
                     evaluator.GeneratePawnRays();
                     break;
                 case EGameModels.TicTacToe:
-                    gameModel = new TTTPositionModel();
+                    displayableGameModel = new TTTPositionModel();
+                    tttModel = (TTTPositionModel)displayableGameModel;
                     break;
             }
-            state = EGameControlState.Initial;
-
-
+            gameState = EGameControlState.Initial;
         }
 
-        public void testStuff()
-        {
-            // preloaded array
-            evaluator.GetPieceRay(EGamePieces.BlackRook, Tuple.Create(3, 6));
-        }
 
+        /* This takes a value indicating a gameModel and returns the values of the displayable
+        and game models and utilities to null. */
         public void UnInitialiseModel(EGameModels model)
         {
-            gameModel = null;
-            evaluator = null;
-            state = EGameControlState.PreInitial;
+            switch(model)
+            {
+                case EGameModels.Chess:
+                    chessModel = null;
+                    evaluator = null;
+                    break;
+                case EGameModels.TicTacToe:
+                    tttModel = null;
+                    break;
+            }
+            displayableGameModel = null;
+            gameState = EGameControlState.PreInitial;
         }
         
-       
-        public void PrepareModel()
+        
+        /* This takes a value indicating a gameModel and performs the initial setup of the
+        model. Mainly populating with initial starting pieces / setting the starting player. */
+        public void PrepareModel(EGameModels model)
         {
-            gameModel.Setup();
-            gameModel.SetPlayer();
-            state = EGameControlState.Ready;
-            //this.Message = "Game is setup";
-            
+            switch(model)
+            {
+                case EGameModels.Chess:
+                    chessModel.Setup();
+                    chessModel.Player = new Player("white");
+                    break;
+                case EGameModels.TicTacToe:
+                    tttModel.Setup();
+                    tttModel.Player = new Player("X");
+                    break;
+            }
+            gameState = EGameControlState.Ready;
         }
 
-        public void Terminate()
+
+        /* This takes a value indicating a gameModel and terminates any running gameLoop,
+        sets some values to null and sets the models player value to null. */
+        public void Terminate(EGameModels model)
         {
             //terminate t, if its running
             StopGameLoop();
-
-            input = null;
-            message = null;
-            gameModel.Player = null;
-            state = EGameControlState.Initial;
+            gameInput = null;
+            infoMessage = null;
+            switch(model)
+            {
+                case EGameModels.Chess:
+                    chessModel.Player = null;
+                    break;
+                case EGameModels.TicTacToe:
+                    tttModel.Player = null;
+                    break;
+            }
+            gameState = EGameControlState.Initial;
             this.Message = "Game is terminated";
         }
 
 
+        /* This stops and nulls the thread which is running a gameLoop. */
         public void StopGameLoop()
         {
-            if (t != null)
+            if (gLoopThread != null)
             {
-                t.Abort();
-                t = null;
+                gLoopThread.Abort();
+                gLoopThread = null;
             }
         }
 
 
+        /* This takes a value indicating a gameModel and starts a new thread
+        running the appropriate gameLoop for the gameModel. */
         public void StartGameLoop(EGameModels model)
         {
             switch(model)
             {
                 case EGameModels.Chess:
-                    t = new Thread(ChessGameLoop);
+                    gLoopThread = new Thread(ChessGameLoop);
                     break;
                 case EGameModels.TicTacToe:
-                    t = new Thread(TTTGameLoop);
+                    gLoopThread = new Thread(TTTGameLoop);
                     break;
             }
-            if (state == EGameControlState.Ready)
-                t.Start();
-                state = EGameControlState.GameInProgress;
-                //this.Message = "Game has started";
+            if (gameState == EGameControlState.Ready)
+                gLoopThread.Start();
+                gameState = EGameControlState.GameInProgress;
         }
 
+
+        /* This is the Game Loop for a chess Game. This is run while a 
+        game is in progress in a seperate thread. When the game meets an ending criteria
+        (winner, concede) this thread will end naturally. This thread may also be 
+        terminated externally. */
         private void ChessGameLoop()
         {
-            // get the explicit type of model since evaluator only works with
-            // specifically the chess position model types
-            ChessPositionModel cpm = (ChessPositionModel)this.gameModel;
             EChessMoveTypes moveType;
             FormedMove move;
-            string winner = null;
+            Player winner = null;
             List<Tuple<int, int>> kingCheckedBy = new List<Tuple<int, int>>();
 
-            // this bool will be set false when the game ends
             while (true)
             {
-                
-                // start of new turn, clear variables
+                // start of new turn, refresh variables
                 move = null;
                 moveType = EChessMoveTypes.None;
                 kingCheckedBy.Clear();
 
-
-                // TODO
-                // check if there is a potential move before evaluating the input FOR CURRENT PLAYER
-                // , else IsGame = false
+                // check there exists a legal move for the current player
                 // if not in check and no legal move : stalemate
                 // if in check and no legal move to remove attack : checkmate
-                
-                if (evaluator.IsKingInCheck(cpm, ref kingCheckedBy))
-                    this.Message = $"Player {cpm.Player.CurPlayer}'s king is in check";
-
-                // break statemetns to exit the loop
-                // validateMove will also ensure the move does not leave the king in check
-
+                // if legal move proceed
+                if (evaluator.IsKingInCheck(chessModel, ref kingCheckedBy))
+                    this.Message = $"Player {chessModel.Player.PlayerValue}'s king is in check";
 
                 // check if display has provided a move
-                if (input != null)
+                if (gameInput != null)
                 {
-                    if (input == "concede")
+                    if (gameInput == "concede")
                     {
-                        // c.Player has conceded
-                        this.Message = "Player " + cpm.Player.CurPlayer + " has conceded!";
-                        cpm.Player.change();
-                        winner = cpm.Player.CurPlayer;
-                        cpm.Player = null;
-                        input = null;
+                        this.Message = $"Player {chessModel.Player.PlayerValue} has conceded!";
+                        chessModel.Player.change();
+                        winner = chessModel.Player;
+                        chessModel.Player = null;
+                        gameInput = null;
                         break;
                     }
-
-                    else if (evaluator.ValidateInput(input, ref move))
+                    // else normal move input
+                    else if (evaluator.ValidateInput(gameInput, ref move))
                     {
-                        // then move is non null
-
-                        if (evaluator.ValidateMove(move, cpm, ref moveType, ref kingCheckedBy))
+                        if (evaluator.IsValidMove(move, chessModel, ref moveType, ref kingCheckedBy))
                         {
-                            //this.Message = "move passed validation";
-                            cpm.applyMove(move, moveType);
-                            // check if any pawns on oposite rank -> promotion
-
-                            // change display message here rather than whos turn
-                            //System.Console.WriteLine("have applied move of type {0}", moveType);
-
-                            // change the player
-                            cpm.ChangePlayer();
-                            // its the start of the player's turn so if he had any pawns that could have been captured
-                            // en passant during hte oponents turn, they will now be unable to be captured en passant
-                            //System.Console.WriteLine(" CLEARING PASSANTS");
-                            cpm.clearEnPassantPawns(cpm.Player);
-                            //this.Message = $"Player {cpm.Player.CurPlayer}'s turn";
-                            //this.Message = $"passant sq if any is{cpm.EnPassantSq}";
-
-
+                            chessModel.applyMove(move, moveType);
+                            chessModel.ChangePlayer();
+                            chessModel.clearEnPassantPawns(chessModel.Player);
                         }
                         else
                             this.Message = "The move was not valid";
@@ -198,83 +213,69 @@ namespace chess.Controller
                     else
                         this.Message = "The input was not valid";
 
-                    input = null;
+                    gameInput = null;
                 }
-                //Thread.Sleep(1000);
             }
             if (winner != null)
-                this.Message = $"Player {winner} has won the game!";
+                this.Message = $"Player {winner.PlayerValue} has won the game!";
             else
                 this.Message = "The game has ended, loop thread detached";
         }
 
 
+        /* This is the Game Loop for a Tic Tac Toe Game. This is run while a 
+        game is in progress in a seperate thread. When the game meets an ending criteria
+        (winner) this thread will end naturally. This thread may also be 
+        terminated externally. */
         private void TTTGameLoop()
         {
-            
-            TTTPositionModel tttpm = (TTTPositionModel)this.gameModel;
             FormedMove move;
-            string winner = null;
+            string winner = null; // change to player
             bool isMaxTurns = false;
 
             while (true)
             {
                 // check if a winner has been found or reached max turns
-                if (tttpm.IsWinningPosition(ref winner) || tttpm.IsMaxTurns(ref isMaxTurns))
-                {
+                if (tttModel.IsWinningPosition(ref winner) || tttModel.IsMaxTurns(ref isMaxTurns))
                     break;
-                }
 
-                this.Message = $"Player {tttpm.Player.CurPlayer}, make your move";
+                this.Message = $"Player {tttModel.Player.PlayerValue}, make your move";
                 move = null;
                 // check if display has provided a move
-                if (input != null)
+                if (gameInput != null)
                 {
-                    // Do Stuff..
-                    move = new FormedMove(input);
-                    if (tttpm.validateMove(move))
+                    move = new FormedMove(gameInput);
+                    if (tttModel.IsValidMove(move))
                     {
-                        tttpm.applyMove(move, null);
-                        tttpm.ChangePlayer();
+                        tttModel.applyMove(move);
+                        tttModel.ChangePlayer();
                     }
                     else
                         this.Message = "The move was not valid";
-                    input = null;
-
-
+                    gameInput = null;
                 }
-                //Thread.Sleep(1000);
-
             }
             // at this point game has ended
-            // why..
-
             if (winner != null)
-                this.Message = $"Player {winner} has won the game!"; // make bold ?
+                this.Message = $"Player {winner} has won the game!";
             else if (isMaxTurns)
                 this.Message = "Draw, no more moves can be made";
-
         }
 
 
-        
-        /// <summary>
-        /// Returns a reference to the current game model.
-        /// </summary>
-        /// <returns></returns>
+        /* This is the displayable version of the current game model, exposed via this controller to the View. */
         public IDisplayableModel Model
         {
             get
             {
-                return this.gameModel;
+                return this.displayableGameModel;
             }
         }
 
-
+        
         public event PropertyChangedEventHandler PropertyChanged;
-
-        // The CallerMemberName attribute makes propertyName of the caller to be the argument.
-        // so Message is the arg for propertyName
+        /* This is the MessageChanged Event, It is declared here in the controller since
+        mostly it is the controller which changes the message to be displayed on the View. */
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
         {
             if (PropertyChanged != null)
@@ -284,45 +285,51 @@ namespace chess.Controller
         }
 
 
+        /* This is the Message setter and getter, when a message is set the notifypropertychanged
+        (messagechanged event) is fired to let the View know. */
         public string Message
         {
             set
             {
-                if (this.message != value)
+                if (this.infoMessage != value)
                 {
-                    this.message = value;
+                    this.infoMessage = value;
                     NotifyPropertyChanged();
                 }
-
             }
             get
             {
-                return this.message;
+                return this.infoMessage;
             }
         }
 
+
+        /* Input setter. This is mainly used by the View / gui using the game controller.
+        If a previous input has not yet been cleared by the controller, it means the controller is
+        not ready to process another one. */
         public string Input
         {
-            get
+            get // is this used?
             {
-                return this.input;
+                return this.gameInput;
             }
             set
             {
-                if (this.input == null)
-                    this.input = value;
+                if (this.gameInput == null)
+                    this.gameInput = value;
                 else
                     System.Console.WriteLine("A previous input hsant been cleared yet (currently being processed) so this Set has failed");
             }
         }
 
+
+        /* Return the state of the game from the controller. */
         public EGameControlState State
         {
             get
             {
-                return this.state;
+                return this.gameState;
             }
         }
-
     }
 }

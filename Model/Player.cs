@@ -48,7 +48,7 @@ namespace chess.Model
             return result;
         }
 
-        public string CurPlayer
+        public string PlayerValue
         {
             get
             {

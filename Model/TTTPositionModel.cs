@@ -6,26 +6,33 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+    /* This is a displayable model but since, for tic tac toe, there is
+    not really a notion of pieces captured, there is a null implementation 
+    of theses methods.*/
     public class TTTPositionModel : IDisplayableModel
     {
-        private int dim;
-        private TileStruct[,] board;
-        private Player player;
-        private int rowToWin;
-        private int turns;
-
         public event EventHandler<BoardChangedEventArgs> BoardChanged;
         public event EventHandler CapturedChanged;
         public event EventHandler PlayerChanged;
 
+        public TileStruct[,] Board { get; }
+        public List<EGamePieces> PiecesCapd { get; }
+        public Player Player { get; set; }
+
+
+        private int dim;
+        private int rowToWin;
+        private int turns;
+
+
+
         public TTTPositionModel()
         {
             this.dim = 3;
-            this.board = new TileStruct[dim, dim];
-            this.player = new Player("X"); //fix player class
+            this.Board = new TileStruct[dim, dim];
             this.rowToWin = dim;
             this.turns = 0;
-        
+            this.PiecesCapd = null;
         }
 
         public void Setup()
@@ -34,14 +41,9 @@ namespace chess.Model
             {
                 for (int col = 0; col < this.dim; col ++)
                 {
-                    this.board[row, col] = new TileStruct(new Piece(EGamePieces.empty));
+                    this.Board[row, col] = new TileStruct(new Piece(EGamePieces.empty));
                 }
             }
-        }
-
-        public void SetPlayer()
-        {
-            //
         }
 
 
@@ -53,25 +55,24 @@ namespace chess.Model
         /// </summary>
         /// <param name="move"></param>
         /// <returns></returns>
-        public bool validateMove(FormedMove move)
+        public bool IsValidMove(FormedMove move)
         {
             Tuple<int, int> location = move.PosA;
-            return this.board[location.Item1, location.Item2].piece.Val == EGamePieces.empty;
+            return this.Board[location.Item1, location.Item2].piece.Val == EGamePieces.empty;
         }
 
 
 
         /* Takes a move (a board coordinate) which has been checked for emptiness.
            Add a piece of the current player to the location in the move.*/
-        public void applyMove(FormedMove move, string moveType)
+        public void applyMove(FormedMove move)
         {
             Tuple<int, int> location = move.PosA;
             Piece playerPiece;
-            if (this.player.CurPlayer == "O")
+            if (this.Player.PlayerValue == "O")
                 playerPiece = new Piece(EGamePieces.O);
             else
                 playerPiece = new Piece(EGamePieces.X);
-            ;
             updateTileWithPiece(location, playerPiece);
             turns += 1;
         }
@@ -80,13 +81,9 @@ namespace chess.Model
 
         private void updateTileWithPiece(Tuple<int, int> location, Piece newPiece)
         {
-            ;
             int row = location.Item1;
             int col = location.Item2;
-            ;
-            board[row, col].piece = newPiece;
-            // finally fire the BoardChanged event!
-            // EventArgs could be the tile coordinates which have changed
+            Board[row, col].piece = newPiece;
             BoardChangedEventArgs e = new BoardChangedEventArgs();
             e.Add(location);
             OnBoardChanged(e);
@@ -108,9 +105,9 @@ namespace chess.Model
             foreach (EGamePieces player in players)
             {
                 // check verticals
-                if ((board[0, 0].piece.Val == player && board[1, 0].piece.Val == player && board[2, 0].piece.Val == player) ||
-                    (board[0, 1].piece.Val == player && board[1, 1].piece.Val == player && board[2, 1].piece.Val == player) ||
-                    (board[0, 2].piece.Val == player && board[1, 2].piece.Val == player && board[2, 2].piece.Val == player))
+                if ((Board[0, 0].piece.Val == player && Board[1, 0].piece.Val == player && Board[2, 0].piece.Val == player) ||
+                    (Board[0, 1].piece.Val == player && Board[1, 1].piece.Val == player && Board[2, 1].piece.Val == player) ||
+                    (Board[0, 2].piece.Val == player && Board[1, 2].piece.Val == player && Board[2, 2].piece.Val == player))
                 {
                     winner = player.ToString();
                     isWin = true;
@@ -119,9 +116,9 @@ namespace chess.Model
 
                 // check horizontals
 
-                if ((board[0, 0].piece.Val == player && board[0, 1].piece.Val == player && board[0, 2].piece.Val == player) ||
-                    (board[1, 0].piece.Val == player && board[1, 1].piece.Val == player && board[1, 2].piece.Val == player) ||
-                    (board[2, 0].piece.Val == player && board[2, 1].piece.Val == player && board[2, 2].piece.Val == player))
+                if ((Board[0, 0].piece.Val == player && Board[0, 1].piece.Val == player && Board[0, 2].piece.Val == player) ||
+                    (Board[1, 0].piece.Val == player && Board[1, 1].piece.Val == player && Board[1, 2].piece.Val == player) ||
+                    (Board[2, 0].piece.Val == player && Board[2, 1].piece.Val == player && Board[2, 2].piece.Val == player))
                 {
                     winner = player.ToString();
                     isWin = true;
@@ -130,8 +127,8 @@ namespace chess.Model
 
                 // check diagonals
 
-                if ((board[0, 0].piece.Val == player && board[1, 1].piece.Val == player && board[2, 2].piece.Val == player) ||
-                    (board[2, 0].piece.Val == player && board[1, 1].piece.Val == player && board[0, 2].piece.Val == player))
+                if ((Board[0, 0].piece.Val == player && Board[1, 1].piece.Val == player && Board[2, 2].piece.Val == player) ||
+                    (Board[2, 0].piece.Val == player && Board[1, 1].piece.Val == player && Board[0, 2].piece.Val == player))
                 {
                     winner = player.ToString();
                     isWin = true;
@@ -145,37 +142,6 @@ namespace chess.Model
             return isWin;
         }
 
-
-        public Player Player
-        {
-            get
-            {
-                return this.player;
-            }
-            set
-            {
-                this.player = value;
-                // add the event
-            }
-        }
-
-
-
-        public TileStruct[,] Board
-        {
-            get
-            {
-                return this.board;
-            }
-        }
-
-        public List<EGamePieces> PiecesCapd
-        {
-            get
-            {
-                return null;
-            }
-        }
         public bool IsMaxTurns(ref bool isMaxTurns)
         {
             isMaxTurns = this.turns == (this.dim * this.dim);
@@ -186,7 +152,7 @@ namespace chess.Model
 
         public void ChangePlayer()
         {
-            this.player.change();
+            this.Player.change();
             OnPlayerChanged(EventArgs.Empty);
         }
 
@@ -199,18 +165,13 @@ namespace chess.Model
         }
         
 
-
-
-        // this method is called by some code (when the code changes the board) and raises the event 
+        
         protected virtual void OnBoardChanged(BoardChangedEventArgs e)
         {
-            // eg makes sure the Event has a delegate attached
             if (BoardChanged != null)
             {
                 BoardChanged(this, e);
             }
         }
-
-
     }
 }

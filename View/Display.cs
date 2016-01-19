@@ -237,7 +237,7 @@ namespace chess.View
 
             // This comes after the handlers are registered so that
             // the boardchanged handler may update the view.
-            this.gameController.PrepareModel();
+            this.gameController.PrepareModel(this.selectedGameModel);
 
 
             this.infoPanel.Visible = false;
@@ -275,7 +275,7 @@ namespace chess.View
 
             // This comes after the handlers are registered so that
             // the boardchanged handler may update the view.
-            this.gameController.PrepareModel();
+            this.gameController.PrepareModel(this.selectedGameModel);
 
             this.infoPanel.Visible = false;
             this.menuItemNewGame.Enabled = true;
@@ -294,7 +294,7 @@ namespace chess.View
             // ADD A SWITCH STATEMENT IN HERE FOR DIFFERENT MODELS -> HANDLERS, VIEW ELEMENTS ARE DIFFERENT ETC
 
             // stop the game loop thread
-            this.gameController.Terminate();
+            this.gameController.Terminate(this.selectedGameModel);
             // deregister handlers from the model
             deregisterHandlers(this.selectedGameModel);
 
@@ -742,7 +742,7 @@ namespace chess.View
             {
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
-                string curPlayer = this.gameController.Model.Player.CurPlayer;
+                string curPlayer = this.gameController.Model.Player.PlayerValue;
                 this.white_turn_panel.Visible = false;
                 this.black_turn_panel.Visible = false;
 
@@ -894,7 +894,7 @@ namespace chess.View
             {
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
-                string curPlayer = this.gameController.Model.Player.CurPlayer;
+                string curPlayer = this.gameController.Model.Player.PlayerValue;
             }
         }
 

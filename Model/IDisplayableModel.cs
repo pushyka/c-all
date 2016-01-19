@@ -17,16 +17,8 @@ namespace chess.Model
         event EventHandler CapturedChanged;
         event EventHandler PlayerChanged;
 
-        //void applyMove(FormedMove move, string moveType);
-
-        void Setup();
-
-        void SetPlayer();
-
-        Player Player { get; set; }
-
         TileStruct[,] Board { get; }
-
         List<EGamePieces> PiecesCapd { get; }
+        Player Player { get; }
     }
 }

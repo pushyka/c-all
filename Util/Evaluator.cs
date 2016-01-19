@@ -66,7 +66,7 @@ namespace chess.Util
                 -(further movement checks)
         Finally it must check, if the move were to be applied, that it does not leave the 
         current player's king in check.*/
-        public bool ValidateMove(FormedMove move, ChessPosition cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
+        public bool IsValidMove(FormedMove move, ChessPosition cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
         {
             bool outcome = false;
             TileStruct tileA = new TileStruct();
@@ -216,6 +216,7 @@ namespace chess.Util
                         break;
                     }
                 }
+                // for all other cases consider the entirety of the ray
                 else
                 {
                     if (ray.Contains(posB))

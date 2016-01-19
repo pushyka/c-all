@@ -10,7 +10,7 @@ namespace chess.Model
     {
         protected int dim;
         protected TileStruct[, ] board;
-        protected Player player;
+        public Player Player { get; set; }
         protected Dictionary<char, bool> castle;
         protected Tuple<int, int> enPassantSq;
         protected int halfmoveClock;
@@ -30,7 +30,7 @@ namespace chess.Model
         {
             this.dim = dim;
             this.board = board;
-            this.player = player;
+            this.Player = player;
             this.castle = castle;
             this.enPassantSq = enPassantSq;
             this.halfmoveClock = halfmoveClock;
@@ -294,7 +294,7 @@ namespace chess.Model
 
 
             // side to move from player
-            Player playerCopy = player;
+            Player playerCopy = this.Player;
             // castling status
             Dictionary<char, bool> castleCopy = new Dictionary<char, bool>(castle);
             // cur en passant sq
@@ -314,17 +314,7 @@ namespace chess.Model
         }
 
 
-        public virtual Player Player
-        {
-            get
-            {
-                return this.player;
-            }
-            set
-            {
-                this.player = value;
-            }
-        }
+
 
 
         /// <summary>
