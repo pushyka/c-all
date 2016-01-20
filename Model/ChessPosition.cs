@@ -6,20 +6,28 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+    /* Base chess position representing a snapshot of a turn. Such an object can be used
+    for move search comparisons and position evaluation. Along with positions of pieces 
+    it holds information about the current en passant square if there is one, halfmove
+    counter, castling rights. */
     public class ChessPosition
     {
-        protected int dim;
-        protected TileStruct[, ] board;
+        public int Dim { get; set; }
+        public TileStruct[, ] Board { get; set; }
         public Player Player { get; set; }
         protected Dictionary<char, bool> castle;
-        protected Tuple<int, int> enPassantSq;
+        public Tuple<int, int> EnPassantSq { get; set; }
         protected int halfmoveClock;
-        protected List<EGamePieces> piecesCapd;//x2 
+        protected List<EGamePieces> piecesCapd;
 
-        // used when creating a chess position model
+
+        /* This is the default base constructor overridden by the ChessPositionModel 
+        constructor ~ I think. */
         protected ChessPosition() { } 
 
-        // used when creating a chess position
+
+        /* Used when a new chess position is created. The property copies are made
+        and then this constructor is called with the copies. */
         public ChessPosition(int dim,
                              TileStruct[,] board,
                              Player player,
@@ -28,23 +36,18 @@ namespace chess.Model
                              int halfmoveClock,
                              List<EGamePieces> piecesCapd)
         {
-            this.dim = dim;
-            this.board = board;
+            this.Dim = dim;
+            this.Board = board;
             this.Player = player;
             this.castle = castle;
-            this.enPassantSq = enPassantSq;
+            this.EnPassantSq = enPassantSq;
             this.halfmoveClock = halfmoveClock;
             this.piecesCapd = piecesCapd;
         }
 
-
-
         
-
-
-        
-        /* The Entry point for move application, this method
-        selects the appropriate type of move to make based on moveType*/
+        /* The Entry point for a move application, this method selects the 
+        appropriate type of move to make based on the moveType property. */
         public void applyMove(FormedMove move, EChessMoveTypes moveType)
         {
             switch (moveType)
@@ -62,17 +65,15 @@ namespace chess.Model
                     applyEnPassantCapture(move);
                     break;
                 default:
-                    System.Console.WriteLine("ERROR: No moveType set"); // should never reach 
-                    break;
+                    throw new ArgumentException($"Unexpected value: {moveType}, for moveType");
             }
-
-            // fire the event (board changed)
         }
 
+
         /* Apply a movement type move to the board. This move has already been validated by
-        the evaluator and found to be legal. If the moving piece is a pawn, need to update the
-        movedOnce value, determine if it can be captured enPassant next turn and determine if it
-        requires promotion.*/
+        the evaluator and found to be legal.
+        There are additional actions to be made if the moving piece is a pawn and fits certain
+        criteria. */
         private void applyMovement(FormedMove move)
         {
             Tuple<int, int> frSqPos = move.PosA;
@@ -83,272 +84,191 @@ namespace chess.Model
 
             Piece mvPiece = frSqTl.piece;
             
-            //  if moving piece is a pawn and its its first move
+            // if moving piece is a pawn do additional actions //
             if (mvPiece.Val == EGamePieces.WhitePawn ||
                 mvPiece.Val == EGamePieces.BlackPawn)
             {
-                // if it has moved two squares on its first move it can be captured en passant
+                // if it has moved two squares on its first move it can be captured En Passant
                 if (!mvPiece.MovedOnce && mvTwoTiles(frSqPos, toSqPos))
-                {
-                    this.enPassantSq = toSqPos;
-                }
-                mvPiece.MovedOnce = true;
-                // if there is a value in move.promotionselection this means the moving piece should be updated
+                    this.EnPassantSq = toSqPos;
+
+                // if there exists a non-empty value in PromotionSelection
+                // this means the moving piece is a pawn being promoted
                 if (move.PromotionSelection != EGamePieces.empty)
-                {
                     mvPiece.Val = move.PromotionSelection;
-                }
+
+                mvPiece.MovedOnce = true;
             }
 
-            // move the piece to the to square (copy)
-            updateTileWithPiece(toSqPos, mvPiece);
-            // empty the from square
-            updateTileWithPiece(frSqPos, null);
+            // move the piece
+            updatePosWithPiece(toSqPos, mvPiece);
+            updatePosWithPiece(frSqPos, null);
         }
 
 
-
-        /// <summary>
-        /// Performs the CAPTURE operation, (a move and
-        /// replacement of a piece) also adds any captured 
-        /// pieces to the capture list. Essentially same as movement.
-        /// </summary>
-        /// <param name="move"></param>
+        /* Apply a capture type move to the board. This capture has already been validated by
+        the evaluator and found to be legal.
+        There are additional actions to be made if the moving piece is a pawn and fits certain
+        criteria. 
+        The captured piece is also added to the piecesCapd List property of this ChessPosition.*/
         private void applyCapture(FormedMove move)
         {
             Tuple<int, int> frSqPos = move.PosA;
             Tuple<int, int> toSqPos = move.PosB;
-            // get the piece from the toSquare (which is being captured)
+
             TileStruct toSqTl = getTile(toSqPos);
             TileStruct frSqTl = getTile(frSqPos);
 
             Piece mvPiece = frSqTl.piece;
 
-            //  if moving piece is a pawn
+            // if moving piece is a pawn do additional actions //
             if (mvPiece.Val == EGamePieces.WhitePawn ||
                 mvPiece.Val == EGamePieces.BlackPawn)
             {
-                // if there is a value in move.promotionselection this means the moving piece should be updated
+                // if there exists a non-empty value in PromotionSelection
+                // this means the capturing piece is also pawn being promoted
                 if (move.PromotionSelection != EGamePieces.empty)
-                {
                     mvPiece.Val = move.PromotionSelection;
-                }
             }
 
             // add the captured to the list
             addToCaptured(toSqTl.piece.Val);
 
-            // move the piece to the to square (copy)
-            updateTileWithPiece(toSqPos, mvPiece);
-            // empty the from square
-            updateTileWithPiece(frSqPos, null);
-
-
+            // move the piece
+            updatePosWithPiece(toSqPos, mvPiece);
+            updatePosWithPiece(frSqPos, null);
         }
 
+
+        /* Apply an En Passant type move to the board. This move has already been validated by
+        the evaluator and found to be legal and there exists an opponent piece on the EnPassant
+        Square which can be captured.
+        As in a normal capture, the piece captured En Passant is also added to the piecesCapd 
+        List property of this ChessPosition.*/
         private void applyEnPassantCapture(FormedMove move)
         {
+            Tuple<int, int> frSqPos = move.PosA;
+            Tuple<int, int> toSqPos = move.PosB;
 
-            // then this is an en passant capture
-            // add the passant square to the captured list
-            Tuple<int, int> fromSquareLoc = move.PosA;
-            Tuple<int, int> toSquareLoc = move.PosB;
+            // Compute En Passant Square
+            int epSqRank = frSqPos.Item1;
+            int epSqFile = toSqPos.Item2;
+            Tuple<int, int> epSqPos = Tuple.Create(epSqRank, epSqFile);
 
-            TileStruct fromSquareVal = getTile(fromSquareLoc);
-            TileStruct toSquareVal = getTile(toSquareLoc);
+            TileStruct frSqTl = getTile(frSqPos);
+            TileStruct toSqTl = getTile(toSqPos);
+            TileStruct epSqTl = getTile(epSqPos);
 
-            // move the pawn to the to square (copy)
-            updateTileWithPiece(toSquareLoc, fromSquareVal.piece);
-            // empty the from square
-            updateTileWithPiece(fromSquareLoc, null);
-            // clear the passant square -> empty
-            Tuple<int, int> passantSquareLoc;
-            int passantSquareLocRank = fromSquareLoc.Item1;
-            int passantSquareLocFile = toSquareLoc.Item2;
-            passantSquareLoc = Tuple.Create(passantSquareLocRank, passantSquareLocFile);
-            TileStruct passantSquareVal = getTile(passantSquareLoc);
+            Piece mvPiece = frSqTl.piece;
 
-            updateTileWithPiece(passantSquareLoc, null);
-            // add the passant square to the captured list
-            addToCaptured(passantSquareVal.piece.Val); // this shouldnt be after the set of the val on loc to null...
+            // move the pawn
+            updatePosWithPiece(toSqPos, mvPiece);
+            updatePosWithPiece(frSqPos, null);
 
+            // add the captured to the list
+            addToCaptured(epSqTl.piece.Val);
+            updatePosWithPiece(epSqPos, null);
         }
 
 
-        /// <summary>
-        /// Performs the CASTLE operation (a specific
-        /// move type operation)
-        /// As with the other applyMove functions, the move has
-        /// already been validated as legal. For castling this
-        /// includes check for check operation.
-        /// </summary>
-        /// <param name="move"></param>
+        /* Apply a Castle type move to the board. This move has already been validated by
+        the evaluator and found to be legal. */
         private void applyCastle(FormedMove move)
         {
-            // todo
+            
         }
 
 
-        /* A pawn is moving to toSqPos. This has already been established
-        Don't need to check the colour of the pawn since by the rules of the game
-        a black pawn can only move to dim-1 and a white pawn can only move to 0 ranks.
-        (only moves forwards) so IF a pawn is mvoing on to toSqPos, only then is the function called,
-        and can assume the color of the pawn is correct. */
-
-
+        /* Return true if distance between the two tiles at the given positions is 2.
+        This is used in determining if a given pawn's position should be (added) marked
+        as the EnPassant captureable position. */
         private bool mvTwoTiles(Tuple<int, int> frSqPos, Tuple<int, int> toSqPos)
         {
+            /* A pawn is moving to toSqPos. This has already been established
+            Don't need to check the colour of the pawn since by the rules of the game
+            a black pawn can only move to dim-1 and a white pawn can only move to 0 ranks.
+            (only moves forwards) so IF a pawn is mvoing on to toSqPos, only then is the function called,
+            and can assume the color of the pawn is correct. */
             return Math.Abs(frSqPos.Item1 - toSqPos.Item1) == 2;
         }
-            
 
 
+        /* Clear the value from the EnPassant Square marker if it is owned by the current
+        player. This method is called at the start of each turn. Therefore if a piece is 
+        cleared by this method, it was a EnPassant captureable pawn which was not captured
+        in the previous turn (eg by the other player). So the other player no longer has 
+        this ability to capture it. */
         public void clearEnPassantPawns(Player player)
         {
-            //System.Console.WriteLine(" www {0}", board.);
-            
-            if (enPassantSq != null)
-            {
-                if (player.Owns(getTile(enPassantSq).piece))
-                    enPassantSq = null;
-            }
-
+            if (EnPassantSq != null)
+                if (player.Owns(getTile(EnPassantSq).piece))
+                    EnPassantSq = null;
         }
 
-
-
-
-
-
-        /// <summary>
-        /// Given a Tuple(int,int) position, return a reference
-        /// to the Tile object located at that at that position on the board.
-        /// </summary>
+        
+        /* Given a Tuple(int,int) position, return a reference
+        to the Tile object located at that at that position on the board. */
         private TileStruct getTile(Tuple<int, int> position)
         {
-           return this.board[position.Item1, position.Item2];
+           return this.Board[position.Item1, position.Item2];
         }
 
 
-
-
-
-        /// <summary>
-        /// This is overridden by the CPM since the CPM also needs to raise events
-        /// to be handled by the display.
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="newValues"></param>
-        protected virtual void updateTileWithPiece(Tuple<int, int> location, Piece newPiece)
+        /* Takes a location and a piece value and updates the tile at that location with
+        this new piece value. 
+        This method is overridden by the ChessPositionModel which adds a BoardChanged event. */
+        protected virtual void updatePosWithPiece(Tuple<int, int> location, Piece newPiece)
         {
             int row = location.Item1;
             int col = location.Item2;
-            board[row, col].piece = newPiece;
+            Board[row, col].piece = newPiece;
         }
-        /// <summary>
-        /// same reasoning as above function
-        /// </summary>
-        /// <param name="piece"></param>
+
+
+        /* Takes a piece value and adds it to the PiecesCapd List.
+        This method is overridden by the ChessPositionModel which adds a CapturedChanged event.*/
         protected virtual void addToCaptured(EGamePieces piece)
         {
             this.piecesCapd.Add(piece);
         }
 
 
-        /// <summary>
-        /// This method of the chess position object returns a clone of the chess position without the listeners and
-        /// captured list etc, a version which can be modified during evaluation of positions (used in search & checkcheck after move) 
-        /// independantly of the chess position model object used for final moves and updating display.
-        /// This copy is required during evaluation (for check checking) and also during generation
-        /// of positions as nodes in the search (parent node copied and modified by one move to create a child node)
-        /// </summary>
-        /// <returns></returns>
-        public ChessPosition getEvaluateableChessPosition()
+        /* Returns a ChessPosition object which is a deep copy of this one. Since this method is
+        also inherited by the ChessPositionModel, if the CPM produces this object it will be a
+        deep copy of the ChessPositionModel object as if it were a ChessPosition. (CPM minus handlers etc).
+        This function will be used during evaluation in the king check phase, and will also be used during
+        the move search of the ai function. */
+        public ChessPosition getChessPositionCopy()
         {
-            int dimCopy = dim; // fix
-
-            // ============  Deep copy the board Manually =================
+            int dimCopy = Dim;
+            // deep copy the board manually //
             TileStruct[,] boardCopy = new TileStruct[dimCopy, dimCopy];
             for (int j = 0; j < dimCopy; j ++)
             {
                 for (int k = 0; k < dimCopy; k ++)
                 {
-                    // foreach tile create a new tile struct, copy the piece from the original, add it to the tilestrcut, add the tilestruct to the array
                     TileStruct tileCopy = new TileStruct();
-                    // copy the piece into the tile if there is one
-                    if (!board[j,k].IsEmpty())
+                    if (!Board[j,k].IsEmpty())
                     {
-                        Piece piece = board[j, k].piece;
+                        Piece piece = Board[j, k].piece;
                         EGamePieces val = piece.Val;
                         bool mv = piece.MovedOnce;
                         Piece pieceCopy = new Piece(val);
                         pieceCopy.MovedOnce = mv;
                         tileCopy.piece = pieceCopy;
                     }
-
                     boardCopy[j, k] = tileCopy;
                 }
             }
-            // done
-            // =============================================================
-
-
-            // side to move from player
+            // copy rest of ChessPosition properties
             Player playerCopy = this.Player;
-            // castling status
             Dictionary<char, bool> castleCopy = new Dictionary<char, bool>(castle);
-            // cur en passant sq
-            Tuple<int, int> enPassantSqCopy = (enPassantSq == null) ? null : Tuple.Create(enPassantSq.Item1, enPassantSq.Item2);
-            // halfmove clock
+            Tuple<int, int> enPassantSqCopy = (EnPassantSq == null) ? null : Tuple.Create(EnPassantSq.Item1, EnPassantSq.Item2);
             int halfmoveClockCopy = halfmoveClock;
-            //capdsofar
             List<EGamePieces> piecesCapdCopy = new List<EGamePieces>(piecesCapd);
-            ChessPosition cpos = new ChessPosition(dimCopy,
-                                              boardCopy,
-                                              playerCopy,
-                                              castleCopy,
-                                              enPassantSqCopy,
-                                              halfmoveClockCopy,
-                                              piecesCapdCopy);
-            return cpos;
+            // create and return the copy
+            ChessPosition cpCopy = new ChessPosition(dimCopy, boardCopy, playerCopy, castleCopy, enPassantSqCopy, halfmoveClockCopy, piecesCapdCopy);
+            return cpCopy;
         }
-
-
-
-
-
-        /// <summary>
-        /// 
-        /// Possibly don't need anymore since array of strings (base type) copied by value
-        /// </summary>
-        public TileStruct[,] Board
-        {
-            get
-            {
-                return this.board;
-            }
-        }
-
-        public Tuple<int, int> EnPassantSq
-        {
-            get
-            {
-                return this.enPassantSq;
-            }
-            set
-            {
-                this.enPassantSq = value;
-            }
-        }
-
-        public int Dim
-        {
-            get
-            {
-                return this.dim;
-            }
-            
-        }
-
     }
 }

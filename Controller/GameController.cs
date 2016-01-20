@@ -50,7 +50,7 @@ namespace chess.Controller
         /* Receives a value indicating a game model and sets up the model as
         'displayableModel' (to which the view is bound) and also
         '*Model' (which is used in the game loop etc). This method also
-        sets up any dependant utilities. */
+        sets up any dependent utilities. */
         public void InitialiseModel(EGameModels model)
         {
             switch(model)

@@ -25,10 +25,10 @@ namespace chess.Model
 
         /* Create instance of the cpm.
         TODO: Add Singleton static check. */
-        public ChessPositionModel()
+        public ChessPositionModel() : base()
         {
-            this.dim = 8;
-            this.board = new TileStruct[dim, dim];
+            this.Dim = 8;
+            this.Board = new TileStruct[Dim, Dim];
             this.piecesCapd = new List<EGamePieces>();
             this.castle = new Dictionary<char, bool>();
             this.halfmoveClock = 0;
@@ -41,55 +41,55 @@ namespace chess.Model
         public void Setup()
         {
             // rank 0 (black)
-            this.board[0, 0] = new TileStruct(new Piece(EGamePieces.BlackRook));
-            this.board[0, 1] = new TileStruct(new Piece(EGamePieces.BlackKnight));
-            this.board[0, 2] = new TileStruct(new Piece(EGamePieces.BlackBishop));
-            this.board[0, 3] = new TileStruct(new Piece(EGamePieces.BlackQueen));
-            this.board[0, 4] = new TileStruct(new Piece(EGamePieces.BlackKing));
-            this.board[0, 5] = new TileStruct(new Piece(EGamePieces.BlackBishop));
-            this.board[0, 6] = new TileStruct(new Piece(EGamePieces.BlackKnight));
-            this.board[0, 7] = new TileStruct(new Piece(EGamePieces.BlackRook));
+            this.Board[0, 0] = new TileStruct(new Piece(EGamePieces.BlackRook));
+            this.Board[0, 1] = new TileStruct(new Piece(EGamePieces.BlackKnight));
+            this.Board[0, 2] = new TileStruct(new Piece(EGamePieces.BlackBishop));
+            this.Board[0, 3] = new TileStruct(new Piece(EGamePieces.BlackQueen));
+            this.Board[0, 4] = new TileStruct(new Piece(EGamePieces.BlackKing));
+            this.Board[0, 5] = new TileStruct(new Piece(EGamePieces.BlackBishop));
+            this.Board[0, 6] = new TileStruct(new Piece(EGamePieces.BlackKnight));
+            this.Board[0, 7] = new TileStruct(new Piece(EGamePieces.BlackRook));
 
 
             // rank 1 (black)
-            for (int col = 0; col < dim; col++)
-                this.board[1, col] = new TileStruct(new Piece(EGamePieces.BlackPawn));
+            for (int col = 0; col < Dim; col++)
+                this.Board[1, col] = new TileStruct(new Piece(EGamePieces.BlackPawn));
 
             // empty ranks
             for (int row = 2; row < 6; row++)
-                for (int col = 0; col < dim; col++)
-                    this.board[row, col] = new TileStruct();
+                for (int col = 0; col < Dim; col++)
+                    this.Board[row, col] = new TileStruct();
 
             // rank 6 (white)
-            for (int col = 0; col < dim; col++)
-                this.board[6, col] = new TileStruct(new Piece(EGamePieces.WhitePawn));
+            for (int col = 0; col < Dim; col++)
+                this.Board[6, col] = new TileStruct(new Piece(EGamePieces.WhitePawn));
 
             // rank 7 (white)
-            this.board[7, 0] = new TileStruct(new Piece(EGamePieces.WhiteRook));
-            this.board[7, 1] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
-            this.board[7, 2] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
-            this.board[7, 3] = new TileStruct(new Piece(EGamePieces.WhiteQueen));
-            this.board[7, 4] = new TileStruct(new Piece(EGamePieces.WhiteKing));
-            this.board[7, 5] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
-            this.board[7, 6] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
-            this.board[7, 7] = new TileStruct(new Piece(EGamePieces.WhiteRook));
+            this.Board[7, 0] = new TileStruct(new Piece(EGamePieces.WhiteRook));
+            this.Board[7, 1] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
+            this.Board[7, 2] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
+            this.Board[7, 3] = new TileStruct(new Piece(EGamePieces.WhiteQueen));
+            this.Board[7, 4] = new TileStruct(new Piece(EGamePieces.WhiteKing));
+            this.Board[7, 5] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
+            this.Board[7, 6] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
+            this.Board[7, 7] = new TileStruct(new Piece(EGamePieces.WhiteRook));
 
             // fire the board changed event with all locations as argument
             BoardChangedEventArgs e = new BoardChangedEventArgs();
-            for (int row = 0; row < this.dim; row++)
-                for (int col = 0; col < this.dim; col++)
+            for (int row = 0; row < this.Dim; row++)
+                for (int col = 0; col < this.Dim; col++)
                     e.Add(Tuple.Create(row, col));
             OnBoardChanged(e);
         }
         
 
        /* Same as the ChessPosition implementation but this also fires the 
-       BoardChanged event since this is the singleton ChessPositionModel which is bound to the View. */
-        protected override void updateTileWithPiece(Tuple<int,int> location, Piece newPiece)
+        BoardChanged event since this is the singleton ChessPositionModel which is bound to the View. */
+        protected override void updatePosWithPiece(Tuple<int,int> location, Piece newPiece)
         {
             int row = location.Item1;
             int col = location.Item2;
-            this.board[row, col].piece = newPiece;
+            this.Board[row, col].piece = newPiece;
             // finally fire the BoardChanged event!
             // EventArgs could be the tile coordinates which have changed
             BoardChangedEventArgs e = new BoardChangedEventArgs();

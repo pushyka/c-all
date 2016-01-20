@@ -18,12 +18,10 @@ namespace chess.Model
         public TileStruct[,] Board { get; }
         public List<EGamePieces> PiecesCapd { get; }
         public Player Player { get; set; }
-
-
+        
         private int dim;
         private int rowToWin;
         private int turns;
-
 
 
         public TTTPositionModel()
@@ -35,6 +33,8 @@ namespace chess.Model
             this.PiecesCapd = null;
         }
 
+
+        /* Populate the board with (empty) pieces. */
         public void Setup()
         {
             for (int row = 0; row < this.dim; row ++)
@@ -47,20 +47,15 @@ namespace chess.Model
         }
 
 
-        /// <summary>
-        /// Given a move object, check that the move would be valid against the current
-        /// ttt model. All moves would be valid so long as they dont specify a a tile
-        /// which has already been clicked. eg so long as they are empty.
-        /// This uses the GamePieces.empty version of empty
-        /// </summary>
-        /// <param name="move"></param>
-        /// <returns></returns>
+        /* Given a move object, check that the move would be valid against the current
+        ttt model. All moves would be valid so long as they dont specify a tile
+        which has already been clicked / is not empty. This uses the GamePieces.empty 
+        version of empty rather than null checking. */
         public bool IsValidMove(FormedMove move)
         {
             Tuple<int, int> location = move.PosA;
             return this.Board[location.Item1, location.Item2].piece.Val == EGamePieces.empty;
         }
-
 
 
         /* Takes a move (a board coordinate) which has been checked for emptiness.
@@ -78,7 +73,8 @@ namespace chess.Model
         }
 
 
-
+        /* Takes a board location and a piece and puts the piece on that location. 
+        The boardchanged event is raised for the View to update accordingly. */
         private void updateTileWithPiece(Tuple<int, int> location, Piece newPiece)
         {
             int row = location.Item1;
@@ -90,14 +86,9 @@ namespace chess.Model
         }
 
 
-
-
-        /// <summary>
-        /// Checks the board for the existence of a winning position for either player.
-        /// If a winning position is found it returns true and puts the winner in the winner
-        /// variable passed by reference. 
-        /// 
-        /// </summary>
+        /* Checks the board for the existence of a winning position for either player.
+        If a winning position is found it returns true and puts the winner in the winner
+        variable passed by reference. */
         public bool IsWinningPosition(ref string winner)
         {
             bool isWin = false;
@@ -113,9 +104,7 @@ namespace chess.Model
                     isWin = true;
                     break;
                 }
-
                 // check horizontals
-
                 if ((Board[0, 0].piece.Val == player && Board[0, 1].piece.Val == player && Board[0, 2].piece.Val == player) ||
                     (Board[1, 0].piece.Val == player && Board[1, 1].piece.Val == player && Board[1, 2].piece.Val == player) ||
                     (Board[2, 0].piece.Val == player && Board[2, 1].piece.Val == player && Board[2, 2].piece.Val == player))
@@ -124,9 +113,7 @@ namespace chess.Model
                     isWin = true;
                     break;
                 }
-
                 // check diagonals
-
                 if ((Board[0, 0].piece.Val == player && Board[1, 1].piece.Val == player && Board[2, 2].piece.Val == player) ||
                     (Board[2, 0].piece.Val == player && Board[1, 1].piece.Val == player && Board[0, 2].piece.Val == player))
                 {
@@ -134,14 +121,13 @@ namespace chess.Model
                     isWin = true;
                     break;
                 }
-
-
-
             }
-            
             return isWin;
         }
 
+
+        /* Returns true if the turn counter (number of pieces placed) is 
+        equal to the number of possible board tiles. */
         public bool IsMaxTurns(ref bool isMaxTurns)
         {
             isMaxTurns = this.turns == (this.dim * this.dim);
@@ -149,12 +135,14 @@ namespace chess.Model
         }
 
 
-
+        /* A wrapper for the change player which also fires the changeevent for the
+        View to update its message accordingly. */
         public void ChangePlayer()
         {
             this.Player.change();
             OnPlayerChanged(EventArgs.Empty);
         }
+
 
         protected virtual void OnPlayerChanged(EventArgs e)
         {
@@ -165,7 +153,6 @@ namespace chess.Model
         }
         
 
-        
         protected virtual void OnBoardChanged(BoardChangedEventArgs e)
         {
             if (BoardChanged != null)

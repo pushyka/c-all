@@ -10,47 +10,37 @@ namespace chess.Controller
     interface IGameController
     {
 
-        /// <summary>
-        /// Instantiates the game objects, models and utilities.
-        /// </summary>
-        /// <param name="model"></param>
+        /* Receives a value indicating a game model and sets up the model as
+        'displayableModel' (to which the view is bound) and also
+        '*Model' (which is used in the game loop etc). This method also
+        sets up any dependent utilities. */
         void InitialiseModel(EGameModels model);
 
 
-        /// <summary>
-        /// Removes the game objects, models and utilities.
-        /// </summary>
-        /// <param name="model"></param>
+        /* This takes a value indicating a gameModel and returns the values of the displayable
+        and game models and utilities to null. */
         void UnInitialiseModel(EGameModels model);
 
 
-        /// <summary>
-        /// Sets the initial parameters of the game model
-        /// like the initial population of pieces and the 
-        /// starting player.
-        /// </summary>
+        /* This takes a value indicating a gameModel and performs the initial setup of the
+        model. Mainly populating with initial starting pieces / setting the starting player. */
         void PrepareModel(EGameModels model);
 
 
-        /// <summary>
-        /// Once everything is prepared, starts the loop thread for the game.
-        /// </summary>
+        /* This takes a value indicating a gameModel and starts a new thread
+        running the appropriate gameLoop for the gameModel. */
         void StartGameLoop(EGameModels model);
 
 
-        /// <summary>
-        /// Stops the runnig game loop thread.
-        /// </summary>
+        /* This stops and nulls the thread which is running a gameLoop. */
         void StopGameLoop();
-    
-        /// <summary>
-        /// Stops the running game loop thread and nullifies the
-        /// initial parameters (unpreparemodel)
-        /// </summary>
+
+        /* This takes a value indicating a gameModel and terminates any running gameLoop,
+        sets some values to null and sets the models player value to null. */
         void Terminate(EGameModels model);
 
 
-        // The view binds to the {model exposed by the controller}
+        /* This is the displayable version of the current game model, exposed via this controller to the View. */
         IDisplayableModel Model { get; }
 
         string Message { get; set; }

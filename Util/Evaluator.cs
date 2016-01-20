@@ -66,7 +66,7 @@ namespace chess.Util
                 -(further movement checks)
         Finally it must check, if the move were to be applied, that it does not leave the 
         current player's king in check.*/
-        public bool IsValidMove(FormedMove move, ChessPosition cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
+        public bool IsValidMove(FormedMove move, ChessPositionModel cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
         {
             bool outcome = false;
             TileStruct tileA = new TileStruct();
@@ -113,7 +113,7 @@ namespace chess.Util
                 // a copy of the chess position is made so that the move may
                 // be applied in order for the king-check to be checked without
                 // causing the chess position to update the display
-                ChessPosition cpCopy = cpm.getEvaluateableChessPosition();
+                ChessPosition cpCopy = cpm.getChessPositionCopy();
                 cpCopy.applyMove(move, moveType);
                 // after this application of the move
                 outcome = IsKingInCheck(cpCopy, ref kingCheckedBy);
