@@ -129,6 +129,9 @@ namespace chess.Model
                 // this means the capturing piece is also pawn being promoted
                 if (move.PromotionSelection != EGamePieces.empty)
                     mvPiece.Val = move.PromotionSelection;
+                // in the cases where a pawns first move is a capture, need to
+                // set this to prevent the 2 move option only applying to first 'movement'
+                mvPiece.MovedOnce = true;
             }
 
             // add the captured to the list
