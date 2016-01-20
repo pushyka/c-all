@@ -201,8 +201,17 @@ namespace chess.Model
         public void clearEnPassantPawns(Player player)
         {
             if (EnPassantSq != null)
-                if (player.Owns(getTile(EnPassantSq).piece))
+            {
+                Piece enPassantPiece = getTile(EnPassantSq).piece;
+                if (enPassantPiece != null)
+                {
+                    if (player.Owns(getTile(EnPassantSq).piece))
+                        EnPassantSq = null;
+                }
+                // else piece is null which must mean it has been captured
+                else
                     EnPassantSq = null;
+            }
         }
 
         
