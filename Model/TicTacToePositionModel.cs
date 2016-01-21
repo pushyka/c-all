@@ -9,26 +9,27 @@ namespace chess.Model
     /* This is a displayable model but since, for tic tac toe, there is
     not really a notion of pieces captured, there is a null implementation 
     of theses methods.*/
-    public class TTTPositionModel : IDisplayableModel
+    public class TicTacToePositionModel : IDisplayableModel
     {
         public event EventHandler<BoardChangedEventArgs> BoardChanged;
         public event EventHandler CapturedChanged;
         public event EventHandler PlayerChanged;
 
-        public TileStruct[,] Board { get; }
+        public Tile[,] Board { get; }
         public List<EGamePieces> PiecesCapd { get; }
         public Player Player { get; set; }
         
-        private int dim;
+        private int size;
         private int rowToWin;
         private int turns;
 
 
-        public TTTPositionModel()
+        /* The constructor for a TicTacToe game model. */
+        public TicTacToePositionModel()
         {
-            this.dim = 3;
-            this.Board = new TileStruct[dim, dim];
-            this.rowToWin = dim;
+            this.size = 3;
+            this.Board = new Tile[size, size];
+            this.rowToWin = size;
             this.turns = 0;
             this.PiecesCapd = null;
         }
@@ -37,11 +38,11 @@ namespace chess.Model
         /* Populate the board with (empty) pieces. */
         public void Setup()
         {
-            for (int row = 0; row < this.dim; row ++)
+            for (int row = 0; row < this.size; row ++)
             {
-                for (int col = 0; col < this.dim; col ++)
+                for (int col = 0; col < this.size; col ++)
                 {
-                    this.Board[row, col] = new TileStruct(new Piece(EGamePieces.empty));
+                    this.Board[row, col] = new Tile(new Piece(EGamePieces.empty));
                 }
             }
         }
@@ -130,7 +131,7 @@ namespace chess.Model
         equal to the number of possible board tiles. */
         public bool IsMaxTurns(ref bool isMaxTurns)
         {
-            isMaxTurns = this.turns == (this.dim * this.dim);
+            isMaxTurns = this.turns == (this.size * this.size);
             return isMaxTurns;
         }
 

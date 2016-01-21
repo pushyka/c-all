@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+    /* Enum representing the various move types in the
+    chess game. */
     public enum EChessMoveTypes
     {
         Movement,

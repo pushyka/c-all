@@ -9,27 +9,25 @@ using System.Windows.Forms;
 
 namespace chess.View
 {
-    /// <summary>
-    /// This is a subclass of the label which overrides the OnPaint
-    /// to add a custom border to the text which is painted. This allows
-    /// us to create a white font with a black outline so that it stands
-    /// out against its background.
-    /// </summary>
-    class CustomeOutlineLabel : Label
+    class CustomOutlineLabel : Label
     {
-
         public Color OutlineColour { get; set; }
         public float OutlineColourWidth { get; set; }
 
-        public CustomeOutlineLabel()
+        /* This is a subclass of the label which overrides the OnPaint
+        to add a custom border to the text which is painted.This allows
+        us to create a white font with a black outline so that it stands
+        out against a coloured background. */
+        public CustomOutlineLabel()
         {
             OutlineColour = Color.Black;
             OutlineColourWidth = 2;
         }
 
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            // backcolor (transparent)
+            // BackColor is the Labels backcolor, set to transparent in the calling code
             e.Graphics.FillRectangle(new SolidBrush(BackColor), ClientRectangle);
 
             using (GraphicsPath gp = new GraphicsPath())
@@ -46,7 +44,5 @@ namespace chess.View
                 e.Graphics.FillPath(foreBrush, gp);
             }
         }
-
-
     }
 }

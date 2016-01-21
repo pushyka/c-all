@@ -12,8 +12,8 @@ namespace chess.Model
     counter, castling rights. */
     public class ChessPosition
     {
-        public int Dim { get; set; }
-        public TileStruct[, ] Board { get; set; }
+        public int Size { get; set; }
+        public Tile[, ] Board { get; set; }
         public Player Player { get; set; }
         protected Dictionary<char, bool> castle;
         public Tuple<int, int> EnPassantSq { get; set; }
@@ -28,15 +28,15 @@ namespace chess.Model
 
         /* Used when a new chess position is created. The property copies are made
         and then this constructor is called with the copies. */
-        public ChessPosition(int dim,
-                             TileStruct[,] board,
+        public ChessPosition(int size,
+                             Tile[,] board,
                              Player player,
                              Dictionary<char, bool> castle,
                              Tuple<int, int> enPassantSq,
                              int halfmoveClock,
                              List<EGamePieces> piecesCapd)
         {
-            this.Dim = dim;
+            this.Size = size;
             this.Board = board;
             this.Player = player;
             this.castle = castle;
@@ -79,8 +79,8 @@ namespace chess.Model
             Tuple<int, int> frSqPos = move.PosA;
             Tuple<int, int> toSqPos = move.PosB;
 
-            TileStruct frSqTl = getTile(frSqPos);
-            TileStruct toSqTl = getTile(toSqPos);
+            Tile frSqTl = getTile(frSqPos);
+            Tile toSqTl = getTile(toSqPos);
 
             Piece mvPiece = frSqTl.piece;
             
@@ -116,8 +116,8 @@ namespace chess.Model
             Tuple<int, int> frSqPos = move.PosA;
             Tuple<int, int> toSqPos = move.PosB;
 
-            TileStruct toSqTl = getTile(toSqPos);
-            TileStruct frSqTl = getTile(frSqPos);
+            Tile toSqTl = getTile(toSqPos);
+            Tile frSqTl = getTile(frSqPos);
 
             Piece mvPiece = frSqTl.piece;
 
@@ -158,9 +158,9 @@ namespace chess.Model
             int epSqFile = toSqPos.Item2;
             Tuple<int, int> epSqPos = Tuple.Create(epSqRank, epSqFile);
 
-            TileStruct frSqTl = getTile(frSqPos);
-            TileStruct toSqTl = getTile(toSqPos);
-            TileStruct epSqTl = getTile(epSqPos);
+            Tile frSqTl = getTile(frSqPos);
+            Tile toSqTl = getTile(toSqPos);
+            Tile epSqTl = getTile(epSqPos);
 
             Piece mvPiece = frSqTl.piece;
 
@@ -220,7 +220,7 @@ namespace chess.Model
         
         /* Given a Tuple(int,int) position, return a reference
         to the Tile object located at that at that position on the board. */
-        private TileStruct getTile(Tuple<int, int> position)
+        private Tile getTile(Tuple<int, int> position)
         {
            return this.Board[position.Item1, position.Item2];
         }
@@ -252,14 +252,14 @@ namespace chess.Model
         the move search of the ai function. */
         public ChessPosition getChessPositionCopy()
         {
-            int dimCopy = Dim;
+            int dimCopy = Size;
             // deep copy the board manually //
-            TileStruct[,] boardCopy = new TileStruct[dimCopy, dimCopy];
+            Tile[,] boardCopy = new Tile[dimCopy, dimCopy];
             for (int j = 0; j < dimCopy; j ++)
             {
                 for (int k = 0; k < dimCopy; k ++)
                 {
-                    TileStruct tileCopy = new TileStruct();
+                    Tile tileCopy = new Tile();
                     if (!Board[j,k].IsEmpty())
                     {
                         Piece piece = Board[j, k].piece;

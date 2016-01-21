@@ -27,8 +27,8 @@ namespace chess.Model
         TODO: Add Singleton static check. */
         public ChessPositionModel() : base()
         {
-            this.Dim = 8;
-            this.Board = new TileStruct[Dim, Dim];
+            this.Size = 8;
+            this.Board = new Tile[Size, Size];
             this.piecesCapd = new List<EGamePieces>();
             this.castle = new Dictionary<char, bool>();
             this.halfmoveClock = 0;
@@ -41,43 +41,43 @@ namespace chess.Model
         public void Setup()
         {
             // rank 0 (black)
-            this.Board[0, 0] = new TileStruct(new Piece(EGamePieces.BlackRook));
-            this.Board[0, 1] = new TileStruct(new Piece(EGamePieces.BlackKnight));
-            this.Board[0, 2] = new TileStruct(new Piece(EGamePieces.BlackBishop));
-            this.Board[0, 3] = new TileStruct(new Piece(EGamePieces.BlackQueen));
-            this.Board[0, 4] = new TileStruct(new Piece(EGamePieces.BlackKing));
-            this.Board[0, 5] = new TileStruct(new Piece(EGamePieces.BlackBishop));
-            this.Board[0, 6] = new TileStruct(new Piece(EGamePieces.BlackKnight));
-            this.Board[0, 7] = new TileStruct(new Piece(EGamePieces.BlackRook));
+            this.Board[0, 0] = new Tile(new Piece(EGamePieces.BlackRook));
+            this.Board[0, 1] = new Tile(new Piece(EGamePieces.BlackKnight));
+            this.Board[0, 2] = new Tile(new Piece(EGamePieces.BlackBishop));
+            this.Board[0, 3] = new Tile(new Piece(EGamePieces.BlackQueen));
+            this.Board[0, 4] = new Tile(new Piece(EGamePieces.BlackKing));
+            this.Board[0, 5] = new Tile(new Piece(EGamePieces.BlackBishop));
+            this.Board[0, 6] = new Tile(new Piece(EGamePieces.BlackKnight));
+            this.Board[0, 7] = new Tile(new Piece(EGamePieces.BlackRook));
 
 
             // rank 1 (black)
-            for (int col = 0; col < Dim; col++)
-                this.Board[1, col] = new TileStruct(new Piece(EGamePieces.BlackPawn));
+            for (int col = 0; col < Size; col++)
+                this.Board[1, col] = new Tile(new Piece(EGamePieces.BlackPawn));
 
             // empty ranks
             for (int row = 2; row < 6; row++)
-                for (int col = 0; col < Dim; col++)
-                    this.Board[row, col] = new TileStruct();
+                for (int col = 0; col < Size; col++)
+                    this.Board[row, col] = new Tile();
 
             // rank 6 (white)
-            for (int col = 0; col < Dim; col++)
-                this.Board[6, col] = new TileStruct(new Piece(EGamePieces.WhitePawn));
+            for (int col = 0; col < Size; col++)
+                this.Board[6, col] = new Tile(new Piece(EGamePieces.WhitePawn));
 
             // rank 7 (white)
-            this.Board[7, 0] = new TileStruct(new Piece(EGamePieces.WhiteRook));
-            this.Board[7, 1] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
-            this.Board[7, 2] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
-            this.Board[7, 3] = new TileStruct(new Piece(EGamePieces.WhiteQueen));
-            this.Board[7, 4] = new TileStruct(new Piece(EGamePieces.WhiteKing));
-            this.Board[7, 5] = new TileStruct(new Piece(EGamePieces.WhiteBishop));
-            this.Board[7, 6] = new TileStruct(new Piece(EGamePieces.WhiteKnight));
-            this.Board[7, 7] = new TileStruct(new Piece(EGamePieces.WhiteRook));
+            this.Board[7, 0] = new Tile(new Piece(EGamePieces.WhiteRook));
+            this.Board[7, 1] = new Tile(new Piece(EGamePieces.WhiteKnight));
+            this.Board[7, 2] = new Tile(new Piece(EGamePieces.WhiteBishop));
+            this.Board[7, 3] = new Tile(new Piece(EGamePieces.WhiteQueen));
+            this.Board[7, 4] = new Tile(new Piece(EGamePieces.WhiteKing));
+            this.Board[7, 5] = new Tile(new Piece(EGamePieces.WhiteBishop));
+            this.Board[7, 6] = new Tile(new Piece(EGamePieces.WhiteKnight));
+            this.Board[7, 7] = new Tile(new Piece(EGamePieces.WhiteRook));
 
             // fire the board changed event with all locations as argument
             BoardChangedEventArgs e = new BoardChangedEventArgs();
-            for (int row = 0; row < this.Dim; row++)
-                for (int col = 0; col < this.Dim; col++)
+            for (int row = 0; row < this.Size; row++)
+                for (int col = 0; col < this.Size; col++)
                     e.Add(Tuple.Create(row, col));
             OnBoardChanged(e);
         }

@@ -30,7 +30,7 @@ namespace chess.Controller
         // game loops use these objects for specialised functionality
         // like passing cpm to eval (which a tttpm cant be passed to)
         private ChessPositionModel chessModel; 
-        private TTTPositionModel tttModel;
+        private TicTacToePositionModel tictactoeModel;
 
         private Evaluator evaluator;
         private Thread gLoopThread;
@@ -63,8 +63,8 @@ namespace chess.Controller
                     evaluator.GeneratePawnRays();
                     break;
                 case EGameModels.TicTacToe:
-                    displayableGameModel = new TTTPositionModel();
-                    tttModel = (TTTPositionModel)displayableGameModel;
+                    displayableGameModel = new TicTacToePositionModel();
+                    tictactoeModel = (TicTacToePositionModel)displayableGameModel;
                     break;
             }
             gameState = EGameControlState.Initial;
@@ -82,7 +82,7 @@ namespace chess.Controller
                     evaluator = null;
                     break;
                 case EGameModels.TicTacToe:
-                    tttModel = null;
+                    tictactoeModel = null;
                     break;
             }
             displayableGameModel = null;
@@ -101,8 +101,8 @@ namespace chess.Controller
                     chessModel.Player = new Player("white");
                     break;
                 case EGameModels.TicTacToe:
-                    tttModel.Setup();
-                    tttModel.Player = new Player("X");
+                    tictactoeModel.Setup();
+                    tictactoeModel.Player = new Player("X");
                     break;
             }
             gameState = EGameControlState.Ready;
@@ -123,7 +123,7 @@ namespace chess.Controller
                     chessModel.Player = null;
                     break;
                 case EGameModels.TicTacToe:
-                    tttModel.Player = null;
+                    tictactoeModel.Player = null;
                     break;
             }
             gameState = EGameControlState.Initial;
@@ -152,7 +152,7 @@ namespace chess.Controller
                     gLoopThread = new Thread(ChessGameLoop);
                     break;
                 case EGameModels.TicTacToe:
-                    gLoopThread = new Thread(TTTGameLoop);
+                    gLoopThread = new Thread(TicTacToeGameLoop);
                     break;
             }
             if (gameState == EGameControlState.Ready)
@@ -227,7 +227,7 @@ namespace chess.Controller
         game is in progress in a seperate thread. When the game meets an ending criteria
         (winner) this thread will end naturally. This thread may also be 
         terminated externally. */
-        private void TTTGameLoop()
+        private void TicTacToeGameLoop()
         {
             FormedMove move;
             string winner = null; // change to player
@@ -236,19 +236,19 @@ namespace chess.Controller
             while (true)
             {
                 // check if a winner has been found or reached max turns
-                if (tttModel.IsWinningPosition(ref winner) || tttModel.IsMaxTurns(ref isMaxTurns))
+                if (tictactoeModel.IsWinningPosition(ref winner) || tictactoeModel.IsMaxTurns(ref isMaxTurns))
                     break;
 
-                this.Message = $"Player {tttModel.Player.PlayerValue}, make your move";
+                this.Message = $"Player {tictactoeModel.Player.PlayerValue}, make your move";
                 move = null;
                 // check if display has provided a move
                 if (gameInput != null)
                 {
                     move = new FormedMove(gameInput);
-                    if (tttModel.IsValidMove(move))
+                    if (tictactoeModel.IsValidMove(move))
                     {
-                        tttModel.applyMove(move);
-                        tttModel.ChangePlayer();
+                        tictactoeModel.applyMove(move);
+                        tictactoeModel.ChangePlayer();
                     }
                     else
                         this.Message = "The move was not valid";
@@ -316,7 +316,10 @@ namespace chess.Controller
             set
             {
                 if (this.gameInput == null)
+                {
                     this.gameInput = value;
+                }
+                    
                 else
                     System.Console.WriteLine("A previous input hsant been cleared yet (currently being processed) so this Set has failed");
             }

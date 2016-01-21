@@ -6,40 +6,21 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+
     public class Piece
     {
-        private EGamePieces val;
-        private bool movedOnce;
+        public EGamePieces Val;
+        public bool MovedOnce;
 
+
+        /* Represents a Game piece object. All that a piece consists of is
+        its value and a MovedOnce property which is false until the piece
+        is moved for the first time. This property is only relevant for
+        the Pawn pieces and is only updated by the model when the piece moves. */
         public Piece(EGamePieces val)
         {
-            this.val = val;
-            this.movedOnce = false;
+            this.Val = val;
+            this.MovedOnce = false;
         }
-
-        public EGamePieces Val
-        {
-            get
-            {
-                return this.val;
-            }
-            set
-            {
-                this.val = value;
-            }
-        }
-
-        public bool MovedOnce
-        {
-            get
-            {
-                return this.movedOnce;
-            }
-            set
-            {
-                this.movedOnce = value;
-            }
-        }
-
     }
 }

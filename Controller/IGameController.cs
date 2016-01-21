@@ -40,7 +40,7 @@ namespace chess.Controller
         void Terminate(EGameModels model);
 
 
-        /* This is the displayable version of the current game model, exposed via this controller to the View. */
+        /* This is the displayable version of the current game model. It is exposed via this controller to the View. */
         IDisplayableModel Model { get; }
 
         string Message { get; set; }

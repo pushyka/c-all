@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 namespace chess.View
 {
+    /* A form used for finding an loading games. */
     public partial class LoadForm : Form
     {
         public LoadForm()

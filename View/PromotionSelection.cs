@@ -13,20 +13,24 @@ namespace chess.View
 {
     public partial class PromotionSelection : Form
     {
-
         private Model.EGamePieces selectedPiece;
 
+
+        /* Creates a promotion selection form which lists 
+        the pieces which the player may select for upgrading their high ranked pawn.
+        The constructor of the form takes the moving pawn as mvPawn in order
+        to determine the colour of the upgraded piece to display and use. */
         public PromotionSelection(chess.Model.Piece mvPawn)
         {
             InitializeComponent();
-            // add the images to the picture boxes based on the colour of the mving pawn
+
             PictureBox queen, knight, rook, bishop;
             if (mvPawn.Val == Model.EGamePieces.WhitePawn)
             {
-                queen = View.Display.getGuiPiece2(Model.EGamePieces.WhiteQueen);
-                knight = View.Display.getGuiPiece2(Model.EGamePieces.WhiteKnight);
-                rook = View.Display.getGuiPiece2(Model.EGamePieces.WhiteRook);
-                bishop = View.Display.getGuiPiece2(Model.EGamePieces.WhiteBishop);
+                queen = View.Display.getGuiPiece(Model.EGamePieces.WhiteQueen);
+                knight = View.Display.getGuiPiece(Model.EGamePieces.WhiteKnight);
+                rook = View.Display.getGuiPiece(Model.EGamePieces.WhiteRook);
+                bishop = View.Display.getGuiPiece(Model.EGamePieces.WhiteBishop);
                 queen.Tag = Model.EGamePieces.WhiteQueen;
                 knight.Tag = Model.EGamePieces.WhiteKnight;
                 rook.Tag = Model.EGamePieces.WhiteRook;
@@ -34,10 +38,10 @@ namespace chess.View
             }
             else
             { 
-                queen = View.Display.getGuiPiece2(Model.EGamePieces.BlackQueen);
-                knight = View.Display.getGuiPiece2(Model.EGamePieces.BlackKnight);
-                rook = View.Display.getGuiPiece2(Model.EGamePieces.BlackRook);
-                bishop = View.Display.getGuiPiece2(Model.EGamePieces.BlackBishop);
+                queen = View.Display.getGuiPiece(Model.EGamePieces.BlackQueen);
+                knight = View.Display.getGuiPiece(Model.EGamePieces.BlackKnight);
+                rook = View.Display.getGuiPiece(Model.EGamePieces.BlackRook);
+                bishop = View.Display.getGuiPiece(Model.EGamePieces.BlackBishop);
                 queen.Tag = Model.EGamePieces.BlackQueen;
                 knight.Tag = Model.EGamePieces.BlackKnight;
                 rook.Tag = Model.EGamePieces.BlackRook;
@@ -45,7 +49,7 @@ namespace chess.View
             }
 
 
-
+            // register the click handler to the selection pieces
             queen.Click += promotionPieceSelect_Click;
             knight.Click += promotionPieceSelect_Click;
             rook.Click += promotionPieceSelect_Click;
@@ -55,12 +59,12 @@ namespace chess.View
             this.panelKnight.Controls.Add(knight);
             this.panelRook.Controls.Add(rook);
             this.panelBishop.Controls.Add(bishop);
-
-            System.Console.WriteLine("IVE BEEN CREATED");
-
-
         }
 
+
+        /* Click handler for the promotion selection dialog. This assigns the 
+        users choice to the SelectedPiece property of the dialog object. This
+        property may then be accessed by the evaluator. */
         private void promotionPieceSelect_Click(object sender, EventArgs e)
         {
             PictureBox p = (PictureBox)sender;
@@ -76,5 +80,7 @@ namespace chess.View
                 return this.selectedPiece;
             }
         }
+
+        // what if the dialogue is terminated forecfully without a selection made?
     }
 }

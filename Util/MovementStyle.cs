@@ -14,20 +14,10 @@ namespace chess.Util
 
         public int maxIterations { get; set; }
 
-        public string type { get; set; }
 
-
-        public MovementStyle() { }
-        /// <summary>
-        /// Create movement style object which contains two public fields.
-        /// dirs : the directions of propagation on the board, eg 1,-1 (knight eg 1,-2
-        /// maxIterations : the number of tiles to be added in that direction
-        ///     (normally 7 maximum on the board, 1 for knight and pawn and king etc (CHANGE TO SIZE - 1)
-        /// On construction the fields are filled according to the piece type passed to the constructor.
-        /// </summary>
-        /// <param name="piece"></param>
-
-
+        /* Create a MovementStyle object which takes as argument a piece and generates
+        The valid directions that piece can move in and the valid lengths of the 
+        movement rays in each of those directions*/
         public MovementStyle(Piece piece)
         {
             this.dirs = new List<Tuple<int, int>>();
@@ -61,15 +51,14 @@ namespace chess.Util
                     createKingMovement();
                     break;
                 default:
-                    Console.WriteLine("MovementStyle switch error");
-                    break;
+                    throw new ArgumentException($"Piece value provided to CaptureStyle invalid {piece.Val}");
             }
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
+        
         private void createKingMovement()
         {
-            // king moves all y, x directions
+            // king moves all directions
             this.dirs.Add(Tuple.Create(+1,  0));
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create( 0, +1));
@@ -81,14 +70,12 @@ namespace chess.Util
 
             // only moves one tile
             this.maxIterations = 1;
-
-            this.type = "king";
-
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
+        
         private void createQueenMovement()
         {
+            // queen moves all directions
             this.dirs.Add(Tuple.Create(+1, 0));
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create(0, +1));
@@ -98,28 +85,27 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(0, -1));
             this.dirs.Add(Tuple.Create(+1, -1));
 
+            // moves maximum number of tiles on the board (size-1)
             this.maxIterations = 7;
-
-            this.type = "queen";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
+
         private void createBishopMovement()
         {
-            // diagonals only
+            // moves diagonals only
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create(-1, +1));
             this.dirs.Add(Tuple.Create(-1, -1));
             this.dirs.Add(Tuple.Create(+1, -1));
 
+            // moves maximum number of tiles on the board
             this.maxIterations = 7;
-
-            this.type = "bishop";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
+
         private void createKnightMovement()
         {
+            // knights directions are only ones not adjacent to starting position (jump)
             this.dirs.Add(Tuple.Create(+2, +1));
             this.dirs.Add(Tuple.Create(+1, +2));
             this.dirs.Add(Tuple.Create(-1, +2));
@@ -129,46 +115,49 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(+1, -2));
             this.dirs.Add(Tuple.Create(+2, -1));
 
+            // moves only once in its non adjacent direction (jump)
             this.maxIterations = 1;
-
-            this.type = "knight";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
+
         private void createRookMovement()
         {
+            // only moves horizontal / vertical
             this.dirs.Add(Tuple.Create(+1,  0));
             this.dirs.Add(Tuple.Create( 0, +1));
             this.dirs.Add(Tuple.Create(-1,  0));
             this.dirs.Add(Tuple.Create( 0, -1));
 
+            // moves max number of tiles
             this.maxIterations = 7;
-
-            this.type = "rook";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        public virtual void createBlackPawnMovement(Piece piece)
+
+        /* pawn moves 'advancing' forward only
+        in all cases of pawn movement(when piece.MovedOnce = true), except for the first
+        the calling code will only consider the first position in the
+        movement ray generated from this style.
+        So this movement style creates the Set of pawn moves, but pawn moves after its
+        first only consider a subset of this style. */
+        private void createBlackPawnMovement(Piece piece)
         {
-            this.dirs.Add(Tuple.Create(+1, 0));
+             this.dirs.Add(Tuple.Create(+1, 0));
+            
             this.maxIterations = 2;
-
-            this.type = "pawn";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        public virtual void createWhitePawnMovement(Piece piece)
+
+        /* pawn moves 'advancing' forward only
+        in all cases of pawn movement(when piece.MovedOnce = true), except for the first
+        the calling code will only consider the first position in the
+        movement ray generated from this style.
+        So this movement style creates the Set of pawn moves, but pawn moves after its
+        first only consider a subset of this style. */
+        private void createWhitePawnMovement(Piece piece)
         {
-            // y / row direction for advancement is negative
             this.dirs.Add(Tuple.Create(-1, 0));
+
             this.maxIterations = 2;
-
-            this.type = "pawn";
         }
-
-
-
-
-
     }
 }

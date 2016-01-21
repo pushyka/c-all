@@ -5,31 +5,26 @@ using System.Text;
 
 namespace chess.Model
 {
-    /// <summary>
-    /// A move object to hold the 2 coord specifications for a move.
-    /// FormedMove moves are only created by the Evaluator.formatMove
-    /// and are thus garunteed to be bound by the board 
-    /// </summary>
+    /* Represents a generic chess move. Currently the TicTacToe game
+    also uses this object for its moves in a partial way. */
     public class FormedMove
     {
         private Tuple<int, int> posA;
         private Tuple<int, int> posB;
-        private bool isValid;
-        private EGamePieces promotionSelection;
+        public bool isValid;
+        public EGamePieces PromotionSelection { get; set; }
         
         public FormedMove()
         {
             this.posA = null;
             this.posB = null;
             this.isValid = false;
-            this.promotionSelection = EGamePieces.empty;
+            this.PromotionSelection = EGamePieces.empty;
         }
 
-        /// <summary>
-        /// Constructor for creating a move object which contains a 
-        /// single position in posA
-        /// </summary>
-        /// <param name="mvSpecifier"></param>
+        
+        /* Constructor for creating a FormedMove which has only one position.
+        This is the partial version used by the TicTacToe game. */
         public FormedMove(string mvSpecifier)
         {
             if (mvSpecifier.Length == 2)
@@ -41,29 +36,26 @@ namespace chess.Model
             }
         }
 
-        /// <summary>
-        /// Constructor for creating a move object when the specifiers are given.
-        /// TODO ~ change chess to use this version rather than the build-as-it-goes version
-        /// </summary>
-        /// <param name="mvSpecifier"></param>
+
+        /* Constructor for creating a FormedMove when the location specifiers are
+        provided. Currently the evaluator 'builds' the move using the .Add method. */
         public FormedMove(string mvSpecifier, string mvSpecifier2)
         {
+            // Todo
+            PromotionSelection = EGamePieces.empty;
             isValid = true;
         }
 
 
-        /// <summary>
-        /// Takes a tuple t (representing a position on the board)
-        /// And adds it to this move object 
-        /// If the move object does not yet contain any position, 
-        /// then the position t is the first position a so add it to posA
-        /// etc
-        /// </summary>
-        /// <param name="t"></param>
+        /* The currently used method for building a chess move. The evaluator computes the 
+        positions for posA and posB and adds them sequentially to the empty FormedMove object.
+        Once the posB position is assigned the move is marked as Valid. */
         public void Add(Tuple<int, int> t)
         {
             if (posA == null)
+            {
                 this.posA = t;
+            }
             else
             {
                 this.posB = t;
@@ -72,30 +64,9 @@ namespace chess.Model
         }
 
 
-        public bool IsValid
-        {
-            get
-            {
-                return this.isValid;
-            }
-        }
-
-
-        public override string ToString()
-        {
-            if (this.isValid)
-            {
-                return this.posA.ToString() + this.posB.ToString();
-            }
-            else
-            {
-                return "EMPTYMOVE";
-            }
-        }
-
-
+        /* The position A (fromPos) */
         public Tuple<int,int> PosA
-        {
+        { 
             get
             {
                 return this.posA;
@@ -103,23 +74,12 @@ namespace chess.Model
         }
 
 
+        /* The position B (toPos) */
         public Tuple<int,int> PosB
         {
             get
             {
                 return this.posB;
-            }
-        }
-
-        public EGamePieces PromotionSelection
-        {
-            get
-            {
-                return this.promotionSelection;
-            }
-            set
-            {
-                this.promotionSelection = value;
             }
         }
     }

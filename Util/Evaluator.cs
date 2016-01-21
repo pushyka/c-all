@@ -11,9 +11,8 @@ namespace chess.Util
 {
     public class Evaluator : IEvaluator
     {
-        // think about add these to contructor etc
         const int UNIQUE_PIECE_NUM = 12;
-        const int DIM = 8;
+        const int SIZE = 8;
 
         public List<List<Tuple<int, int>>>[][,] rayArray;
         public List<List<Tuple<int, int>>>[][,] rayArrayPawnCapture;
@@ -50,7 +49,7 @@ namespace chess.Util
                     }
                 }
             }
-            return move.IsValid;
+            return move.isValid;
         }
 
 
@@ -69,8 +68,8 @@ namespace chess.Util
         public bool IsValidMove(FormedMove move, ChessPositionModel cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
         {
             bool outcome = false;
-            TileStruct tileA = new TileStruct();
-            TileStruct tileB = new TileStruct();
+            Tile tileA = new Tile();
+            Tile tileB = new Tile();
 
             if (IsMovePositionsDistinct(move))
             {
@@ -116,7 +115,8 @@ namespace chess.Util
                 ChessPosition cpCopy = cpm.getChessPositionCopy();
                 cpCopy.applyMove(move, moveType);
                 // after this application of the move
-                outcome = IsKingInCheck(cpCopy, ref kingCheckedBy);
+                if (IsKingInCheck(cpCopy, ref kingCheckedBy))
+                    outcome = false;
             }
             return outcome;
         }
@@ -134,7 +134,7 @@ namespace chess.Util
 
         /* Takes a move object and a chess board object and returns true if
         the piece on the A position of the move belongs to the current player. */
-        private bool IsMoveAPieceCurPlayer(FormedMove move, ChessPosition cpm, ref TileStruct tileA)
+        private bool IsMoveAPieceCurPlayer(FormedMove move, ChessPosition cpm, ref Tile tileA)
         {
             bool result = false;
             tileA = cpm.Board[move.PosA.Item1, move.PosA.Item2];
@@ -149,7 +149,7 @@ namespace chess.Util
         the piece on the B position of the move belongs to the current player. 
 
         TODO: merge into previous*/
-        private bool IsMoveBPieceCurPlayer(FormedMove move, ChessPosition cpm, ref TileStruct tileB)
+        private bool IsMoveBPieceCurPlayer(FormedMove move, ChessPosition cpm, ref Tile tileB)
         {
             bool result = false;
             tileB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
@@ -164,7 +164,7 @@ namespace chess.Util
         the piece on the B position of the move belongs to the other player.
         
         TODO: replace with alternate call to previous functions*/
-        private bool IsMoveBPieceOtherPlayer(FormedMove move, ChessPosition cpm, ref TileStruct tileB)
+        private bool IsMoveBPieceOtherPlayer(FormedMove move, ChessPosition cpm, ref Tile tileB)
         {
             bool result = false;
             tileB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
@@ -177,7 +177,7 @@ namespace chess.Util
 
         /* Takes a move object and a chess board object and returns true if
         the tile on the B position of the move is empty. */
-        private bool IsMoveBEmpty(FormedMove move, ChessPosition cpm, ref TileStruct tileB)
+        private bool IsMoveBEmpty(FormedMove move, ChessPosition cpm, ref Tile tileB)
         {
             tileB = cpm.Board[move.PosB.Item1, move.PosB.Item2];
             return tileB.IsEmpty();
@@ -193,7 +193,7 @@ namespace chess.Util
             bool isLegalMovement = true;
             Tuple<int, int> posA = move.PosA;
             Tuple<int, int> posB = move.PosB;
-            TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
+            Tile tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> movementRays;
             // get the rays for a piece of type=piece.Val and location=posA
            
@@ -232,7 +232,7 @@ namespace chess.Util
                 // check there are no intermediate Pieces blocking the movement
                 foreach (Tuple<int, int> tilePos in moveRayUsed)
                 {
-                    TileStruct tileAtPosition = cpm.Board[tilePos.Item1, tilePos.Item2];
+                    Tile tileAtPosition = cpm.Board[tilePos.Item1, tilePos.Item2];
                     if (!tileAtPosition.IsEmpty())
                     {
                         isLegalMovement = false;
@@ -258,7 +258,7 @@ namespace chess.Util
             bool isLegalEnPassantCapture = true;
             Tuple<int, int> posA = move.PosA;
             Tuple<int, int> posB = move.PosB;
-            TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
+            Tile tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> epMovementRays;
             // get attack ray for the pawn on tileA
             // these are the movement rays in the case of EP
@@ -317,7 +317,7 @@ namespace chess.Util
             Tuple<int, int> posA = move.PosA;
             Tuple<int, int> posB = move.PosB;
 
-            TileStruct tileA = cpm.Board[posA.Item1, posA.Item2];
+            Tile tileA = cpm.Board[posA.Item1, posA.Item2];
             List<List<Tuple<int, int>>> captureRays;
 
             if (tileA.piece.Val == EGamePieces.BlackPawn || tileA.piece.Val == EGamePieces.WhitePawn)
@@ -340,7 +340,7 @@ namespace chess.Util
                 {
                     if (position.Equals(posB))
                         break;
-                    TileStruct tileAtPosition = cpm.Board[position.Item1, position.Item2];
+                    Tile tileAtPosition = cpm.Board[position.Item1, position.Item2];
                     if (!tileAtPosition.IsEmpty())
                     {
                         isLegalCapture = false;
@@ -370,6 +370,10 @@ namespace chess.Util
                 // prompt player for a promotion piece and add it to the move object
                 EGamePieces promotionPiece;
                 View.PromotionSelection promotionSelection = new View.PromotionSelection(mvPiece);
+                // remove the ability to x close the dialog before a piece is selected
+                promotionSelection.ControlBox = false;
+                // focus the dialog
+                
                 if (promotionSelection.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     promotionPiece = promotionSelection.SelectedPiece;
@@ -384,7 +388,7 @@ namespace chess.Util
         Used by MoveIncludesPawnPromotion ^ */
         private bool IsHighRank(Tuple<int, int> toSqPos)
         {
-            return ((toSqPos.Item1 == 0) || (toSqPos.Item1 == DIM - 1));
+            return ((toSqPos.Item1 == 0) || (toSqPos.Item1 == SIZE - 1));
         }
 
 
@@ -397,11 +401,11 @@ namespace chess.Util
             // find the king
             Player curPlayer = cpmCopy.Player;
             Tuple<int, int> curPlayersKingPos;
-            for (int row = 0; row < cpmCopy.Dim; row ++)
+            for (int row = 0; row < cpmCopy.Size; row ++)
             {
-                for (int col = 0; col < cpmCopy.Dim; col ++)
+                for (int col = 0; col < cpmCopy.Size; col ++)
                 {
-                    TileStruct tile = cpmCopy.Board[row, col];
+                    Tile tile = cpmCopy.Board[row, col];
                     if (!tile.IsEmpty())
                     {
                         if ((curPlayer.Owns(tile.piece)) && 
@@ -425,7 +429,7 @@ namespace chess.Util
             // want to get a series of rays for each of the above pieces on the king pos
             // eg bishop (4 rays), then foreach ray: starting from the ray origin: if find queen, bishop, pawn(?) of opponent piece
             //    in this, the bishop ray, then break as this piece threatens the king on origin
-            return true;
+            return false;
             
         }
 
@@ -469,11 +473,11 @@ namespace chess.Util
             for (int i = 0; i < rayArray.Length; i++)
             {
                 // foreach of the i piece types, create 64 tiles each containing a number of rays (n directions)
-                MovementStyle style = MovementStyles.getMovementStyle((EGamePieces)i);
-                rayArray[i] = new List<List<Tuple<int,int>>>[DIM, DIM];
-                for (int j = 0; j < DIM; j++) // row
+                MovementStyle style = Styles.getMovementStyle((EGamePieces)i);
+                rayArray[i] = new List<List<Tuple<int,int>>>[SIZE, SIZE];
+                for (int j = 0; j < SIZE; j++) // row
                 {
-                    for (int k = 0; k < DIM; k++) // col
+                    for (int k = 0; k < SIZE; k++) // col
                     {
                         List<List<Tuple<int, int>>> rays = new List<List<Tuple<int, int>>>();
                         foreach (Tuple<int, int> dir in style.dirs)
@@ -511,15 +515,15 @@ namespace chess.Util
         {
             // 2 unique pawn pieces
             rayArrayPawnCapture = new List<List<Tuple<int, int>>>[2][,];
-            CaptureStyle WhitePawnCaptureStyle = MovementStyles.getCaptureStyle(EGamePieces.WhitePawn);
-            CaptureStyle BlackPawnCaptureStyle = MovementStyles.getCaptureStyle(EGamePieces.BlackPawn);
+            CaptureStyle WhitePawnCaptureStyle = Styles.getCaptureStyle(EGamePieces.WhitePawn);
+            CaptureStyle BlackPawnCaptureStyle = Styles.getCaptureStyle(EGamePieces.BlackPawn);
 
-            rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[DIM, DIM]; // white
-            rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[DIM, DIM]; // black
+            rayArrayPawnCapture[0] = new List<List<Tuple<int, int>>>[SIZE, SIZE]; // white
+            rayArrayPawnCapture[1] = new List<List<Tuple<int, int>>>[SIZE, SIZE]; // black
 
-            for (int j = 0; j < DIM; j ++)
+            for (int j = 0; j < SIZE; j ++)
             {
-                for (int k = 0; k < DIM; k ++)
+                for (int k = 0; k < SIZE; k ++)
                 {
                     List<List<Tuple<int, int>>> whiteRays = new List<List<Tuple<int, int>>>();
                     List<List<Tuple<int, int>>> blackRays = new List<List<Tuple<int, int>>>();

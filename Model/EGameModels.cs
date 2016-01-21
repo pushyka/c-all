@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+    /* Game model identifiers */
     public enum EGameModels
     {
         Chess,

@@ -14,20 +14,10 @@ namespace chess.Util
 
         public int maxIterations { get; set; }
 
-        public string type { get; set; }
 
-
-        public CaptureStyle() { }
-        /// <summary>
-        /// Create movement style object which contains two public fields.
-        /// dirs : the directions of propagation on the board, eg 1,-1 (knight eg 1,-2
-        /// maxIterations : the number of tiles to be added in that direction
-        ///     (normally 7 maximum on the board, 1 for knight and pawn and king etc (CHANGE TO SIZE - 1)
-        /// On construction the fields are filled according to the piece type passed to the constructor.
-        /// </summary>
-        /// <param name="piece"></param>
-
-
+        /* Create a CaptureStyle object which takes as argument a piece and generates
+        The valid directions that piece can capture in and the valid lengths of the 
+        capture rays in each of those directions*/
         public CaptureStyle(Piece piece)
         {
             this.dirs = new List<Tuple<int, int>>();
@@ -35,41 +25,40 @@ namespace chess.Util
             switch (piece.Val)
             {
                 case EGamePieces.WhitePawn:
-                    createWhitePawnMovement();
+                    createWhitePawnCapture();
                     break;
                 case EGamePieces.BlackPawn:
-                    createBlackPawnMovement();
+                    createBlackPawnCapture();
                     break;
                 case EGamePieces.WhiteRook:
                 case EGamePieces.BlackRook:
-                    createRookMovement();
+                    createRookCapture();
                     break;
                 case EGamePieces.WhiteKnight:
                 case EGamePieces.BlackKnight:
-                    createKnightMovement();
+                    createKnightCapture();
                     break;
                 case EGamePieces.WhiteBishop:
                 case EGamePieces.BlackBishop:
-                    createBishopMovement();
+                    createBishopCapture();
                     break;
                 case EGamePieces.WhiteQueen:
                 case EGamePieces.BlackQueen:
-                    createQueenMovement();
+                    createQueenCapture();
                     break;
                 case EGamePieces.WhiteKing:
                 case EGamePieces.BlackKing:
-                    createKingMovement();
+                    createKingCapture();
                     break;
                 default:
-                    Console.WriteLine("MovementStyle switch error");
-                    break;
+                    throw new ArgumentException($"Piece value provided to CaptureStyle invalid {piece.Val}");
             }
         }
+        
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createKingMovement()
+        private void createKingCapture()
         {
-            // king moves all y, x directions
+            // king captures all directions
             this.dirs.Add(Tuple.Create(+1, 0));
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create(0, +1));
@@ -79,16 +68,14 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(0, -1));
             this.dirs.Add(Tuple.Create(+1, -1));
 
-            // only moves one tile
+            // only moves 1 tile
             this.maxIterations = 1;
-
-            this.type = "king";
-
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createQueenMovement()
+
+        private void createQueenCapture()
         {
+            // queen captures all directions
             this.dirs.Add(Tuple.Create(+1, 0));
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create(0, +1));
@@ -98,13 +85,12 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(0, -1));
             this.dirs.Add(Tuple.Create(+1, -1));
 
+            // moves maximum number of tiles on the board (size-1)
             this.maxIterations = 7;
-
-            this.type = "queen";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createBishopMovement()
+
+        private void createBishopCapture()
         {
             // diagonals only
             this.dirs.Add(Tuple.Create(+1, +1));
@@ -112,14 +98,14 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(-1, -1));
             this.dirs.Add(Tuple.Create(+1, -1));
 
+            // moves maximum numer of tiles
             this.maxIterations = 7;
-
-            this.type = "bishop";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createKnightMovement()
+
+        private void createKnightCapture()
         {
+            // knights directions are only ones not adjacent to starting position (jump)
             this.dirs.Add(Tuple.Create(+2, +1));
             this.dirs.Add(Tuple.Create(+1, +2));
             this.dirs.Add(Tuple.Create(-1, +2));
@@ -129,40 +115,42 @@ namespace chess.Util
             this.dirs.Add(Tuple.Create(+1, -2));
             this.dirs.Add(Tuple.Create(+2, -1));
 
+            // moves only once in its non adjacent direction (jump)
             this.maxIterations = 1;
-
-            this.type = "knight";
         }
 
-        // TUPLES SHOULD BE Y,X format since ROW,COL
-        private void createRookMovement()
+
+        private void createRookCapture()
         {
+            // only moves horizontal / vertical
             this.dirs.Add(Tuple.Create(+1, 0));
             this.dirs.Add(Tuple.Create(0, +1));
             this.dirs.Add(Tuple.Create(-1, 0));
             this.dirs.Add(Tuple.Create(0, -1));
 
+            // moves max number of tiles
             this.maxIterations = 7;
-
-            this.type = "rook";
         }
-        // override the pawn methods of movement style
-        public void createBlackPawnMovement()
+
+
+        private void createBlackPawnCapture()
         {
+            // pawn captures only on 'advancing' diagonal
+            // this includes the en passant capture
             this.dirs.Add(Tuple.Create(+1, +1));
             this.dirs.Add(Tuple.Create(+1, -1));
 
             this.maxIterations = 1;
-            this.type = "pawn";
         }
 
-        public void createWhitePawnMovement()
+        private void createWhitePawnCapture()
         {
+            // pawn captures only on 'advancing' diagonal
+            // this includes the en passant capture
             this.dirs.Add(Tuple.Create(-1, +1));
             this.dirs.Add(Tuple.Create(-1, -1));
 
             this.maxIterations = 1;
-            this.type = "pawn";
         }
 
     }

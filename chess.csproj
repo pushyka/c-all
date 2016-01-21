@@ -70,19 +70,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\IGameController.cs" />
-    <Compile Include="Model\BaseModel.cs" />
     <Compile Include="Model\BoardChangedEventArgs.cs" />
     <Compile Include="Model\ChessPosition.cs" />
     <Compile Include="Model\ChessPositionModel.cs" />
     <Compile Include="Model\EChessMoveTypes.cs" />
     <Compile Include="Model\EGameControlState.cs" />
     <Compile Include="Model\EGameModels.cs" />
-    <Compile Include="Model\IChessModel.cs" />
     <Compile Include="Model\IDisplayableModel.cs" />
     <Compile Include="Model\Piece.cs" />
     <Compile Include="Model\EGamePieces.cs" />
     <Compile Include="Model\Player.cs" />
-    <Compile Include="Model\TTTPositionModel.cs" />
+    <Compile Include="Model\TicTacToePositionModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -94,12 +92,11 @@
     <Compile Include="Controller\GameController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Model\TileStruct.cs" />
+    <Compile Include="Model\Tile.cs" />
     <Compile Include="Util\IEvaluator.cs" />
     <Compile Include="Util\MovementStyle.cs" />
-    <Compile Include="Util\MovementStyles.cs" />
-    <Compile Include="Util\utility.cs" />
-    <Compile Include="View\CustomeOutlineLabel.cs">
+    <Compile Include="Util\Styles.cs" />
+    <Compile Include="View\CustomOutlineLabel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="View\Display.cs">

@@ -53,8 +53,8 @@
             this.whitePiecesCaptured = new System.Windows.Forms.TableLayoutPanel();
             this.placeholder = new System.Windows.Forms.Panel();
             this.infoPanel = new System.Windows.Forms.Panel();
-            this.customeOutlineLabel2 = new chess.View.CustomeOutlineLabel();
-            this.customeOutlineLabel1 = new chess.View.CustomeOutlineLabel();
+            this.customeOutlineLabel2 = new chess.View.CustomOutlineLabel();
+            this.customeOutlineLabel1 = new chess.View.CustomOutlineLabel();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.infoPanel.SuspendLayout();
@@ -329,7 +329,7 @@
         private System.Windows.Forms.ToolStripMenuItem tTTToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.Panel infoPanel;
-        private CustomeOutlineLabel customeOutlineLabel2;
-        private CustomeOutlineLabel customeOutlineLabel1;
+        private CustomOutlineLabel customeOutlineLabel2;
+        private CustomOutlineLabel customeOutlineLabel1;
     }
 }

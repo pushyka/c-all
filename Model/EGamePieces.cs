@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace chess.Model
 {
+    /* Enum representing the various game pieces for chess and tictactoe. */
     public enum EGamePieces
     {
         WhitePawn,
