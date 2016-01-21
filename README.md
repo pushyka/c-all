@@ -7,9 +7,9 @@ a View using WPF and an AI engine which will also be able to provide some inputs
  _________                ____________             _________
 | View 1. |------------->|            |-----3.--->|         |       -Move Process-
 |         |              | controller |           | model   |   1. A pair of coordinates are generated
-|    5.   |<--------------------------------4.----|         |   2. The pair is evaluated for legality as a move 
+|    5.   |<------4.------------------------------|         |   2. The pair is evaluated for legality as a move 
 |_________|              |____________|           |_________|   3. If legal the move is applied to the model
-                           |       ^                            4. The View detects the change
+                           |       ^                            4. The View detects the change via controller
                          __v_______|___                         5. The View updates itself to match the model
                         | 2.           |
                         |  evaluator   |                           
