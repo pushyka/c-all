@@ -27,4 +27,6 @@ procedure just seems overly complicating. I have read that WPF uses a data bindi
 perhaps this is the simplicity I am looking for.
 
 I am intending for the Chess game to follow the FIDE Laws of Chess, including complete promotion, en passant and 
-castling. The saving and loading of games will use the Standard Algebraic Notation.</pre>
+castling. The saving and loading of games will use the Standard Algebraic Notation.
+
+Thanks for having a look.</pre>
