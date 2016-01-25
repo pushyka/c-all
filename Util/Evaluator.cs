@@ -13,6 +13,9 @@ namespace chess.Util
     {
         const int UNIQUE_PIECE_NUM = 12;
         const int SIZE = 8;
+        // the showdialog for promotion selection popup requires a reference to the main display form
+        // if i want that main form to be disabled while the user selects a promotion piece
+        private System.Windows.Forms.Form viewRef = null;
 
         public List<List<Tuple<int, int>>>[][,] rayArray;
         public List<List<Tuple<int, int>>>[][,] rayArrayPawnCapture;
@@ -367,14 +370,29 @@ namespace chess.Util
             if ((mvPiece.Val == EGamePieces.WhitePawn || mvPiece.Val == EGamePieces.BlackPawn) &&
                 (IsHighRank(posB)))
             {
-                // prompt player for a promotion piece and add it to the move object
+                // Safe invoke for popup onto main thread via viewRef
+                PromotionSelectionPopup(ref move, mvPiece);
+            }
+        }
+
+
+        delegate void PromotionSelectionPopupCallback(ref FormedMove move, Piece mvPiece);
+        /* Make a thread safe invoke on the viewRef in order to use it as the parent argument
+        to showDialog for the promotion selection form. This is called by Move includes pawn promotion. */
+        private void PromotionSelectionPopup(ref FormedMove move, Piece mvPiece)
+        {
+            if (this.viewRef.InvokeRequired)
+            {
+                PromotionSelectionPopupCallback d = new PromotionSelectionPopupCallback(PromotionSelectionPopup);
+                this.viewRef.Invoke(d, new object[] { move, mvPiece });
+            }
+            else
+            {
                 EGamePieces promotionPiece;
                 View.PromotionSelection promotionSelection = new View.PromotionSelection(mvPiece);
                 // remove the ability to x close the dialog before a piece is selected
                 promotionSelection.ControlBox = false;
-                // focus the dialog
-                
-                if (promotionSelection.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                if (promotionSelection.ShowDialog(this.viewRef) == System.Windows.Forms.DialogResult.OK)
                 {
                     promotionPiece = promotionSelection.SelectedPiece;
                     promotionSelection.Dispose();
@@ -559,6 +577,14 @@ namespace chess.Util
                     rayArrayPawnCapture[0][j, k] = whiteRays;
                     rayArrayPawnCapture[1][j, k] = blackRays;
                 }
+            }
+        }
+
+        public System.Windows.Forms.Form ViewRef
+        {
+            set
+            {
+                this.viewRef = value;
             }
         }
     }

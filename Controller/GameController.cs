@@ -51,7 +51,7 @@ namespace chess.Controller
         'displayableModel' (to which the view is bound) and also
         '*Model' (which is used in the game loop etc). This method also
         sets up any dependent utilities. */
-        public void InitialiseModel(EGameModels model)
+        public void InitialiseModel(EGameModels model, System.Windows.Forms.Form viewRef)
         {
             switch(model)
             {
@@ -59,6 +59,7 @@ namespace chess.Controller
                     displayableGameModel = new ChessPositionModel();
                     chessModel = (ChessPositionModel)displayableGameModel;
                     evaluator = new Evaluator();
+                    evaluator.ViewRef = viewRef;
                     evaluator.GenerateRays();
                     evaluator.GeneratePawnRays();
                     break;

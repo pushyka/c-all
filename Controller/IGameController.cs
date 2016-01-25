@@ -13,8 +13,10 @@ namespace chess.Controller
         /* Receives a value indicating a game model and sets up the model as
         'displayableModel' (to which the view is bound) and also
         '*Model' (which is used in the game loop etc). This method also
-        sets up any dependent utilities. */
-        void InitialiseModel(EGameModels model);
+        sets up any dependent utilities. In the case of chess a reference to the display
+        form is also passed along, only needed for promotionselection focussing
+        */
+        void InitialiseModel(EGameModels model, System.Windows.Forms.Form viewRef);
 
 
         /* This takes a value indicating a gameModel and returns the values of the displayable

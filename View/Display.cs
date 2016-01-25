@@ -70,8 +70,15 @@ namespace chess.View
             InitializeOtherComponents();
 
             tintRef = new List<Control>(); //reset?
+            //testc();
         }
 
+        private void testc()
+        {
+            PromotionSelection p = new PromotionSelection(new Piece(EGamePieces.BlackPawn));
+            //p.ControlBox = false;
+            p.ShowDialog(this);
+        }
         
         /* Generates a chess board and adds it to the parent
         Display (main) form's Control. Makes it visible and 
@@ -200,7 +207,7 @@ namespace chess.View
             this.selectedGameModel = EGameModels.Chess;
 
             // Model
-            this.gameController.InitialiseModel(this.selectedGameModel);
+            this.gameController.InitialiseModel(this.selectedGameModel, this); 
 
             // View
             AssembleChessBoard();
@@ -245,7 +252,7 @@ namespace chess.View
             this.selectedGameModel = EGameModels.TicTacToe;
 
             // Model
-            this.gameController.InitialiseModel(this.selectedGameModel);
+            this.gameController.InitialiseModel(this.selectedGameModel, this);
 
             // View
             AssembleTTTBoard();
