@@ -25,34 +25,44 @@ namespace chess.Util
         move object is also created and passed to the non-local move variable. */
         public bool ValidateInput(string input, ref FormedMove move)
         {
-            move = new FormedMove();
-
-            string[] tileSpecifiers = input.Split();
-
+            // these lists contain only the valid file and ranks
+            // and are indexed such that a file/rank will correspond to the col/row pos
             List<char> validFiles = "ABCDEFGH".ToList();
-            List<int> validRanks = new List<int>(new int[] { 8, 7, 6, 5, 4, 3, 2, 1});
+            List<int> validRanks = new List<int>(new int[] { 8, 7, 6, 5, 4, 3, 2, 1 });
+            bool validMove = false;
+            
+            string[] chessBoardLocs = input.Split();
+            Tuple<int, int> chessBoardPos1;
+            Tuple<int, int> chessBoardPos2;
 
-            if (tileSpecifiers.Length == 2)
+            if (chessBoardLocs.Length == 2)
             {
-                foreach (string tileSpecifier in tileSpecifiers)
+                string chessBoardLoc1 = chessBoardLocs[0];
+                string chessBoardLoc2 = chessBoardLocs[1];
                 {
-                    if (tileSpecifier.Length == 2)
-                    {
-                        char file = Char.ToUpper(tileSpecifier[0]);
-                        int rank = (int)Char.GetNumericValue(tileSpecifier[1]);
-                        
-                        if (validFiles.Contains(file) && validRanks.Contains(rank))
-                        {
-                            int fileToCol = validFiles.IndexOf(file);
-                            int rankToRow = validRanks.IndexOf(rank);
+                    char loc1File = Char.ToUpper(chessBoardLoc1[0]);
+                    int loc1Rank = (int)Char.GetNumericValue(chessBoardLoc1[1]);
 
-                            Tuple<int, int> formedPosition = Tuple.Create<int, int>(rankToRow, fileToCol);
-                            move.Add(formedPosition);
-                        }
+                    char loc2File = Char.ToUpper(chessBoardLoc2[0]);
+                    int loc2Rank = (int)Char.GetNumericValue(chessBoardLoc2[1]);
+
+                    if (validFiles.Contains(loc1File) && validRanks.Contains(loc1Rank) &&
+                       (validFiles.Contains(loc2File) && validRanks.Contains(loc2Rank)))
+                    {
+                        int loc1Col = validFiles.IndexOf(loc1File);
+                        int loc1Row = validRanks.IndexOf(loc1Rank);
+
+                        int loc2Col = validFiles.IndexOf(loc2File);
+                        int loc2Row = validRanks.IndexOf(loc2Rank);
+
+                        chessBoardPos1 = Tuple.Create<int, int>(loc1Row, loc1Col);
+                        chessBoardPos2 = Tuple.Create<int, int>(loc2Row, loc2Col);
+                        move = new FormedMove(chessBoardPos1, chessBoardPos2);
+                        validMove = true;
                     }
                 }
             }
-            return move.isValid;
+            return validMove;
         }
 
 
@@ -68,7 +78,7 @@ namespace chess.Util
                 -(further movement checks)
         Finally it must check, if the move were to be applied, that it does not leave the 
         current player's king in check.*/
-        public bool IsValidMove(FormedMove move, ChessPositionModel cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy)
+        public bool IsValidMove(ref FormedMove move, ChessPositionModel cpm, ref List<Tuple<int, int>> kingCheckedBy)
         {
             bool outcome = false;
             Tile tileA = new Tile();
@@ -82,24 +92,24 @@ namespace chess.Util
                     if (IsMoveBPieceCurPlayer(move, cpm, ref tileB))
                     {
                         outcome = false; // IsLegalCastle?
-                        moveType = EChessMoveTypes.Castle;
+                        move.MoveType = EChessMoveTypes.Castle;
                     }
                     // check if its a capture
                     else if (IsMoveBPieceOtherPlayer(move, cpm, ref tileB))
                     {
                         outcome = IsCaptureLegal(move, cpm);
-                        moveType = EChessMoveTypes.Capture;
+                        move.MoveType = EChessMoveTypes.Capture;
                     }
                     // check if its a movement
                     else if (IsMoveBEmpty(move, cpm, ref tileB))
                     {
                         if (outcome = IsPieceMovementLegal(move, cpm))
                         {
-                            moveType = EChessMoveTypes.Movement;
+                            move.MoveType = EChessMoveTypes.Movement;
                         }
                         else if (outcome = IsEnPassantCaptureLegal(move, cpm))
                         {
-                            moveType = EChessMoveTypes.EpMovement;
+                            move.MoveType = EChessMoveTypes.EpMovement;
                         }
                     }
                 }
@@ -116,7 +126,7 @@ namespace chess.Util
                 // be applied in order for the king-check to be checked without
                 // causing the chess position to update the display
                 ChessPosition cpCopy = cpm.getChessPositionCopy();
-                cpCopy.applyMove(move, moveType);
+                cpCopy.applyMove(move);
                 // after this application of the move
                 if (IsKingInCheck(cpCopy, ref kingCheckedBy))
                     outcome = false;

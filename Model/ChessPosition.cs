@@ -48,9 +48,9 @@ namespace chess.Model
         
         /* The Entry point for a move application, this method selects the 
         appropriate type of move to make based on the moveType property. */
-        public void applyMove(FormedMove move, EChessMoveTypes moveType)
+        public void applyMove(FormedMove move)
         {
-            switch (moveType)
+            switch (move.MoveType)
             {
                 case EChessMoveTypes.Castle:
                     applyCastle(move);
@@ -65,7 +65,7 @@ namespace chess.Model
                     applyEnPassantCapture(move);
                     break;
                 default:
-                    throw new ArgumentException($"Unexpected value: {moveType}, for moveType");
+                    throw new ArgumentException($"Unexpected value: {move.MoveType}, for moveType");
             }
         }
 

@@ -13,18 +13,19 @@ namespace chess.Model
         private Tuple<int, int> posB;
         public bool isValid;
         public EGamePieces PromotionSelection { get; set; }
+        public EChessMoveTypes MoveType { get; set; }
         
         public FormedMove()
         {
             this.posA = null;
             this.posB = null;
-            this.isValid = false;
             this.PromotionSelection = EGamePieces.empty;
         }
 
         
         /* Constructor for creating a FormedMove which has only one position.
-        This is the partial version used by the TicTacToe game. */
+        This is the partial version used by the TicTacToe game. Needs to be refactored to
+        next non string type. */
         public FormedMove(string mvSpecifier)
         {
             if (mvSpecifier.Length == 2)
@@ -32,35 +33,18 @@ namespace chess.Model
                 int col = (int)Char.GetNumericValue(mvSpecifier[0]);
                 int row = (int)Char.GetNumericValue(mvSpecifier[1]);
                 posA = Tuple.Create<int, int>(row, col);
-                isValid = true;
             }
         }
 
 
-        /* Constructor for creating a FormedMove when the location specifiers are
-        provided. Currently the evaluator 'builds' the move using the .Add method. */
-        public FormedMove(string mvSpecifier, string mvSpecifier2)
+        /* Constructor for building a chess move. The evaluator computes the 
+        positions for posA and posB and adds them to the empty FormedMove object. */
+        public FormedMove(Tuple<int, int> posA, Tuple<int, int> posB)
         {
-            // Todo
             PromotionSelection = EGamePieces.empty;
-            isValid = true;
-        }
-
-
-        /* The currently used method for building a chess move. The evaluator computes the 
-        positions for posA and posB and adds them sequentially to the empty FormedMove object.
-        Once the posB position is assigned the move is marked as Valid. */
-        public void Add(Tuple<int, int> t)
-        {
-            if (posA == null)
-            {
-                this.posA = t;
-            }
-            else
-            {
-                this.posB = t;
-                this.isValid = true;
-            }
+            MoveType = EChessMoveTypes.None;
+            this.posA = posA;
+            this.posB = posB;
         }
 
 

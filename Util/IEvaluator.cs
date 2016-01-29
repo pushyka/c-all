@@ -27,7 +27,7 @@ namespace chess.Util
                 -(further movement checks)
         Finally it must check, if the move were to be applied, that it does not leave the 
         current player's king in check.*/
-        bool IsValidMove(FormedMove move, ChessPositionModel cpm, ref EChessMoveTypes moveType, ref List<Tuple<int, int>> kingCheckedBy);
+        bool IsValidMove(ref FormedMove move, ChessPositionModel cpm, ref List<Tuple<int, int>> kingCheckedBy);
 
 
         /* This function is passed a copy of the chess game. It uses the information contained in this object

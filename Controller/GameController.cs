@@ -168,7 +168,6 @@ namespace chess.Controller
         terminated externally. */
         private void ChessGameLoop()
         {
-            EChessMoveTypes moveType;
             FormedMove move;
             Player winner = null;
             List<Tuple<int, int>> kingCheckedBy = new List<Tuple<int, int>>();
@@ -177,7 +176,6 @@ namespace chess.Controller
             {
                 // start of new turn, refresh variables
                 move = null;
-                moveType = EChessMoveTypes.None;
                 kingCheckedBy.Clear();
 
                 // check there exists a legal move for the current player
@@ -202,9 +200,9 @@ namespace chess.Controller
                     // else normal move input
                     else if (evaluator.ValidateInput(gameInput, ref move))
                     {
-                        if (evaluator.IsValidMove(move, chessModel, ref moveType, ref kingCheckedBy))
+                        if (evaluator.IsValidMove(ref move, chessModel, ref kingCheckedBy))
                         {
-                            chessModel.applyMove(move, moveType);
+                            chessModel.applyMove(move);
                             chessModel.ChangePlayer();
                             chessModel.clearEnPassantPawns(chessModel.Player);
                         }
