@@ -14,6 +14,7 @@ namespace chess.View
     public partial class PromotionSelection : Form
     {
         private Model.EGamePieces selectedPiece;
+        private Model.EGamePieces defaultPiece;
 
 
         /* Creates a promotion selection form which lists 
@@ -35,6 +36,8 @@ namespace chess.View
                 knight.Tag = Model.EGamePieces.WhiteKnight;
                 rook.Tag = Model.EGamePieces.WhiteRook;
                 bishop.Tag = Model.EGamePieces.WhiteBishop;
+
+                this.defaultPiece = Model.EGamePieces.WhiteQueen;
             }
             else
             { 
@@ -46,6 +49,8 @@ namespace chess.View
                 knight.Tag = Model.EGamePieces.BlackKnight;
                 rook.Tag = Model.EGamePieces.BlackRook;
                 bishop.Tag = Model.EGamePieces.BlackBishop;
+
+                this.defaultPiece = Model.EGamePieces.BlackQueen;
             }
 
 
@@ -59,6 +64,8 @@ namespace chess.View
             this.panelKnight.Controls.Add(knight);
             this.panelRook.Controls.Add(rook);
             this.panelBishop.Controls.Add(bishop);
+
+            this.DialogResult = DialogResult.None;
         }
 
 
@@ -81,6 +88,12 @@ namespace chess.View
             }
         }
 
-        // what if the dialogue is terminated forecfully without a selection made?
+        public Model.EGamePieces DefaultPiece
+        {
+            get
+            {
+                return this.defaultPiece;
+            }
+        }
     }
 }

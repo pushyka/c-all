@@ -399,7 +399,9 @@ namespace chess.Util
             else
             {
                 EGamePieces promotionPiece;
+                EGamePieces promotionPieceDefault; 
                 View.PromotionSelection promotionSelection = new View.PromotionSelection(mvPiece);
+                promotionPieceDefault = promotionSelection.DefaultPiece; // (queen)
                 // remove the ability to x close the dialog before a piece is selected
                 promotionSelection.ControlBox = false;
                 if (promotionSelection.ShowDialog(this.viewRef) == System.Windows.Forms.DialogResult.OK)
@@ -408,6 +410,8 @@ namespace chess.Util
                     promotionSelection.Dispose();
                     move.PromotionSelection = promotionPiece;
                 }
+                else
+                    move.PromotionSelection = promotionPieceDefault;
             }
         }
 
