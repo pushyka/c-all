@@ -76,6 +76,7 @@
     <Compile Include="Model\EChessMoveTypes.cs" />
     <Compile Include="Model\EGameControlState.cs" />
     <Compile Include="Model\EGameModels.cs" />
+    <Compile Include="Model\EGamePlayers.cs" />
     <Compile Include="Model\IDisplayableModel.cs" />
     <Compile Include="Model\Piece.cs" />
     <Compile Include="Model\EGamePieces.cs" />

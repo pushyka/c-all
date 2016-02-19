@@ -9,12 +9,12 @@ namespace chess.Model
     public class Player
     {
 
-        public string PlayerValue { get; set; }
+        public EGamePlayers PlayerValue { get; set; }
 
 
         /* Create a Player object with a string indicating the player.
         TODO: change to enum*/
-        public Player(string player)
+        public Player(EGamePlayers player)
         {
             this.PlayerValue = player;
         }
@@ -23,23 +23,20 @@ namespace chess.Model
         /* If playerValue is not null, changes to the next player in the game. */
         public void change()
         {
-            if (PlayerValue != null)
+            switch (PlayerValue)
             {
-                switch (PlayerValue)
-                {
-                    case "white":
-                        PlayerValue = "black";
-                        break;
-                    case "black":
-                        PlayerValue = "white";
-                        break;
-                    case "X":
-                        PlayerValue = "O";
-                        break;
-                    case "O":
-                        PlayerValue = "X";
-                        break;
-                }
+                case EGamePlayers.White:
+                    PlayerValue = EGamePlayers.Black;
+                    break;
+                case EGamePlayers.Black:
+                    PlayerValue = EGamePlayers.White;
+                    break;
+                case EGamePlayers.X:
+                    PlayerValue = EGamePlayers.O;
+                    break;
+                case EGamePlayers.O:
+                    PlayerValue = EGamePlayers.X;
+                    break;
             }
         }
 
@@ -49,9 +46,9 @@ namespace chess.Model
         public bool Owns(Piece piece)
         {
             bool result = false;
-            if (this.PlayerValue == "white")
+            if (this.PlayerValue == EGamePlayers.White)
                 result = (int)piece.Val < 6;
-            if (this.PlayerValue == "black")
+            if (this.PlayerValue == EGamePlayers.Black)
                 result = (int)piece.Val >= 6 && (int)piece.Val < 12;
             return result;
         }

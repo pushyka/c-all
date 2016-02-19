@@ -668,14 +668,14 @@ namespace chess.View
             {
                 // update captured display current player turn indicator squares to the model.player value
                 // which has recently been changed
-                string curPlayer = this.gameController.Model.Player.PlayerValue;
+                EGamePlayers curPlayer = this.gameController.Model.Player.PlayerValue;
                 this.white_turn_panel.Visible = false;
                 this.black_turn_panel.Visible = false;
 
-                if (curPlayer == "white")
+                if (curPlayer == EGamePlayers.White)
                     this.white_turn_panel.Visible = true;
 
-                else if (curPlayer == "black")
+                else if (curPlayer == EGamePlayers.Black)
                     this.black_turn_panel.Visible = true;
             }
         }

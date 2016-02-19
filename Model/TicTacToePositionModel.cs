@@ -65,7 +65,7 @@ namespace chess.Model
         {
             Tuple<int, int> location = move.PosA;
             Piece playerPiece;
-            if (this.Player.PlayerValue == "O")
+            if (this.Player.PlayerValue == EGamePlayers.O)
                 playerPiece = new Piece(EGamePieces.O);
             else
                 playerPiece = new Piece(EGamePieces.X);

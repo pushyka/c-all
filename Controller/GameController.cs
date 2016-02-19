@@ -99,11 +99,11 @@ namespace chess.Controller
             {
                 case EGameModels.Chess:
                     chessModel.Setup();
-                    chessModel.Player = new Player("white");
+                    chessModel.Player = new Player(EGamePlayers.White);
                     break;
                 case EGameModels.TicTacToe:
                     tictactoeModel.Setup();
-                    tictactoeModel.Player = new Player("X");
+                    tictactoeModel.Player = new Player(EGamePlayers.X);
                     break;
             }
             gameState = EGameControlState.Ready;
