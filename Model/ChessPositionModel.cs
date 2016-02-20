@@ -21,7 +21,7 @@ namespace chess.Model
         public event EventHandler CapturedChanged;
         public event EventHandler PlayerChanged;
 
-        public List<EGamePieces> PiecesCapd { get; }
+        //public List<EGamePieces> PiecesCapd { get; }
 
         /* Create instance of the cpm.
         TODO: Add Singleton static check. */
@@ -29,9 +29,9 @@ namespace chess.Model
         {
             this.Size = 8;
             this.Board = new Tile[Size, Size];
-            this.piecesCapd = new List<EGamePieces>();
-            this.castle = new Dictionary<char, bool>();
-            this.halfmoveClock = 0;
+            this.PiecesCapd = new List<EGamePieces>();
+            this.Castle = new Dictionary<char, bool>();
+            this.HalfMoveClock = 0;
         }
 
 
@@ -102,7 +102,7 @@ namespace chess.Model
         CapturedChanged event so the View can update accordingly */
         protected override void addToCaptured(EGamePieces piece)
         {
-            this.piecesCapd.Add(piece);
+            this.PiecesCapd.Add(piece);
             OnCapturedChanged(EventArgs.Empty);
         }
 

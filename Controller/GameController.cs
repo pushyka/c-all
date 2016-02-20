@@ -34,7 +34,7 @@ namespace chess.Controller
 
         private Evaluator evaluator;
         private Thread gLoopThread;
-
+        
 
         public GameController()
         {

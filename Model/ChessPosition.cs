@@ -15,10 +15,10 @@ namespace chess.Model
         public int Size { get; set; }
         public Tile[, ] Board { get; set; }
         public Player Player { get; set; }
-        protected Dictionary<char, bool> castle;
+        public Dictionary<char, bool> Castle { get; set; }
         public Tuple<int, int> EnPassantSq { get; set; }
-        protected int halfmoveClock;
-        protected List<EGamePieces> piecesCapd;
+        public int HalfMoveClock { get; set; }
+        public List<EGamePieces> PiecesCapd { get; set; }
 
 
         /* This is the default base constructor overridden by the ChessPositionModel 
@@ -39,10 +39,10 @@ namespace chess.Model
             this.Size = size;
             this.Board = board;
             this.Player = player;
-            this.castle = castle;
+            this.Castle = castle;
             this.EnPassantSq = enPassantSq;
-            this.halfmoveClock = halfmoveClock;
-            this.piecesCapd = piecesCapd;
+            this.HalfMoveClock = halfmoveClock;
+            this.PiecesCapd = piecesCapd;
         }
 
         
@@ -241,7 +241,7 @@ namespace chess.Model
         This method is overridden by the ChessPositionModel which adds a CapturedChanged event.*/
         protected virtual void addToCaptured(EGamePieces piece)
         {
-            this.piecesCapd.Add(piece);
+            this.PiecesCapd.Add(piece);
         }
 
 
@@ -273,11 +273,11 @@ namespace chess.Model
                 }
             }
             // copy rest of ChessPosition properties
-            Player playerCopy = this.Player;
-            Dictionary<char, bool> castleCopy = new Dictionary<char, bool>(castle);
+            Player playerCopy = new Player(this.Player.PlayerValue);
+            Dictionary<char, bool> castleCopy = new Dictionary<char, bool>(Castle);
             Tuple<int, int> enPassantSqCopy = (EnPassantSq == null) ? null : Tuple.Create(EnPassantSq.Item1, EnPassantSq.Item2);
-            int halfmoveClockCopy = halfmoveClock;
-            List<EGamePieces> piecesCapdCopy = new List<EGamePieces>(piecesCapd);
+            int halfmoveClockCopy = HalfMoveClock;
+            List<EGamePieces> piecesCapdCopy = new List<EGamePieces>(PiecesCapd);
             // create and return the copy
             ChessPosition cpCopy = new ChessPosition(dimCopy, boardCopy, playerCopy, castleCopy, enPassantSqCopy, halfmoveClockCopy, piecesCapdCopy);
             return cpCopy;
