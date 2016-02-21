@@ -80,7 +80,7 @@ namespace chess.Util
         current player's king in check.*/
         public bool IsValidMove(ref FormedMove move, ChessPositionModel cpm, ref List<Tuple<int, int>> kingCheckedBy)
         {
-            bool outcome = false;
+            bool validMove = false;
             Tile tileA = new Tile();
             Tile tileB = new Tile();
 
@@ -91,23 +91,23 @@ namespace chess.Util
                     // check if its a castling
                     if (IsMoveBPieceCurPlayer(move, cpm, ref tileB))
                     {
-                        outcome = false; // IsLegalCastle?
+                        validMove = false; // IsLegalCastle? - this involves calls to isKingInCheck
                         move.MoveType = EChessMoveTypes.Castle;
                     }
                     // check if its a capture
                     else if (IsMoveBPieceOtherPlayer(move, cpm, ref tileB))
                     {
-                        outcome = IsCaptureLegal(move, cpm);
+                        validMove = IsCaptureLegal(move, cpm);
                         move.MoveType = EChessMoveTypes.Capture;
                     }
                     // check if its a movement
                     else if (IsMoveBEmpty(move, cpm, ref tileB))
                     {
-                        if (outcome = IsPieceMovementLegal(move, cpm))
+                        if (validMove = IsPieceMovementLegal(move, cpm))
                         {
                             move.MoveType = EChessMoveTypes.Movement;
                         }
-                        else if (outcome = IsEnPassantCaptureLegal(move, cpm))
+                        else if (validMove = IsEnPassantCaptureLegal(move, cpm))
                         {
                             move.MoveType = EChessMoveTypes.EpMovement;
                         }
@@ -117,7 +117,7 @@ namespace chess.Util
             // if its a valid move so far, check if there is a pawn promotion,
             // then apply the move to a copy of the chess position and
             // finally check it passes a check test
-            if (outcome)
+            if (validMove)
             {
                 // if there is a pawn promotion the player is prompted for the promotion piece and it is added to the move object
                 MoveIncludesPawnPromotion(ref move, cpm);
@@ -129,9 +129,9 @@ namespace chess.Util
                 cpCopy.applyMove(move);
                 // after this application of the move
                 if (IsKingInCheck(cpCopy, ref kingCheckedBy))
-                    outcome = false;
+                    validMove = false;
             }
-            return outcome;
+            return validMove;
         }
 
 
@@ -427,12 +427,13 @@ namespace chess.Util
         /* This function is passed a copy of the chess game. It uses the information contained in this object
         to determine whether or not the Current player's king is being threatened by check from the other player
         returning true if so. If it is being checked by the opposing player a list of the one / two coords containing the 
-        attacking piece's is stored in 'kingCheckedBy */
+        attacking pieces is stored in 'kingCheckedBy */
         public bool IsKingInCheck(ChessPosition cpmCopy, ref List<Tuple<int, int>> kingCheckedBy)
         {
             // find the king
+            bool isCheck = false;
             Player curPlayer = cpmCopy.Player;
-            Tuple<int, int> curPlayersKingPos;
+            Tuple<int, int> curPlayersKingPos = null;
             for (int row = 0; row < cpmCopy.Size; row ++)
             {
                 for (int col = 0; col < cpmCopy.Size; col ++)
@@ -449,6 +450,40 @@ namespace chess.Util
                     }
                 }
             }
+            // using current player's king position, generate all attack vectors
+            // bishop, break when find one of bishop or queen of opposite colour
+            if (curPlayersKingPos != null)
+            {
+                EGamePieces oppositeBishop = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackBishop : EGamePieces.WhiteBishop;
+                EGamePieces oppositeQueen = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackQueen : EGamePieces.WhiteQueen;
+                var diagonalRays = GetPieceRay(oppositeBishop, curPlayersKingPos);
+                // look through the rays until blocked, if find a bishop or queen not owned by curPlayer
+                // then this represents a discovered attack on current Player's king.
+                foreach (var ray in diagonalRays)
+                {
+                    foreach (var position in ray)
+                    {
+                        Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
+                        // if position not empty
+                        if (!tileAtPosition.IsEmpty())
+                        {
+                            // if the position is occupied by an attacking bishop/ queen
+                            // add this to the kingcheckedbyvalue
+                            if (!curPlayer.Owns(tileAtPosition.piece))
+                            {
+                                if (tileAtPosition.piece.Val == oppositeBishop || tileAtPosition.piece.Val == oppositeQueen)
+                                {
+                                    isCheck = true;
+                                    kingCheckedBy.Add(position);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+
 
             // look along all possible attack vectors for isUpper if 'b' or usLower if 'w' using kingpos as origin
             // bishop vectors : break when find one of queen, bishop
@@ -457,11 +492,11 @@ namespace chess.Util
             // king vectors : king
             // pawn vectors : pawn, pawn enpassant
 
-           // this will match the pre compute ray array forall computation
+            // this will match the pre compute ray array forall computation
             // want to get a series of rays for each of the above pieces on the king pos
             // eg bishop (4 rays), then foreach ray: starting from the ray origin: if find queen, bishop, pawn(?) of opponent piece
             //    in this, the bishop ray, then break as this piece threatens the king on origin
-            return false;
+            return isCheck;
             
         }
 
