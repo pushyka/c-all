@@ -430,13 +430,34 @@ namespace chess.Util
         attacking pieces is stored in 'kingCheckedBy */
         public bool IsKingInCheck(ChessPosition cpmCopy, ref List<Tuple<int, int>> kingCheckedBy)
         {
-            // find the king
-            bool isCheck = false;
+            bool kingInCheck = false;
             Player curPlayer = cpmCopy.Player;
-            Tuple<int, int> curPlayersKingPos = null;
-            for (int row = 0; row < cpmCopy.Size; row ++)
+            Tuple<int, int> curPlayersKingPos = GetCurPlayersKingPos(cpmCopy, curPlayer);
+
+            // using current player's king position, generate all attack vectors
+            if (curPlayersKingPos != null)
             {
-                for (int col = 0; col < cpmCopy.Size; col ++)
+                // check for threats from the pieces of the opponent
+                if (BishopQueenCheck(cpmCopy, curPlayer, curPlayersKingPos, ref kingCheckedBy) ||
+                    RookQueenCheck(cpmCopy, curPlayer, curPlayersKingPos, ref kingCheckedBy) ||
+                    KnightCheck(cpmCopy, curPlayer, curPlayersKingPos, ref kingCheckedBy) ||
+                    KingCheck(cpmCopy, curPlayer, curPlayersKingPos, ref kingCheckedBy) ||
+                    PawnCheck(cpmCopy, curPlayer, curPlayersKingPos, ref kingCheckedBy))
+                    kingInCheck = true;
+            }
+            return kingInCheck;
+        }
+
+
+        /* Takes the board and the current player and returns the position of the current
+        player's king. */
+        private Tuple<int, int> GetCurPlayersKingPos(ChessPosition cpmCopy, Player curPlayer)
+        {
+            
+            Tuple<int, int> curPlayersKingPos = null;
+            for (int row = 0; row<cpmCopy.Size; row ++)
+            {
+                for (int col = 0; col<cpmCopy.Size; col ++)
                 {
                     Tile tile = cpmCopy.Board[row, col];
                     if (!tile.IsEmpty())
@@ -447,58 +468,194 @@ namespace chess.Util
                             curPlayersKingPos = Tuple.Create(row, col);
                             break;
                         }
-                    }
+                    }   
                 }
             }
-            // using current player's king position, generate all attack vectors
-            // bishop, break when find one of bishop or queen of opposite colour
-            if (curPlayersKingPos != null)
-            {
-                EGamePieces oppositeBishop = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackBishop : EGamePieces.WhiteBishop;
-                EGamePieces oppositeQueen = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackQueen : EGamePieces.WhiteQueen;
-                var diagonalRays = GetPieceRay(oppositeBishop, curPlayersKingPos);
-                // look through the rays until blocked, if find a bishop or queen not owned by curPlayer
-                // then this represents a discovered attack on current Player's king.
-                foreach (var ray in diagonalRays)
-                {
-                    foreach (var position in ray)
-                    {
-                        Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
-                        // if position not empty
-                        if (!tileAtPosition.IsEmpty())
-                        {
-                            // if the position is occupied by an attacking bishop/ queen
-                            // add this to the kingcheckedbyvalue
-                            if (!curPlayer.Owns(tileAtPosition.piece))
-                            {
-                                if (tileAtPosition.piece.Val == oppositeBishop || tileAtPosition.piece.Val == oppositeQueen)
-                                {
-                                    isCheck = true;
-                                    kingCheckedBy.Add(position);
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-
-            // look along all possible attack vectors for isUpper if 'b' or usLower if 'w' using kingpos as origin
-            // bishop vectors : break when find one of queen, bishop
-            // rook vectors : queen, rook
-            // knight vectors : knight
-            // king vectors : king
-            // pawn vectors : pawn, pawn enpassant
-
-            // this will match the pre compute ray array forall computation
-            // want to get a series of rays for each of the above pieces on the king pos
-            // eg bishop (4 rays), then foreach ray: starting from the ray origin: if find queen, bishop, pawn(?) of opponent piece
-            //    in this, the bishop ray, then break as this piece threatens the king on origin
-            return isCheck;
-            
+            return curPlayersKingPos;
         }
+
+
+        /* Takes the board, current player, and current players king position and looks for checks on the
+        king position from the opponent bishop and diagonal queen. */
+        private bool BishopQueenCheck(ChessPosition cpmCopy, Player curPlayer, Tuple<int, int> curPlayersKingPos, ref List<Tuple<int, int>> kingCheckedBy)
+        {
+            bool kingInCheck = false;
+            EGamePieces oppositeBishop = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackBishop : EGamePieces.WhiteBishop;
+            EGamePieces oppositeQueen = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackQueen : EGamePieces.WhiteQueen;
+            var diagonalRays = GetPieceRay(oppositeBishop, curPlayersKingPos);
+            // look through the rays until blocked, if find a bishop or queen not owned by curPlayer
+            // then this represents a discovered attack on current Player's king.
+            foreach (var ray in diagonalRays)
+            {
+                foreach (var position in ray)
+                {
+                    Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
+                    // if position not empty
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        // if the position is occupied by an attacking bishop/ queen
+                        // add this to the kingcheckedbyvalue
+                        if (!curPlayer.Owns(tileAtPosition.piece))
+                        {
+                            if (tileAtPosition.piece.Val == oppositeBishop || tileAtPosition.piece.Val == oppositeQueen)
+                            {
+                                kingInCheck = true;
+                                kingCheckedBy.Add(position);
+                            }
+                        }
+                        // no more threats in this ray, move onto next rays to see if any other threats
+                        break;
+                    }
+                }
+            }
+            return kingInCheck;
+        }
+
+
+        /* Takes the board, current player, and current players king position and looks for checks on the
+        king position from the opponent rook and diagonal queen. */
+        private bool RookQueenCheck(ChessPosition cpmCopy, Player curPlayer, Tuple<int, int> curPlayersKingPos, ref List<Tuple<int, int>> kingCheckedBy)
+        {
+            bool kingInCheck = false;
+            EGamePieces oppositeRook = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackRook : EGamePieces.WhiteRook;
+            EGamePieces oppositeQueen = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackQueen : EGamePieces.WhiteQueen;
+            var adjRays = GetPieceRay(oppositeRook, curPlayersKingPos);
+            // look through the rays until blocked, if find a rook or queen not owned by curPlayer
+            // then this represents a discovered attack on current Player's king.
+            foreach (var ray in adjRays)
+            {
+                foreach (var position in ray)
+                {
+                    Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
+                    // if position not empty
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        // if the position is occupied by an attacking bishop/ queen
+                        // add this to the kingcheckedbyvalue
+                        if (!curPlayer.Owns(tileAtPosition.piece))
+                        {
+                            if (tileAtPosition.piece.Val == oppositeRook || tileAtPosition.piece.Val == oppositeQueen)
+                            {
+                                kingInCheck = true;
+                                kingCheckedBy.Add(position);
+                            }
+                        }
+                        // no more threats in this ray, move onto next rays to see if any other threats
+                        break;
+                    }
+                }
+            }
+            return kingInCheck;
+        }
+
+
+        /* Takes the board, current player, and current players king position and looks for checks on the
+        king position from the opponent knight. */
+        private bool KnightCheck(ChessPosition cpmCopy, Player curPlayer, Tuple<int, int> curPlayersKingPos, ref List<Tuple<int, int>> kingCheckedBy)
+        {
+            bool kingInCheck = false;
+            EGamePieces oppositeKnight = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackKnight : EGamePieces.WhiteKnight;
+            var knRays = GetPieceRay(oppositeKnight, curPlayersKingPos);
+            // look through the rays until blocked, if find a knight not owned by curPlayer
+            // then this represents a discovered attack on current Player's king.
+            foreach (var ray in knRays)
+            {
+                foreach (var position in ray)
+                {
+                    Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
+                    // if position not empty
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        // if the position is occupied by an attacking knight
+                        // add this to the kingcheckedbyvalue
+                        if (!curPlayer.Owns(tileAtPosition.piece))
+                        {
+                            if (tileAtPosition.piece.Val == oppositeKnight)
+                            {
+                                kingInCheck = true;
+                                kingCheckedBy.Add(position);
+                            }
+                        }
+                        // no more threats in this ray, move onto next rays to see if any other threats
+                        break;
+                    }
+                }
+            }
+            return kingInCheck;
+        }
+
+
+        /* Takes the board, current player, and current players king position and looks for checks on the
+        king position from the opponent King. */
+        private bool KingCheck(ChessPosition cpmCopy, Player curPlayer, Tuple<int, int> curPlayersKingPos, ref List<Tuple<int, int>> kingCheckedBy)
+        {
+            bool kingInCheck = false;
+            EGamePieces oppositeKing = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackKing : EGamePieces.WhiteKing;
+            var kRays = GetPieceRay(oppositeKing, curPlayersKingPos);
+            // look through the rays until blocked, if find a king not owned by curPlayer
+            // then this represents a discovered attack on current Player's king.
+            foreach (var ray in kRays)
+            {
+                foreach (var position in ray)
+                {
+                    Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
+                    // if position not empty
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        // if the position is occupied by an attacking king
+                        // add this to the kingcheckedbyvalue
+                        if (!curPlayer.Owns(tileAtPosition.piece))
+                        {
+                            if (tileAtPosition.piece.Val == oppositeKing)
+                            {
+                                kingInCheck = true;
+                                kingCheckedBy.Add(position);
+                            }
+                        }
+                        // no more threats in this ray, move onto next rays to see if any other threats
+                        break;
+                    }
+                }
+            }
+            return kingInCheck;
+        }
+
+
+        /* Takes the board, current player, and current players king position and looks for checks on the
+        king position from the opponent Pawn. */
+        private bool PawnCheck(ChessPosition cpmCopy, Player curPlayer, Tuple<int, int> curPlayersKingPos, ref List<Tuple<int, int>> kingCheckedBy)
+        {
+            bool kingInCheck = false;
+            EGamePieces oppositePawn = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackPawn : EGamePieces.WhitePawn;
+            var pRays = GetPieceRayPawnCapture(oppositePawn, curPlayersKingPos);
+            // look through the rays until blocked, if find a Pawn not owned by curPlayer
+            // then this represents a discovered attack on current Player's king.
+            foreach (var ray in pRays)
+            {
+                foreach (var position in ray)
+                {
+                    Tile tileAtPosition = cpmCopy.Board[position.Item1, position.Item2];
+                    // if position not empty
+                    if (!tileAtPosition.IsEmpty())
+                    {
+                        // if the position is occupied by an attacking pawn
+                        // add this to the kingcheckedbyvalue
+                        if (!curPlayer.Owns(tileAtPosition.piece))
+                        {
+                            if (tileAtPosition.piece.Val == oppositePawn)
+                            {
+                                kingInCheck = true;
+                                kingCheckedBy.Add(position);
+                            }
+                        }
+                        // no more threats in this ray, move onto next rays to see if any other threats
+                        break;
+                    }
+                }
+            }
+            return kingInCheck;
+        }
+
 
 
         /* Takes a piece and a y,x board location and returns one List containing a List for each valid 
