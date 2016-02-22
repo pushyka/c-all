@@ -626,8 +626,10 @@ namespace chess.Util
         private bool PawnCheck(ChessPosition cpmCopy, Player curPlayer, Tuple<int, int> curPlayersKingPos, ref List<Tuple<int, int>> kingCheckedBy)
         {
             bool kingInCheck = false;
-            EGamePieces oppositePawn = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackPawn : EGamePieces.WhitePawn;
-            var pRays = GetPieceRayPawnCapture(oppositePawn, curPlayersKingPos);
+            // the code must look in the advance direction (own pawn / CURRENT) to see the tiles an OPPONENT pawn could be on
+            EGamePieces currentPawn = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.WhitePawn : EGamePieces.BlackPawn;
+            EGamePieces opponentPawn = (curPlayer.PlayerValue == EGamePlayers.White) ? EGamePieces.BlackPawn : EGamePieces.WhitePawn;
+            var pRays = GetPieceRayPawnCapture(currentPawn, curPlayersKingPos);
             // look through the rays until blocked, if find a Pawn not owned by curPlayer
             // then this represents a discovered attack on current Player's king.
             foreach (var ray in pRays)
@@ -642,7 +644,7 @@ namespace chess.Util
                         // add this to the kingcheckedbyvalue
                         if (!curPlayer.Owns(tileAtPosition.piece))
                         {
-                            if (tileAtPosition.piece.Val == oppositePawn)
+                            if (tileAtPosition.piece.Val == opponentPawn)
                             {
                                 kingInCheck = true;
                                 kingCheckedBy.Add(position);

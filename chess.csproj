@@ -81,6 +81,7 @@
     <Compile Include="Model\Piece.cs" />
     <Compile Include="Model\EGamePieces.cs" />
     <Compile Include="Model\Player.cs" />
+    <Compile Include="Model\Position.cs" />
     <Compile Include="Model\TicTacToePositionModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

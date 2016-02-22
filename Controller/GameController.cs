@@ -184,7 +184,6 @@ namespace chess.Controller
                 // if legal move proceed
                 if (evaluator.IsKingInCheck(chessModel, ref kingCheckedBy))
                     this.Message = $@"Player {chessModel.Player.PlayerValue}'s king is threatened by {kingCheckedBy.Count} piece";
-
                 // check if display has provided a move
                 if (gameInput != null)
                 {
